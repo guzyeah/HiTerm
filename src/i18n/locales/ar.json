@@ -60,6 +60,7 @@
     "appVersion": "إصدار التطبيق",
     "publisher": "الناشر",
     "releaseTime": "وقت الإصدار",
+    "renderEngineLabel": "محرك العرض",
     "renderEngine": {
       "gpu": "عرض GPU",
       "cpu": "عرض CPU"

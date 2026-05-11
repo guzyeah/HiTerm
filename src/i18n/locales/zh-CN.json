@@ -60,6 +60,7 @@
     "appVersion": "应用版本",
     "publisher": "发行方",
     "releaseTime": "发行时间",
+    "renderEngineLabel": "渲染引擎",
     "renderEngine": {
       "gpu": "GPU渲染",
       "cpu": "CPU渲染"

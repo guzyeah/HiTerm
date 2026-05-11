@@ -60,6 +60,7 @@
     "appVersion": "Versión de la aplicación",
     "publisher": "Editor",
     "releaseTime": "Fecha de lanzamiento",
+    "renderEngineLabel": "Motor de renderizado",
     "renderEngine": {
       "gpu": "Renderizado GPU",
       "cpu": "Renderizado CPU"

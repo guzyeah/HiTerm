@@ -60,6 +60,7 @@
     "appVersion": "アプリケーションバージョン",
     "publisher": "発行者",
     "releaseTime": "リリース時刻",
+    "renderEngineLabel": "レンダリングエンジン",
     "renderEngine": {
       "gpu": "GPUレンダリング",
       "cpu": "CPUレンダリング"

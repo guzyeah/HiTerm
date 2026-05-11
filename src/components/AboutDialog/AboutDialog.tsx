@@ -11,7 +11,10 @@ import {
   DialogSurface,
   DialogBody,
   DialogTitle,
+  DialogContent,
+  DialogTrigger,
   Divider,
+  Button,
 } from '@fluentui/react-components'
 import { detectActualRenderedFont } from '@/utils/fontDetector'
 import { detectRenderEngine } from '@/utils/renderEngineDetector'
@@ -48,18 +51,28 @@ export const AboutDialog: FC<AboutDialogProps> = ({ open, onOpenChange }) => {
     <Dialog open={open} onOpenChange={(_, data) => onOpenChange(data.open)}>
       <DialogSurface style={{ width: '500px', minHeight: '300px' }}>
         <DialogBody>
-          <DialogTitle>{t('about.title')}</DialogTitle>
-          <div className="about-table">
-            <KvRow keyText={t('about.appName')} valueText={__APP_VERSION__ ? 'HiTerm' : t('app.name')} />
-            <KvRow keyText={t('about.appVersion')} valueText={__APP_VERSION__} />
-            <KvRow keyText={t('about.publisher')} valueText={__APP_PUBLISHER__} />
-            <KvRow keyText={t('about.releaseTime')} valueText={__BUILD_TIME__} />
-            <div className="about-separator">
-              <Divider />
+          <DialogTitle
+            action={(
+              <DialogTrigger action="close">
+                <Button appearance="subtle" aria-label={t('common.close')} icon={<span aria-hidden="true">×</span>} />
+              </DialogTrigger>
+            )}
+          >
+            {t('about.title')}
+          </DialogTitle>
+          <DialogContent>
+            <div className="about-table">
+              <KvRow keyText={t('about.appName')} valueText={__APP_VERSION__ ? 'HiTerm' : t('app.name')} />
+              <KvRow keyText={t('about.appVersion')} valueText={__APP_VERSION__} />
+              <KvRow keyText={t('about.publisher')} valueText={__APP_PUBLISHER__} />
+              <KvRow keyText={t('about.releaseTime')} valueText={__BUILD_TIME__} />
+              <div className="about-separator">
+                <Divider />
+              </div>
+              <KvRow keyText={t('about.renderEngineLabel')} valueText={renderEngine} />
+              <KvRow keyText={t('about.renderFont')} valueText={renderFont} />
             </div>
-            <KvRow keyText={t('about.renderEngine')} valueText={renderEngine} />
-            <KvRow keyText={t('about.renderFont')} valueText={renderFont} />
-          </div>
+          </DialogContent>
         </DialogBody>
       </DialogSurface>
     </Dialog>

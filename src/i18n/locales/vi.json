@@ -60,6 +60,7 @@
     "appVersion": "Phiên bản ứng dụng",
     "publisher": "Nhà phát hành",
     "releaseTime": "Thời gian phát hành",
+    "renderEngineLabel": "Công cụ kết xuất",
     "renderEngine": {
       "gpu": "Kết xuất GPU",
       "cpu": "Kết xuất CPU"

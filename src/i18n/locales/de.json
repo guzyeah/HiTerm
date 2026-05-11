@@ -60,6 +60,7 @@
     "appVersion": "App-Version",
     "publisher": "Herausgeber",
     "releaseTime": "Veröffentlichungszeit",
+    "renderEngineLabel": "Rendering-Engine",
     "renderEngine": {
       "gpu": "GPU-Rendering",
       "cpu": "CPU-Rendering"
