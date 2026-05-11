@@ -34,8 +34,24 @@ interface MenuAPI {
   updateLabels: (labels: Record<string, string>) => void
 }
 
+interface ShellAPI {
+  saveShell: (record: unknown) => Promise<unknown>
+  listGroups: () => Promise<string[]>
+}
+
+interface DialogAPI {
+  openFile: (options?: { title?: string; filters?: Electron.FileFilter[] }) => Promise<string | null>
+}
+
+interface SerialAPI {
+  listSerialPorts: () => Promise<{ path: string; friendlyName?: string }[]>
+}
+
 interface Window {
   ipcRenderer: import('electron').IpcRenderer
   settingsAPI: SettingsAPI
   menuAPI: MenuAPI
+  shellAPI: ShellAPI
+  dialogAPI: DialogAPI
+  serialAPI: SerialAPI
 }

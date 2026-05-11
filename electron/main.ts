@@ -1,8 +1,10 @@
-import { app, BrowserWindow, ipcMain, Menu } from 'electron'
+import { app, BrowserWindow, ipcMain, Menu, dialog } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { getLocale, setLocale, getFontOverride, setFontOverride, getSystemInfo } from './settings'
 import { initNativeMenu, updateNativeMenu, type MenuLabels } from './menu'
+import { saveShell, listGroups } from './shellStore'
+import { listSerialPorts } from './utils/serialPort'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -65,6 +67,32 @@ function registerIpcHandlers() {
     if (process.platform === 'darwin') {
       updateNativeMenu(labels)
     }
+  })
+
+  // Shell 连接记录保存
+  ipcMain.handle('shell:save', (_event, record) => {
+    return saveShell(record)
+  })
+
+  // Shell 分组列表
+  ipcMain.handle('shell:listGroups', () => {
+    return listGroups()
+  })
+
+  // 系统文件选择对话框
+  ipcMain.handle('dialog:openFile', async (_event, options) => {
+    const win = BrowserWindow.getFocusedWindow()
+    const result = await dialog.showOpenDialog(win!, {
+      title: options?.title,
+      filters: options?.filters,
+      properties: ['openFile'],
+    })
+    return result.filePaths[0] ?? null
+  })
+
+  // 串口枚举
+  ipcMain.handle('serial:listPorts', async () => {
+    return listSerialPorts()
   })
 }
 

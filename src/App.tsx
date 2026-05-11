@@ -2,15 +2,19 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MenuBar, type MenuItemId } from '@/components/MenuBar/MenuBar'
 import { AboutDialog } from '@/components/AboutDialog/AboutDialog'
+import { ConnectDialog } from '@/components/ConnectDialog'
 import './App.css'
 
 function App() {
   const { t } = useTranslation()
   const [aboutOpen, setAboutOpen] = useState(false)
+  const [connectOpen, setConnectOpen] = useState(false)
 
   const handleMenuItemClick = (itemId: MenuItemId) => {
     if (itemId === 'help.about') {
       setAboutOpen(true)
+    } else if (itemId === 'shell.connect') {
+      setConnectOpen(true)
     }
   }
 
@@ -20,6 +24,8 @@ function App() {
     const handler = (_event: Electron.IpcRendererEvent, itemId: string) => {
       if (itemId === 'help.about') {
         setAboutOpen(true)
+      } else if (itemId === 'shell.connect') {
+        setConnectOpen(true)
       }
     }
     window.ipcRenderer.on('menu:click', handler)
@@ -36,6 +42,7 @@ function App() {
         <p>{t('app.description')}</p>
       </main>
       <AboutDialog open={aboutOpen} onOpenChange={setAboutOpen} />
+      <ConnectDialog open={connectOpen} onOpenChange={setConnectOpen} />
     </>
   )
 }

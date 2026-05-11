@@ -33,3 +33,20 @@ contextBridge.exposeInMainWorld('settingsAPI', {
 contextBridge.exposeInMainWorld('menuAPI', {
   updateLabels: (labels: Record<string, string>) => ipcRenderer.send('menu:updateLabels', labels),
 })
+
+// --------- Expose Shell API to the Renderer process ---------
+contextBridge.exposeInMainWorld('shellAPI', {
+  saveShell: (record: unknown) => ipcRenderer.invoke('shell:save', record),
+  listGroups: () => ipcRenderer.invoke('shell:listGroups'),
+})
+
+// --------- Expose Dialog API to the Renderer process ---------
+contextBridge.exposeInMainWorld('dialogAPI', {
+  openFile: (options?: { title?: string; filters?: Electron.FileFilter[] }) =>
+    ipcRenderer.invoke('dialog:openFile', options),
+})
+
+// --------- Expose Serial API to the Renderer process ---------
+contextBridge.exposeInMainWorld('serialAPI', {
+  listSerialPorts: () => ipcRenderer.invoke('serial:listPorts'),
+})
