@@ -36,6 +36,7 @@
     "vi": "Tiếng Việt"
   },
   "menu": {
+    "applicationMenuBar": "Thanh menu ứng dụng",
     "shell": "Shell",
     "shell.connect": "Kết nối Shell",
     "shell.management": "Quản lý Shell",

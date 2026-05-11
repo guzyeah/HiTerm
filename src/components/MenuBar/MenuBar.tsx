@@ -1,37 +1,69 @@
 /**
  * 自绘菜单栏组件
- * 仅在Win/Linux平台渲染，macOS使用原生菜单栏不渲染此组件
- * 使用Fluent UI Toolbar + Menu组合实现水平菜单栏
+ * 仅在 Win/Linux 平台渲染，macOS 使用原生菜单栏。
+ * 使用 Fluent UI Button + Menu 组合实现轻量桌面应用菜单栏。
  */
 
 import { type FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  Toolbar,
-  ToolbarButton,
+  Button,
   Menu,
   MenuTrigger,
   MenuPopover,
   MenuList,
   MenuItem,
+  makeStyles,
+  tokens,
 } from '@fluentui/react-components'
 import { useLocale } from '@/hooks/useLocale'
 
-/** 菜单项ID，与macOS原生菜单的IPC标识保持一致 */
+/** 菜单项 ID，与 macOS 原生菜单的 IPC 标识保持一致 */
 export type MenuItemId = 'shell.connect' | 'shell.management' | 'settings.preferences' | 'help.about'
 
 interface MenuBarProps {
   onMenuItemClick?: (itemId: MenuItemId) => void
 }
 
-/** Shell菜单（一级菜单 + 子菜单项） */
-function ShellMenu({ onMenuItemClick }: MenuBarProps) {
+interface MenuBarItemProps extends MenuBarProps {
+  triggerClassName: string
+}
+
+const useStyles = makeStyles({
+  root: {
+    flexShrink: 0,
+    display: 'flex',
+    alignItems: 'center',
+    minHeight: '32px',
+    boxSizing: 'border-box',
+    gap: tokens.spacingHorizontalXXS,
+    paddingInlineStart: tokens.spacingHorizontalS,
+    paddingInlineEnd: tokens.spacingHorizontalS,
+    backgroundColor: tokens.colorNeutralBackground2,
+    borderBottomColor: tokens.colorNeutralStroke2,
+    borderBottomStyle: 'solid',
+    borderBottomWidth: tokens.strokeWidthThin,
+  },
+  trigger: {
+    minWidth: 'unset',
+    height: '26px',
+    paddingInlineStart: tokens.spacingHorizontalS,
+    paddingInlineEnd: tokens.spacingHorizontalS,
+    borderRadius: tokens.borderRadiusMedium,
+    fontWeight: tokens.fontWeightRegular,
+  },
+})
+
+/** Shell 菜单（一级菜单 + 子菜单项） */
+function ShellMenu({ onMenuItemClick, triggerClassName }: MenuBarItemProps) {
   const { t } = useTranslation()
 
   return (
     <Menu>
-      <MenuTrigger>
-        <ToolbarButton>{t('menu.shell')}</ToolbarButton>
+      <MenuTrigger disableButtonEnhancement>
+        <Button appearance="subtle" className={triggerClassName} role="menuitem" size="small">
+          {t('menu.shell')}
+        </Button>
       </MenuTrigger>
       <MenuPopover>
         <MenuList>
@@ -48,13 +80,15 @@ function ShellMenu({ onMenuItemClick }: MenuBarProps) {
 }
 
 /** 设置菜单 */
-function SettingsMenu({ onMenuItemClick }: MenuBarProps) {
+function SettingsMenu({ onMenuItemClick, triggerClassName }: MenuBarItemProps) {
   const { t } = useTranslation()
 
   return (
     <Menu>
-      <MenuTrigger>
-        <ToolbarButton>{t('menu.settings')}</ToolbarButton>
+      <MenuTrigger disableButtonEnhancement>
+        <Button appearance="subtle" className={triggerClassName} role="menuitem" size="small">
+          {t('menu.settings')}
+        </Button>
       </MenuTrigger>
       <MenuPopover>
         <MenuList>
@@ -68,13 +102,15 @@ function SettingsMenu({ onMenuItemClick }: MenuBarProps) {
 }
 
 /** 帮助菜单 */
-function HelpMenu({ onMenuItemClick }: MenuBarProps) {
+function HelpMenu({ onMenuItemClick, triggerClassName }: MenuBarItemProps) {
   const { t } = useTranslation()
 
   return (
     <Menu>
-      <MenuTrigger>
-        <ToolbarButton>{t('menu.help')}</ToolbarButton>
+      <MenuTrigger disableButtonEnhancement>
+        <Button appearance="subtle" className={triggerClassName} role="menuitem" size="small">
+          {t('menu.help')}
+        </Button>
       </MenuTrigger>
       <MenuPopover>
         <MenuList>
@@ -87,18 +123,19 @@ function HelpMenu({ onMenuItemClick }: MenuBarProps) {
   )
 }
 
-/** 自绘菜单栏：仅在Win/Linux渲染 */
+/** 自绘菜单栏：仅在 Win/Linux 渲染 */
 export const MenuBar: FC<MenuBarProps> = ({ onMenuItemClick }) => {
   const { platform } = useLocale()
+  const { t } = useTranslation()
+  const styles = useStyles()
 
-  // macOS使用原生菜单栏，不渲染自绘菜单
   if (platform === 'darwin') return null
 
   return (
-    <Toolbar size="small" role="menubar" aria-label="Application menu bar">
-      <ShellMenu onMenuItemClick={onMenuItemClick} />
-      <SettingsMenu onMenuItemClick={onMenuItemClick} />
-      <HelpMenu onMenuItemClick={onMenuItemClick} />
-    </Toolbar>
+    <nav className={styles.root} role="menubar" aria-label={t('menu.applicationMenuBar')}>
+      <ShellMenu onMenuItemClick={onMenuItemClick} triggerClassName={styles.trigger} />
+      <SettingsMenu onMenuItemClick={onMenuItemClick} triggerClassName={styles.trigger} />
+      <HelpMenu onMenuItemClick={onMenuItemClick} triggerClassName={styles.trigger} />
+    </nav>
   )
 }

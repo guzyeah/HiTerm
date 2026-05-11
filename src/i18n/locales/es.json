@@ -36,6 +36,7 @@
     "vi": "Vietnamita"
   },
   "menu": {
+    "applicationMenuBar": "Barra de menús de la aplicación",
     "shell": "Shell",
     "shell.connect": "Conectar Shell",
     "shell.management": "Gestión de Shell",

@@ -36,6 +36,7 @@
     "vi": "베트남어"
   },
   "menu": {
+    "applicationMenuBar": "애플리케이션 메뉴 모음",
     "shell": "Shell",
     "shell.connect": "Shell 연결",
     "shell.management": "Shell 관리",

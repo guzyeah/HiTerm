@@ -36,6 +36,7 @@
     "vi": "الفييتنامية"
   },
   "menu": {
+    "applicationMenuBar": "شريط قائمة التطبيق",
     "shell": "Shell",
     "shell.connect": "اتصال Shell",
     "shell.management": "إدارة Shell",

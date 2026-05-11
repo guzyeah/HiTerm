@@ -36,6 +36,7 @@
     "vi": "越南语"
   },
   "menu": {
+    "applicationMenuBar": "应用菜单栏",
     "shell": "Shell",
     "shell.connect": "连接 Shell",
     "shell.management": "Shell 管理",

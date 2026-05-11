@@ -36,6 +36,7 @@
     "vi": "Vietnamese"
   },
   "menu": {
+    "applicationMenuBar": "Application menu bar",
     "shell": "Shell",
     "shell.connect": "Connect Shell",
     "shell.management": "Shell Management",
