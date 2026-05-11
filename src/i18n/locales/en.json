@@ -35,6 +35,25 @@
     "ar": "Arabic",
     "vi": "Vietnamese"
   },
+  "menu": {
+    "shell": "Shell",
+    "shell.connect": "Connect Shell",
+    "shell.management": "Shell Management",
+    "settings": "Settings",
+    "settings.preferences": "Preferences",
+    "help": "Help",
+    "help.about": "About",
+    "edit": "Edit",
+    "edit.undo": "Undo",
+    "edit.redo": "Redo",
+    "edit.cut": "Cut",
+    "edit.copy": "Copy",
+    "edit.paste": "Paste",
+    "edit.selectAll": "Select All",
+    "window": "Window",
+    "window.minimize": "Minimize",
+    "window.close": "Close"
+  },
   "common": {
     "confirm": "Confirm",
     "cancel": "Cancel",

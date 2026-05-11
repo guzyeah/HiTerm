@@ -35,6 +35,25 @@
     "ar": "العربية",
     "vi": "الفييتنامية"
   },
+  "menu": {
+    "shell": "Shell",
+    "shell.connect": "اتصال Shell",
+    "shell.management": "إدارة Shell",
+    "settings": "الإعدادات",
+    "settings.preferences": "التفضيلات",
+    "help": "المساعدة",
+    "help.about": "حول",
+    "edit": "التحرير",
+    "edit.undo": "التراجع",
+    "edit.redo": "الإعادة",
+    "edit.cut": "القص",
+    "edit.copy": "النسخ",
+    "edit.paste": "اللصق",
+    "edit.selectAll": "تحديد الكل",
+    "window": "النافذة",
+    "window.minimize": "التقليل",
+    "window.close": "إغلاق النافذة"
+  },
   "common": {
     "confirm": "تأكيد",
     "cancel": "إلغاء",

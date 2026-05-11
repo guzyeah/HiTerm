@@ -28,3 +28,8 @@ contextBridge.exposeInMainWorld('settingsAPI', {
   setFontOverride: (override: string | null) => ipcRenderer.invoke('settings:setFontOverride', override),
   getSystemInfo: () => ipcRenderer.invoke('settings:getSystemInfo'),
 })
+
+// --------- Expose Menu API to the Renderer process ---------
+contextBridge.exposeInMainWorld('menuAPI', {
+  updateLabels: (labels: Record<string, string>) => ipcRenderer.send('menu:updateLabels', labels),
+})

@@ -35,6 +35,25 @@
     "ar": "阿拉伯语",
     "vi": "越南语"
   },
+  "menu": {
+    "shell": "Shell",
+    "shell.connect": "连接 Shell",
+    "shell.management": "Shell 管理",
+    "settings": "设置",
+    "settings.preferences": "首选项",
+    "help": "帮助",
+    "help.about": "关于",
+    "edit": "编辑",
+    "edit.undo": "撤销",
+    "edit.redo": "重做",
+    "edit.cut": "剪切",
+    "edit.copy": "复制",
+    "edit.paste": "粘贴",
+    "edit.selectAll": "全选",
+    "window": "窗口",
+    "window.minimize": "最小化",
+    "window.close": "关闭窗口"
+  },
   "common": {
     "confirm": "确认",
     "cancel": "取消",

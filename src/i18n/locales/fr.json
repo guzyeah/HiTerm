@@ -35,6 +35,25 @@
     "ar": "Arabe",
     "vi": "Vietnamien"
   },
+  "menu": {
+    "shell": "Shell",
+    "shell.connect": "Connecter Shell",
+    "shell.management": "Gestion Shell",
+    "settings": "Paramètres",
+    "settings.preferences": "Préférences",
+    "help": "Aide",
+    "help.about": "À propos",
+    "edit": "Édition",
+    "edit.undo": "Annuler",
+    "edit.redo": "Rétablir",
+    "edit.cut": "Couper",
+    "edit.copy": "Copier",
+    "edit.paste": "Coller",
+    "edit.selectAll": "Sélectionner tout",
+    "window": "Fenêtre",
+    "window.minimize": "Réduire",
+    "window.close": "Fermer la fenêtre"
+  },
   "common": {
     "confirm": "Confirmer",
     "cancel": "Annuler",

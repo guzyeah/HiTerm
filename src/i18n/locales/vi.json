@@ -35,6 +35,25 @@
     "ar": "Tiếng Ả Rập",
     "vi": "Tiếng Việt"
   },
+  "menu": {
+    "shell": "Shell",
+    "shell.connect": "Kết nối Shell",
+    "shell.management": "Quản lý Shell",
+    "settings": "Cài đặt",
+    "settings.preferences": "Tuỳ chọn",
+    "help": "Trợ giúp",
+    "help.about": "Giới thiệu",
+    "edit": "Chỉnh sửa",
+    "edit.undo": "Hoàn tác",
+    "edit.redo": "Làm lại",
+    "edit.cut": "Cắt",
+    "edit.copy": "Sao chép",
+    "edit.paste": "Dán",
+    "edit.selectAll": "Chọn tất cả",
+    "window": "Cửa sổ",
+    "window.minimize": "Thu nhỏ",
+    "window.close": "Đóng cửa sổ"
+  },
   "common": {
     "confirm": "Xác nhận",
     "cancel": "Hủy",

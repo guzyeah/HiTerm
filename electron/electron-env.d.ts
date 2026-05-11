@@ -30,7 +30,12 @@ interface SettingsAPI {
   getSystemInfo: () => Promise<{ locale: string; platform: string }>
 }
 
+interface MenuAPI {
+  updateLabels: (labels: Record<string, string>) => void
+}
+
 interface Window {
   ipcRenderer: import('electron').IpcRenderer
   settingsAPI: SettingsAPI
+  menuAPI: MenuAPI
 }

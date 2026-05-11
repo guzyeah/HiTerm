@@ -35,6 +35,25 @@
     "ar": "아랍어",
     "vi": "베트남어"
   },
+  "menu": {
+    "shell": "Shell",
+    "shell.connect": "Shell 연결",
+    "shell.management": "Shell 관리",
+    "settings": "설정",
+    "settings.preferences": "기본 설정",
+    "help": "도움말",
+    "help.about": "정보",
+    "edit": "편집",
+    "edit.undo": "실행 취소",
+    "edit.redo": "다시 실행",
+    "edit.cut": "잘라내기",
+    "edit.copy": "복사",
+    "edit.paste": "붙여넣기",
+    "edit.selectAll": "모두 선택",
+    "window": "창",
+    "window.minimize": "最小化",
+    "window.close": "창 닫기"
+  },
   "common": {
     "confirm": "확인",
     "cancel": "취소",

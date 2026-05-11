@@ -145,15 +145,12 @@ export function mapOSLocaleToSupported(osLocale: string): SupportedLocale {
 
 /**
  * 检测当前系统语言并映射到SupportedLocale
- * 在Electron renderer中使用navigator.language
+ * 在Electron renderer中使用navigator.languages的首选语言
+ * navigator.languages按用户偏好排序，第一个元素是最首选语言
  */
 export function detectSystemLocale(): SupportedLocale {
-  const browserLocales = navigator.languages ?? [navigator.language ?? 'en']
-  for (const locale of browserLocales) {
-    const mapped = mapOSLocaleToSupported(locale)
-    if (mapped !== DEFAULT_LOCALE) return mapped
-  }
-  return DEFAULT_LOCALE
+  const primaryLocale = (navigator.languages?.[0]) ?? navigator.language ?? 'en'
+  return mapOSLocaleToSupported(primaryLocale)
 }
 
 /**

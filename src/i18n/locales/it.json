@@ -35,6 +35,25 @@
     "ar": "Arabo",
     "vi": "Vietnamita"
   },
+  "menu": {
+    "shell": "Shell",
+    "shell.connect": "Connetti Shell",
+    "shell.management": "Gestione Shell",
+    "settings": "Impostazioni",
+    "settings.preferences": "Preferenze",
+    "help": "Aiuto",
+    "help.about": "Informazioni",
+    "edit": "Modifica",
+    "edit.undo": "Annulla",
+    "edit.redo": "Ripeti",
+    "edit.cut": "Taglia",
+    "edit.copy": "Copia",
+    "edit.paste": "Incolla",
+    "edit.selectAll": "Seleziona tutto",
+    "window": "Finestra",
+    "window.minimize": "Minimizza",
+    "window.close": "Chiudi finestra"
+  },
   "common": {
     "confirm": "Conferma",
     "cancel": "Annulla",

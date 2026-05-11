@@ -35,6 +35,25 @@
     "ar": "アラビア語",
     "vi": "ベトナム語"
   },
+  "menu": {
+    "shell": "Shell",
+    "shell.connect": "Shell に接続",
+    "shell.management": "Shell 管理",
+    "settings": "設定",
+    "settings.preferences": "環境設定",
+    "help": "ヘルプ",
+    "help.about": "概要",
+    "edit": "編集",
+    "edit.undo": "元に戻す",
+    "edit.redo": "やり直す",
+    "edit.cut": "切り取り",
+    "edit.copy": "コピー",
+    "edit.paste": "貼り付け",
+    "edit.selectAll": "すべて選択",
+    "window": "ウィンドウ",
+    "window.minimize": "最小化",
+    "window.close": "ウィンドウを閉じる"
+  },
   "common": {
     "confirm": "確認",
     "cancel": "キャンセル",

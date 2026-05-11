@@ -12,6 +12,30 @@ import { isValidLocale } from '@/i18n/localeDetector'
 import type { FontStack, FontOverride } from '@/i18n/fontConfig'
 import { getEffectiveFontStack } from '@/i18n/fontConfig'
 
+/** 从i18next收集当前语言的所有菜单标签，用于发送到主进程更新macOS原生菜单 */
+function collectMenuLabels(): Record<string, string> {
+  const t = i18n.t
+  return {
+    menuShell: t('menu.shell'),
+    menuShellConnect: t('menu.shell.connect'),
+    menuShellManagement: t('menu.shell.management'),
+    menuSettings: t('menu.settings'),
+    menuSettingsPreferences: t('menu.settings.preferences'),
+    menuHelp: t('menu.help'),
+    menuHelpAbout: t('menu.help.about'),
+    menuEdit: t('menu.edit'),
+    menuEditUndo: t('menu.edit.undo'),
+    menuEditRedo: t('menu.edit.redo'),
+    menuEditCut: t('menu.edit.cut'),
+    menuEditCopy: t('menu.edit.copy'),
+    menuEditPaste: t('menu.edit.paste'),
+    menuEditSelectAll: t('menu.edit.selectAll'),
+    menuWindow: t('menu.window'),
+    menuWindowMinimize: t('menu.window.minimize'),
+    menuWindowClose: t('menu.window.close'),
+  }
+}
+
 /** Locale上下文值 */
 interface LocaleContextValue {
   currentLocale: SupportedLocale
@@ -62,7 +86,11 @@ export function LocaleProvider({ children }: LocaleProviderProps) {
         const storedLocale = await window.ipcRenderer.invoke('settings:getLocale')
         if (storedLocale && isValidLocale(storedLocale)) {
           setCurrentLocaleState(storedLocale as SupportedLocale)
-          i18n.changeLanguage(storedLocale)
+          await i18n.changeLanguage(storedLocale)
+          // 初始化后同步macOS原生菜单标签
+          if (window.menuAPI) {
+            window.menuAPI.updateLabels(collectMenuLabels())
+          }
         }
         const storedFontOverride = await window.ipcRenderer.invoke('settings:getFontOverride')
         if (storedFontOverride !== undefined) {
@@ -73,6 +101,10 @@ export function LocaleProvider({ children }: LocaleProviderProps) {
       }
     }
     loadStoredPreferences()
+    // 无存储偏好时也同步macOS菜单标签（使用OS检测的默认语言）
+    if (window.menuAPI) {
+      window.menuAPI.updateLabels(collectMenuLabels())
+    }
   }, [])
 
   // 切换语言时同步更新所有相关状态
@@ -94,6 +126,15 @@ export function LocaleProvider({ children }: LocaleProviderProps) {
       }
     } catch {
       // 持久化失败时忽略
+    }
+
+    // 同步macOS原生菜单标签
+    try {
+      if (window.menuAPI) {
+        window.menuAPI.updateLabels(collectMenuLabels())
+      }
+    } catch {
+      // 主进程不可用时忽略
     }
   }, [platform, fontOverride])
 
