@@ -1,0 +1,52 @@
+{
+  "app": {
+    "name": "HiTerm",
+    "description": "モダンターミナルアプリケーション"
+  },
+  "nav": {
+    "home": "ホーム",
+    "settings": "設定",
+    "about": "概要"
+  },
+  "settings": {
+    "title": "設定",
+    "language": "言語",
+    "languageDescription": "アプリの表示言語を選択してください",
+    "fontFamily": "フォント",
+    "fontFamilyDescription": "アプリの表示フォントを選択してください",
+    "fontFamilyDefault": "デフォルト",
+    "fontFamilyCustom": "カスタム",
+    "fontFamilyCustomLabel": "カスタムフォントを入力",
+    "theme": "テーマ",
+    "themeLight": "ライト",
+    "themeDark": "ダーク",
+    "themeSystem": "システム"
+  },
+  "locale": {
+    "en": "英語",
+    "zh-CN": "簡体字中国語",
+    "zh-TW": "繁体字中国語",
+    "ja": "日本語",
+    "ko": "韓国語",
+    "fr": "フランス語",
+    "de": "ドイツ語",
+    "it": "イタリア語",
+    "es": "スペイン語",
+    "ar": "アラビア語",
+    "vi": "ベトナム語"
+  },
+  "common": {
+    "confirm": "確認",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "reset": "リセット",
+    "close": "閉じる",
+    "ok": "OK",
+    "yes": "はい",
+    "no": "いいえ",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "warning": "警告",
+    "success": "成功"
+  }
+}

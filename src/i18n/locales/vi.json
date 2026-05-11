@@ -1,0 +1,52 @@
+{
+  "app": {
+    "name": "HiTerm",
+    "description": "Ứng dụng terminal hiện đại"
+  },
+  "nav": {
+    "home": "Trang chủ",
+    "settings": "Cài đặt",
+    "about": "Giới thiệu"
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "language": "Ngôn ngữ",
+    "languageDescription": "Chọn ngôn ngữ hiển thị của ứng dụng",
+    "fontFamily": "Phông chữ",
+    "fontFamilyDescription": "Chọn phông chữ hiển thị của ứng dụng",
+    "fontFamilyDefault": "Mặc định",
+    "fontFamilyCustom": "Tùy chỉnh",
+    "fontFamilyCustomLabel": "Nhập phông chữ tùy chỉnh",
+    "theme": "Chủ đề",
+    "themeLight": "Sáng",
+    "themeDark": "Tối",
+    "themeSystem": "Hệ thống"
+  },
+  "locale": {
+    "en": "Tiếng Anh",
+    "zh-CN": "Tiếng Trung giản thể",
+    "zh-TW": "Tiếng Trung phồn thể",
+    "ja": "Tiếng Nhật",
+    "ko": "Tiếng Hàn",
+    "fr": "Tiếng Pháp",
+    "de": "Tiếng Đức",
+    "it": "Tiếng Ý",
+    "es": "Tiếng Tây Ban Nha",
+    "ar": "Tiếng Ả Rập",
+    "vi": "Tiếng Việt"
+  },
+  "common": {
+    "confirm": "Xác nhận",
+    "cancel": "Hủy",
+    "save": "Lưu",
+    "reset": "Đặt lại",
+    "close": "Đóng",
+    "ok": "OK",
+    "yes": "Có",
+    "no": "Không",
+    "loading": "Đang tải...",
+    "error": "Lỗi",
+    "warning": "Cảnh báo",
+    "success": "Thành công"
+  }
+}

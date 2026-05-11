@@ -1,0 +1,52 @@
+{
+  "app": {
+    "name": "HiTerm",
+    "description": "A modern terminal application"
+  },
+  "nav": {
+    "home": "Home",
+    "settings": "Settings",
+    "about": "About"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "languageDescription": "Select the application display language",
+    "fontFamily": "Font",
+    "fontFamilyDescription": "Select the application display font",
+    "fontFamilyDefault": "Default",
+    "fontFamilyCustom": "Custom",
+    "fontFamilyCustomLabel": "Enter custom font family",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System"
+  },
+  "locale": {
+    "en": "English",
+    "zh-CN": "Simplified Chinese",
+    "zh-TW": "Traditional Chinese",
+    "ja": "Japanese",
+    "ko": "Korean",
+    "fr": "French",
+    "de": "German",
+    "it": "Italian",
+    "es": "Spanish",
+    "ar": "Arabic",
+    "vi": "Vietnamese"
+  },
+  "common": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "reset": "Reset",
+    "close": "Close",
+    "ok": "OK",
+    "yes": "Yes",
+    "no": "No",
+    "loading": "Loading...",
+    "error": "Error",
+    "warning": "Warning",
+    "success": "Success"
+  }
+}

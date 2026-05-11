@@ -1,0 +1,52 @@
+{
+  "app": {
+    "name": "HiTerm",
+    "description": "تطبيق طرفية حديث"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "settings": "الإعدادات",
+    "about": "حول"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "language": "اللغة",
+    "languageDescription": "اختر لغة عرض التطبيق",
+    "fontFamily": "الخط",
+    "fontFamilyDescription": "اختر خط عرض التطبيق",
+    "fontFamilyDefault": "الافتراضي",
+    "fontFamilyCustom": "مخصص",
+    "fontFamilyCustomLabel": "أدخل خط مخصص",
+    "theme": "المظهر",
+    "themeLight": "فاتح",
+    "themeDark": "داكن",
+    "themeSystem": "النظام"
+  },
+  "locale": {
+    "en": "الإنجليزية",
+    "zh-CN": "الصينية المبسطة",
+    "zh-TW": "الصينية التقليدية",
+    "ja": "اليابانية",
+    "ko": "الكورية",
+    "fr": "الفرنسية",
+    "de": "الألمانية",
+    "it": "الإيطالية",
+    "es": "الإسبانية",
+    "ar": "العربية",
+    "vi": "الفييتنامية"
+  },
+  "common": {
+    "confirm": "تأكيد",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "reset": "إعادة تعيين",
+    "close": "إغلاق",
+    "ok": "موافق",
+    "yes": "نعم",
+    "no": "لا",
+    "loading": "جاري التحميل...",
+    "error": "خطأ",
+    "warning": "تحذير",
+    "success": "تم بنجاح"
+  }
+}

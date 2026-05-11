@@ -1,0 +1,52 @@
+{
+  "app": {
+    "name": "HiTerm",
+    "description": "現代終端應用"
+  },
+  "nav": {
+    "home": "首頁",
+    "settings": "設定",
+    "about": "關於"
+  },
+  "settings": {
+    "title": "設定",
+    "language": "語言",
+    "languageDescription": "選擇應用的顯示語言",
+    "fontFamily": "字型",
+    "fontFamilyDescription": "選擇應用的顯示字型",
+    "fontFamilyDefault": "預設",
+    "fontFamilyCustom": "自訂",
+    "fontFamilyCustomLabel": "輸入自訂字型",
+    "theme": "主題",
+    "themeLight": "淺色",
+    "themeDark": "深色",
+    "themeSystem": "跟隨系統"
+  },
+  "locale": {
+    "en": "英文",
+    "zh-CN": "簡體中文",
+    "zh-TW": "繁體中文",
+    "ja": "日文",
+    "ko": "韓文",
+    "fr": "法文",
+    "de": "德文",
+    "it": "義大利文",
+    "es": "西班牙文",
+    "ar": "阿拉伯文",
+    "vi": "越南文"
+  },
+  "common": {
+    "confirm": "確認",
+    "cancel": "取消",
+    "save": "儲存",
+    "reset": "重設",
+    "close": "關閉",
+    "ok": "確定",
+    "yes": "是",
+    "no": "否",
+    "loading": "載入中...",
+    "error": "錯誤",
+    "warning": "警告",
+    "success": "成功"
+  }
+}
