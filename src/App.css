@@ -11,3 +11,28 @@
   justify-content: center;
   align-items: center;
 }
+
+.about-table {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 16px;
+  padding: 8px 0;
+}
+
+.about-key {
+  text-align: right;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.about-value {
+  text-align: left;
+  word-break: break-word;
+  font-size: 13px;
+}
+
+.about-separator {
+  grid-column: 1 / -1;
+  margin: 4px 0;
+}

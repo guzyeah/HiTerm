@@ -54,6 +54,18 @@
     "window.minimize": "Thu nhỏ",
     "window.close": "Đóng cửa sổ"
   },
+  "about": {
+    "title": "Giới thiệu HiTerm",
+    "appName": "Tên ứng dụng",
+    "appVersion": "Phiên bản ứng dụng",
+    "publisher": "Nhà phát hành",
+    "releaseTime": "Thời gian phát hành",
+    "renderEngine": {
+      "gpu": "Kết xuất GPU",
+      "cpu": "Kết xuất CPU"
+    },
+    "renderFont": "Phông chữ kết xuất"
+  },
   "common": {
     "confirm": "Xác nhận",
     "cancel": "Hủy",

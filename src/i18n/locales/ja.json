@@ -54,6 +54,18 @@
     "window.minimize": "最小化",
     "window.close": "ウィンドウを閉じる"
   },
+  "about": {
+    "title": "HiTerm について",
+    "appName": "アプリケーション名",
+    "appVersion": "アプリケーションバージョン",
+    "publisher": "発行者",
+    "releaseTime": "リリース時刻",
+    "renderEngine": {
+      "gpu": "GPUレンダリング",
+      "cpu": "CPUレンダリング"
+    },
+    "renderFont": "レンダリングフォント"
+  },
   "common": {
     "confirm": "確認",
     "cancel": "キャンセル",

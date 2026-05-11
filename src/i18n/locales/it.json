@@ -54,6 +54,18 @@
     "window.minimize": "Minimizza",
     "window.close": "Chiudi finestra"
   },
+  "about": {
+    "title": "Informazioni su HiTerm",
+    "appName": "Nome app",
+    "appVersion": "Versione app",
+    "publisher": "Editore",
+    "releaseTime": "Data di rilascio",
+    "renderEngine": {
+      "gpu": "Rendering GPU",
+      "cpu": "Rendering CPU"
+    },
+    "renderFont": "Carattere di rendering"
+  },
   "common": {
     "confirm": "Conferma",
     "cancel": "Annulla",

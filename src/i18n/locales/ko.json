@@ -54,6 +54,18 @@
     "window.minimize": "最小化",
     "window.close": "창 닫기"
   },
+  "about": {
+    "title": "HiTerm 정보",
+    "appName": "앱 이름",
+    "appVersion": "앱 버전",
+    "publisher": "발행자",
+    "releaseTime": "출시 시간",
+    "renderEngine": {
+      "gpu": "GPU 렌더링",
+      "cpu": "CPU 렌더링"
+    },
+    "renderFont": "렌더링 글꼴"
+  },
   "common": {
     "confirm": "확인",
     "cancel": "취소",

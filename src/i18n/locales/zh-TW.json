@@ -54,6 +54,18 @@
     "window.minimize": "最小化",
     "window.close": "關閉視窗"
   },
+  "about": {
+    "title": "關於 HiTerm",
+    "appName": "應用名稱",
+    "appVersion": "應用版本",
+    "publisher": "發行方",
+    "releaseTime": "發行時間",
+    "renderEngine": {
+      "gpu": "GPU渲染",
+      "cpu": "CPU渲染"
+    },
+    "renderFont": "渲染字型"
+  },
   "common": {
     "confirm": "確認",
     "cancel": "取消",

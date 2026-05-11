@@ -3,6 +3,11 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "author": {
+    "name": "Xi'an Beilin Guzyeah LLC.",
+    "email": "guzyeah@foxmail.com",
+    "url": "https://www.guzyeah.cn"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && electron-builder",

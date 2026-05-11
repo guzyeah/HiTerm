@@ -54,6 +54,18 @@
     "window.minimize": "التقليل",
     "window.close": "إغلاق النافذة"
   },
+  "about": {
+    "title": "حول HiTerm",
+    "appName": "اسم التطبيق",
+    "appVersion": "إصدار التطبيق",
+    "publisher": "الناشر",
+    "releaseTime": "وقت الإصدار",
+    "renderEngine": {
+      "gpu": "عرض GPU",
+      "cpu": "عرض CPU"
+    },
+    "renderFont": "خط العرض"
+  },
   "common": {
     "confirm": "تأكيد",
     "cancel": "إلغاء",
