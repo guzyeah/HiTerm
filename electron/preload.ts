@@ -1,7 +1,7 @@
-import { ipcRenderer, contextBridge, webUtils } from 'electron'
+import electron from 'electron'
 import type {
-  CreateLocalTerminalSessionRequest,
-  CreateLocalTerminalSessionResult,
+  CreateTerminalSessionRequest,
+  CreateTerminalSessionResult,
   TerminalDataEvent,
   TerminalExitEvent,
   TerminalResizeRequest,
@@ -30,6 +30,8 @@ import type {
   TerminalStatusSubscribeRequest,
 } from '../src/shared/terminalStatusTypes'
 import type { OpenPathsDialogOptions } from '../src/shared/dialogTypes'
+
+const { ipcRenderer, contextBridge, webUtils } = electron
 
 // --------- Expose IPC API to the Renderer process ---------
 contextBridge.exposeInMainWorld('ipcRenderer', {
@@ -89,8 +91,8 @@ contextBridge.exposeInMainWorld('serialAPI', {
 
 // --------- Expose Terminal API to the Renderer process ---------
 contextBridge.exposeInMainWorld('terminalAPI', {
-  createLocalSession: (request: CreateLocalTerminalSessionRequest): Promise<CreateLocalTerminalSessionResult> =>
-    ipcRenderer.invoke('terminal:createLocalSession', request),
+  createSession: (request: CreateTerminalSessionRequest): Promise<CreateTerminalSessionResult> =>
+    ipcRenderer.invoke('terminal:createSession', request),
   write: (request: TerminalWriteRequest): Promise<void> =>
     ipcRenderer.invoke('terminal:write', request),
   resize: (request: TerminalResizeRequest): Promise<void> =>

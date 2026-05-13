@@ -3,7 +3,7 @@ import path from 'node:path'
 import electron from 'vite-plugin-electron/simple'
 import react from '@vitejs/plugin-react'
 
-const pkg = await import('./package.json', { assert: { type: 'json' } }).then(m => m.default)
+const pkg = await import('./package.json', { with: { type: 'json' } }).then(m => m.default)
 
 function formatBuildTime(): string {
   const d = new Date()
@@ -32,7 +32,7 @@ export default defineConfig({
         vite: {
           build: {
             rollupOptions: {
-              external: ['node-pty'],
+              external: ['node-pty', 'ssh2'],
             },
           },
         },

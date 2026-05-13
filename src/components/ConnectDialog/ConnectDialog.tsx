@@ -31,6 +31,8 @@ import { VNCForm } from './forms/VNCForm'
 import { RDPForm } from './forms/RDPForm'
 import { DEFAULT_SHELL_GROUP_NAME } from '@/shared/shellGroups'
 import { PROTOCOL_ICON_MAP } from '@/shared/protocolIcons'
+import { emitOpenShellTab } from '@/shared/workspaceEvents'
+import type { ShellSummary } from '@/shared/shellTypes'
 
 // ==================== 协议配置 ====================
 const PROTOCOLS: ProtocolConfig[] = [
@@ -306,42 +308,42 @@ export function ConnectDialog({ open, onOpenChange }: ConnectDialogProps) {
     if (sshData.name) return
     const name = generateName('ssh', sshData)
     if (name) setSshData(prev => ({ ...prev, name }))
-  }, [sshData.host, sshData.port, sshData.username, generateName])
+  }, [sshData, generateName])
 
   // 更新 Local 名称
   useEffect(() => {
     if (localData.name) return
     const name = generateName('local', localData)
     if (name) setLocalData(prev => ({ ...prev, name }))
-  }, [localData.terminalPath, generateName])
+  }, [localData, generateName])
 
   // 更新 Telnet 名称
   useEffect(() => {
     if (telnetData.name) return
     const name = generateName('telnet', telnetData)
     if (name) setTelnetData(prev => ({ ...prev, name }))
-  }, [telnetData.host, telnetData.port, telnetData.username, generateName])
+  }, [telnetData, generateName])
 
   // 更新 Serial 名称
   useEffect(() => {
     if (serialData.name) return
     const name = generateName('serial', serialData)
     if (name) setSerialData(prev => ({ ...prev, name }))
-  }, [serialData.serialPort, generateName])
+  }, [serialData, generateName])
 
   // 更新 VNC 名称
   useEffect(() => {
     if (vncData.name) return
     const name = generateName('vnc', vncData)
     if (name) setVncData(prev => ({ ...prev, name }))
-  }, [vncData.host, vncData.port, generateName])
+  }, [vncData, generateName])
 
   // 更新 RDP 名称
   useEffect(() => {
     if (rdpData.name) return
     const name = generateName('rdp', rdpData)
     if (name) setRdpData(prev => ({ ...prev, name }))
-  }, [rdpData.host, rdpData.port, rdpData.username, generateName])
+  }, [rdpData, generateName])
 
   // 保存处理
   const handleSave = async (connect = false) => {
@@ -432,10 +434,10 @@ export function ConnectDialog({ open, onOpenChange }: ConnectDialogProps) {
 
     try {
       if (window.shellAPI) {
-        await window.shellAPI.saveShell(record)
+        const savedShell = await window.shellAPI.saveShell(record) as ShellSummary | null
         window.dispatchEvent(new CustomEvent('shells:changed'))
-        if (connect) {
-          console.log('连接:', record)
+        if (connect && savedShell) {
+          emitOpenShellTab(savedShell)
         }
         onOpenChange(false)
       }

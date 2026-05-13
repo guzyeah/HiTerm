@@ -140,7 +140,7 @@ export const TerminalPane: FC<TerminalPaneProps> = ({
       fitTerminal(fitAddon, null)
       const dimensions = fitAddon.proposeDimensions() ?? { cols: terminal.cols, rows: terminal.rows }
       try {
-        const result = await window.terminalAPI.createLocalSession({
+        const result = await window.terminalAPI.createSession({
           shellId,
           cols: dimensions.cols,
           rows: dimensions.rows,

@@ -591,8 +591,6 @@ export const WorkspacePanel: FC = () => {
   }, [focusTab])
 
   const addTerminalTab = useCallback((shell: ShellSummary) => {
-    if (shell.protocol !== 'local') return
-
     const newTab = createWorkspaceTab(
       nextSequenceRef.current,
       {

@@ -5,7 +5,9 @@
  * Edit/Window菜单使用Electron内置role，系统自动处理快捷键和本地化
  */
 
-import { Menu, BrowserWindow } from 'electron'
+import electron from 'electron'
+
+const { Menu, BrowserWindow } = electron
 
 /** 菜单标签字典：renderer通过IPC发送的i18n翻译文本 */
 export interface MenuLabels {
@@ -64,7 +66,7 @@ function sendMenuClickToRenderer(itemId: MenuItemId) {
  * 根据i18n标签构建macOS原生菜单
  * 菜单结构：Shell → Edit → 设置 → Window → 帮助
  */
-export function buildNativeMenu(labels: MenuLabels): Menu {
+export function buildNativeMenu(labels: MenuLabels): Electron.Menu {
   const template: Electron.MenuItemConstructorOptions[] = [
     {
       label: labels.menuShell,

@@ -3,11 +3,11 @@ export interface TerminalSize {
   rows: number
 }
 
-export interface CreateLocalTerminalSessionRequest extends TerminalSize {
+export interface CreateTerminalSessionRequest extends TerminalSize {
   shellId: string
 }
 
-export interface CreateLocalTerminalSessionResult {
+export interface CreateTerminalSessionResult {
   sessionId: string
 }
 

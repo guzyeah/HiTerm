@@ -1,9 +1,9 @@
 /**
  * Terminal 文件浏览侧信道。
- * 文件读取和本地传输均运行在 worker 中，避免阻塞主进程或影响 PTY 交互。
+ * Local 文件扫描/复制使用 worker，SSH 文件能力通过 SFTP 侧信道提供。
  */
 
-import { app, ipcMain, type WebContents } from 'electron'
+import electron, { type WebContents } from 'electron'
 import { randomUUID } from 'node:crypto'
 import fsPromises from 'node:fs/promises'
 import path from 'node:path'
@@ -11,6 +11,18 @@ import { Worker } from 'node:worker_threads'
 import { LOCAL_FILES_TRANSFER_WORKER_SOURCE } from './localFilesTransferWorkerSource'
 import { LOCAL_FILES_WORKER_SOURCE } from './localFilesWorkerSource'
 import { getTerminalSessionMetadata } from './terminalSession'
+import {
+  createSshDirectory,
+  createSshFile,
+  createSshSnapshot,
+  deleteSshEntries,
+  downloadSshFiles,
+  isRemotePathWithinRoot,
+  normalizeRemotePath,
+  readSshDirectory,
+  resolveSshRootPath,
+  uploadSshFiles,
+} from './sshFileSystem'
 import type {
   TerminalFileEntry,
   TerminalFilesCreateDirectoryRequest,
@@ -31,6 +43,8 @@ import type {
   TerminalFilesTransferStateEvent,
   TerminalFilesUploadRequest,
 } from '../src/shared/terminalFilesTypes'
+
+const { app, ipcMain } = electron
 
 interface TerminalFilesSubscription {
   sessionId: string
@@ -87,9 +101,10 @@ interface PendingDirectoryWorkerRequest {
 type PendingWorkerRequest = PendingSnapshotWorkerRequest | PendingDirectoryWorkerRequest
 
 interface TransferTask {
+  kind: 'local-worker' | 'ssh'
   sessionId: string
   webContentsId: number
-  worker: Worker
+  worker: Worker | null
   state: TerminalFilesTransferState
 }
 
@@ -421,11 +436,45 @@ function queueDirectoryRequest(subscriptionKey: string, targetPath: string): voi
   }).catch(() => undefined)
 }
 
+function queueSshSnapshotRequest(
+  subscriptionKey: string,
+  sessionId: string,
+  rootPath: string,
+  homeDir: string,
+): void {
+  void createSshSnapshot(sessionId, rootPath, homeDir).then(snapshot => {
+    sendTerminalFilesSnapshot(subscriptionKey, snapshot)
+  }).catch(error => {
+    publishSubscriptionError(
+      subscriptionKey,
+      error instanceof Error ? error.message : String(error),
+    )
+  })
+}
+
+function queueSshDirectoryRequest(
+  subscriptionKey: string,
+  sessionId: string,
+  targetPath: string,
+): void {
+  void readSshDirectory(sessionId, targetPath).then(({ parentPath, entries }) => {
+    sendTerminalFilesDirectory(subscriptionKey, parentPath, entries)
+  }).catch(error => {
+    publishSubscriptionError(
+      subscriptionKey,
+      error instanceof Error ? error.message : String(error),
+    )
+  })
+}
+
 function stopTransferTask(subscriptionKey: string): void {
   const transferTask = transferTasks.get(subscriptionKey)
   if (!transferTask) return
 
   transferTasks.delete(subscriptionKey)
+
+  if (!transferTask.worker) return
+
   try {
     transferTask.worker.postMessage({ type: 'stop' })
   } catch {
@@ -522,21 +571,18 @@ function getSubscriptionForSender(sessionId: string, webContents: WebContents): 
   return subscription
 }
 
-function ensureLocalSession(sessionId: string, webContents: WebContents) {
+function ensureSessionMetadata(sessionId: string, webContents: WebContents) {
   const metadata = getTerminalSessionMetadata(sessionId, webContents)
-  if (!metadata || metadata.protocol !== 'local') {
+  if (!metadata || (metadata.protocol !== 'local' && metadata.protocol !== 'ssh')) {
     unsubscribeTerminalFiles(webContents, sessionId)
-    throw new Error('Only local terminal files are supported')
+    throw new Error('Unsupported terminal files session')
   }
 
   return metadata
 }
 
 function subscribeTerminalFiles(webContents: WebContents, sessionId: string): void {
-  const metadata = getTerminalSessionMetadata(sessionId, webContents)
-  if (!metadata || metadata.protocol !== 'local') {
-    throw new Error('Only local terminal files are supported')
-  }
+  const metadata = ensureSessionMetadata(sessionId, webContents)
 
   const subscriptionKey = getSubscriptionKey(webContents, sessionId)
   subscriptions.set(subscriptionKey, {
@@ -546,7 +592,13 @@ function subscribeTerminalFiles(webContents: WebContents, sessionId: string): vo
     homeDir: metadata.homeDir,
   })
   trackWebContentsSubscription(webContents, sessionId)
-  queueSnapshotRequest(subscriptionKey, metadata.cwd, metadata.homeDir)
+
+  if (metadata.protocol === 'local') {
+    queueSnapshotRequest(subscriptionKey, metadata.cwd, metadata.homeDir)
+  } else {
+    queueSshSnapshotRequest(subscriptionKey, sessionId, metadata.cwd, metadata.homeDir)
+  }
+
   publishActiveTransferState(subscriptionKey)
 }
 
@@ -557,19 +609,29 @@ function unsubscribeTerminalFiles(webContents: WebContents, sessionId: string): 
 }
 
 function refreshTerminalFiles(webContents: WebContents, sessionId: string): void {
-  const metadata = ensureLocalSession(sessionId, webContents)
+  const metadata = ensureSessionMetadata(sessionId, webContents)
   const subscriptionKey = getSubscriptionKey(webContents, sessionId)
   const subscription = getSubscriptionForSender(sessionId, webContents)
-  queueSnapshotRequest(subscriptionKey, subscription.rootPath, metadata.homeDir)
+
+  if (metadata.protocol === 'local') {
+    queueSnapshotRequest(subscriptionKey, subscription.rootPath, metadata.homeDir)
+  } else {
+    queueSshSnapshotRequest(subscriptionKey, sessionId, subscription.rootPath, metadata.homeDir)
+  }
 }
 
 function goHomeTerminalFiles(webContents: WebContents, sessionId: string): void {
-  const metadata = ensureLocalSession(sessionId, webContents)
+  const metadata = ensureSessionMetadata(sessionId, webContents)
   const subscriptionKey = getSubscriptionKey(webContents, sessionId)
-  queueSnapshotRequest(subscriptionKey, metadata.homeDir, metadata.homeDir)
+
+  if (metadata.protocol === 'local') {
+    queueSnapshotRequest(subscriptionKey, metadata.homeDir, metadata.homeDir)
+  } else {
+    queueSshSnapshotRequest(subscriptionKey, sessionId, metadata.homeDir, metadata.homeDir)
+  }
 }
 
-function resolveNextRootPath(subscription: TerminalFilesSubscription, requestedPath: string): string {
+function resolveNextLocalRootPath(subscription: TerminalFilesSubscription, requestedPath: string): string {
   const trimmedPath = requestedPath.trim()
   if (!trimmedPath) {
     throw new Error('Directory path is required')
@@ -594,18 +656,29 @@ async function setRootPathTerminalFiles(
   webContents: WebContents,
   request: TerminalFilesSetRootPathRequest,
 ): Promise<void> {
-  ensureLocalSession(request.sessionId, webContents)
-
+  const metadata = ensureSessionMetadata(request.sessionId, webContents)
   const subscription = getSubscriptionForSender(request.sessionId, webContents)
-  const nextRootPath = resolveNextRootPath(subscription, request.path)
   const subscriptionKey = getSubscriptionKey(webContents, request.sessionId)
-  const snapshot = await requestWorkerSnapshot(
-    subscriptionKey,
-    nextRootPath,
-    subscription.homeDir,
-    false,
-  )
 
+  if (metadata.protocol === 'local') {
+    const nextRootPath = resolveNextLocalRootPath(subscription, request.path)
+    const snapshot = await requestWorkerSnapshot(
+      subscriptionKey,
+      nextRootPath,
+      subscription.homeDir,
+      false,
+    )
+
+    sendTerminalFilesSnapshot(subscriptionKey, snapshot)
+    return
+  }
+
+  const nextRootPath = await resolveSshRootPath({
+    sessionId: request.sessionId,
+    rootPath: subscription.rootPath,
+    homeDir: subscription.homeDir,
+  }, request.path)
+  const snapshot = await createSshSnapshot(request.sessionId, nextRootPath, subscription.homeDir)
   sendTerminalFilesSnapshot(subscriptionKey, snapshot)
 }
 
@@ -613,14 +686,25 @@ function readTerminalDirectory(
   webContents: WebContents,
   request: TerminalFilesReadDirectoryRequest,
 ): void {
-  ensureLocalSession(request.sessionId, webContents)
-
+  const metadata = ensureSessionMetadata(request.sessionId, webContents)
   const subscription = getSubscriptionForSender(request.sessionId, webContents)
-  if (!isPathWithinRoot(subscription.rootPath, request.path)) {
+  const subscriptionKey = getSubscriptionKey(webContents, request.sessionId)
+
+  if (metadata.protocol === 'local') {
+    if (!isPathWithinRoot(subscription.rootPath, request.path)) {
+      throw new Error('Directory is outside the current root path')
+    }
+
+    queueDirectoryRequest(subscriptionKey, request.path)
+    return
+  }
+
+  const normalizedPath = normalizeRemotePath(request.path)
+  if (!isRemotePathWithinRoot(subscription.rootPath, normalizedPath)) {
     throw new Error('Directory is outside the current root path')
   }
 
-  queueDirectoryRequest(getSubscriptionKey(webContents, request.sessionId), request.path)
+  queueSshDirectoryRequest(subscriptionKey, request.sessionId, normalizedPath)
 }
 
 async function createTerminalFileEntry(
@@ -628,9 +712,27 @@ async function createTerminalFileEntry(
   request: TerminalFilesCreateFileRequest | TerminalFilesCreateDirectoryRequest,
   kind: 'file' | 'directory',
 ): Promise<TerminalFilesCreateEntryResult> {
-  ensureLocalSession(request.sessionId, webContents)
-
+  const metadata = ensureSessionMetadata(request.sessionId, webContents)
   const subscription = getSubscriptionForSender(request.sessionId, webContents)
+
+  if (metadata.protocol === 'ssh') {
+    if (kind === 'directory') {
+      return createSshDirectory(
+        request.sessionId,
+        subscription.rootPath,
+        request.parentPath,
+        request.name,
+      )
+    }
+
+    return createSshFile(
+      request.sessionId,
+      subscription.rootPath,
+      request.parentPath,
+      request.name,
+    )
+  }
+
   const parentPath = path.resolve(request.parentPath)
   if (!isPathWithinRoot(subscription.rootPath, parentPath)) {
     throw new Error('Target directory is outside the current root path')
@@ -671,9 +773,13 @@ async function deleteTerminalEntries(
   webContents: WebContents,
   request: TerminalFilesDeleteEntriesRequest,
 ): Promise<TerminalFilesDeleteEntriesResult> {
-  ensureLocalSession(request.sessionId, webContents)
-
+  const metadata = ensureSessionMetadata(request.sessionId, webContents)
   const subscription = getSubscriptionForSender(request.sessionId, webContents)
+
+  if (metadata.protocol === 'ssh') {
+    return deleteSshEntries(request.sessionId, subscription.rootPath, request.targetPaths)
+  }
+
   const normalizedTargetPaths = normalizeTransferSourcePaths(request.targetPaths)
   if (normalizedTargetPaths.length === 0) {
     throw new Error('No files or directories were selected for deletion')
@@ -737,9 +843,99 @@ async function startTerminalFilesTransfer(
   request: TerminalFilesUploadRequest | TerminalFilesDownloadRequest,
   direction: TerminalFilesTransferDirection,
 ): Promise<void> {
-  ensureLocalSession(request.sessionId, webContents)
-
+  const metadata = ensureSessionMetadata(request.sessionId, webContents)
   const subscription = getSubscriptionForSender(request.sessionId, webContents)
+  const subscriptionKey = getSubscriptionKey(webContents, request.sessionId)
+  const activeTransferTask = transferTasks.get(subscriptionKey)
+  if (activeTransferTask && (
+    activeTransferTask.state.status === 'scanning'
+    || activeTransferTask.state.status === 'transferring'
+  )) {
+    throw new Error(createTransferInProgressMessage(direction))
+  }
+
+  stopTransferTask(subscriptionKey)
+
+  if (metadata.protocol === 'ssh') {
+    const destinationPath = direction === 'upload'
+      ? normalizeRemotePath(request.destinationPath)
+      : path.resolve(request.destinationPath)
+    const taskId = randomUUID()
+    const sourcePaths = direction === 'upload'
+      ? request.sourcePaths
+      : request.sourcePaths.map(normalizeRemotePath)
+
+    if (sourcePaths.length === 0) {
+      throw new Error(createMissingTransferSourcesMessage(direction))
+    }
+
+    const initialState: TerminalFilesTransferState = {
+      taskId,
+      direction,
+      destinationPath,
+      currentItemName: null,
+      completedItems: 0,
+      totalItems: sourcePaths.length,
+      copiedBytes: 0,
+      totalBytes: null,
+      percent: null,
+      status: 'scanning',
+    }
+
+    transferTasks.set(subscriptionKey, {
+      kind: 'ssh',
+      sessionId: request.sessionId,
+      webContentsId: webContents.id,
+      worker: null,
+      state: initialState,
+    })
+
+    publishActiveTransferState(subscriptionKey)
+
+    const publishState = (state: TerminalFilesTransferState) => {
+      const transferTask = transferTasks.get(subscriptionKey)
+      if (!transferTask) return
+
+      transferTask.state = state
+      sendTerminalFilesTransferState(subscriptionKey, state)
+
+      if (state.status === 'completed' || state.status === 'failed') {
+        stopTransferTask(subscriptionKey)
+      }
+    }
+
+    try {
+      if (direction === 'upload') {
+        await uploadSshFiles(
+          request.sessionId,
+          subscription.rootPath,
+          destinationPath,
+          request.sourcePaths,
+          taskId,
+          publishState,
+        )
+      } else {
+        await downloadSshFiles(
+          request.sessionId,
+          subscription.rootPath,
+          destinationPath,
+          request.sourcePaths,
+          taskId,
+          publishState,
+        )
+      }
+    } catch (error) {
+      publishState({
+        ...initialState,
+        status: 'failed',
+        errorMessage: error instanceof Error ? error.message : String(error),
+      })
+      throw error
+    }
+
+    return
+  }
+
   const destinationPath = path.resolve(request.destinationPath)
   const sourcePaths = normalizeTransferSourcePaths(request.sourcePaths)
 
@@ -758,20 +954,10 @@ async function startTerminalFilesTransfer(
     }
   }
 
-  const subscriptionKey = getSubscriptionKey(webContents, request.sessionId)
-  const activeTransferTask = transferTasks.get(subscriptionKey)
-  if (activeTransferTask && (
-    activeTransferTask.state.status === 'scanning'
-    || activeTransferTask.state.status === 'transferring'
-  )) {
-    throw new Error(createTransferInProgressMessage(direction))
-  }
-
-  stopTransferTask(subscriptionKey)
-
   const taskId = randomUUID()
   const worker = createTransferWorker(subscriptionKey, direction)
   transferTasks.set(subscriptionKey, {
+    kind: 'local-worker',
     sessionId: request.sessionId,
     webContentsId: webContents.id,
     worker,
@@ -862,7 +1048,7 @@ export function registerTerminalFilesIpcHandlers(): void {
     subscriptions.clear()
     pendingWorkerRequests.clear()
     transferTasks.forEach(transferTask => {
-      transferTask.worker.postMessage({ type: 'stop' })
+      transferTask.worker?.postMessage({ type: 'stop' })
     })
     transferTasks.clear()
     localFilesWorker?.postMessage({ type: 'stop' })

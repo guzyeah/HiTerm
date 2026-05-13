@@ -51,9 +51,9 @@ interface SerialAPI {
 }
 
 interface TerminalAPI {
-  createLocalSession: (
-    request: import('../src/shared/terminalTypes').CreateLocalTerminalSessionRequest
-  ) => Promise<import('../src/shared/terminalTypes').CreateLocalTerminalSessionResult>
+  createSession: (
+    request: import('../src/shared/terminalTypes').CreateTerminalSessionRequest
+  ) => Promise<import('../src/shared/terminalTypes').CreateTerminalSessionResult>
   write: (request: import('../src/shared/terminalTypes').TerminalWriteRequest) => Promise<void>
   resize: (request: import('../src/shared/terminalTypes').TerminalResizeRequest) => Promise<void>
   dispose: (request: import('../src/shared/terminalTypes').TerminalSessionRequest) => Promise<void>

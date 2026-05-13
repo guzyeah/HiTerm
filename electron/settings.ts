@@ -4,7 +4,9 @@
  */
 
 import ElectronStore from 'electron-store'
-import { app } from 'electron'
+import electron from 'electron'
+
+const { app } = electron
 
 interface SettingsSchema {
   locale: string

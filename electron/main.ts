@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Menu, dialog } from 'electron'
+import electron from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { getLocale, setLocale, getFontOverride, setFontOverride, getSystemInfo } from './settings'
@@ -10,6 +10,8 @@ import { registerTerminalStatusIpcHandlers } from './terminalStatus'
 import { listSerialPorts } from './utils/serialPort'
 import type { OpenPathsDialogOptions } from '../src/shared/dialogTypes'
 
+const { app, BrowserWindow, ipcMain, Menu, dialog } = electron
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 process.env.APP_ROOT = path.join(__dirname, '..')
@@ -20,7 +22,7 @@ export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')
 
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 'public') : RENDERER_DIST
 
-let win: BrowserWindow | null
+let win: Electron.BrowserWindow | null
 
 function createWindow() {
   // macOS使用原生菜单栏，Win/Linux移除原生菜单使用自绘菜单

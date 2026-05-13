@@ -1,12 +1,16 @@
 /**
  * Terminal 状态采样通道。
- * 状态采样运行在 worker 中，避免和 PTY 字符流争用主进程事件循环。
+ * Local 会话复用全局 worker，SSH 会话按订阅创建独立采样器。
  */
 
-import { app, ipcMain, type WebContents } from 'electron'
+import electron, { type WebContents } from 'electron'
 import { Worker } from 'node:worker_threads'
 import { getTerminalSessionMetadata } from './terminalSession'
 import { LOCAL_STATUS_WORKER_SOURCE } from './localStatusWorkerSource'
+import {
+  clearSshTerminalStatusState,
+  sampleSshTerminalStatus,
+} from './sshStatusSampling'
 import type {
   TerminalStatusErrorEvent,
   TerminalStatusSample,
@@ -14,9 +18,17 @@ import type {
   TerminalStatusSubscribeRequest,
 } from '../src/shared/terminalStatusTypes'
 
+const { app, ipcMain } = electron
+
 interface TerminalStatusSubscription {
   sessionId: string
   webContents: WebContents
+  protocol: 'local' | 'ssh'
+}
+
+interface SshSamplerTask {
+  intervalId: ReturnType<typeof setInterval>
+  isSampling: boolean
 }
 
 type LocalStatusWorkerMessage =
@@ -26,6 +38,7 @@ type LocalStatusWorkerMessage =
 const subscriptions = new Map<string, TerminalStatusSubscription>()
 const webContentsSubscriptions = new Map<number, Set<string>>()
 const trackedWebContentsIds = new Set<number>()
+const sshSamplerTasks = new Map<string, SshSamplerTask>()
 
 let localStatusWorker: Worker | null = null
 
@@ -37,6 +50,10 @@ function sendStatusError(webContents: WebContents, payload: TerminalStatusErrorE
   if (!webContents.isDestroyed()) {
     webContents.send('terminalStatus:error', payload)
   }
+}
+
+function hasLocalSubscriptions(): boolean {
+  return [...subscriptions.values()].some(subscription => subscription.protocol === 'local')
 }
 
 function ensureLocalStatusWorker(): Worker {
@@ -60,7 +77,7 @@ function ensureLocalStatusWorker(): Worker {
       localStatusWorker = null
     }
 
-    if (subscriptions.size > 0) {
+    if (hasLocalSubscriptions()) {
       ensureLocalStatusWorker()
     }
   })
@@ -69,7 +86,7 @@ function ensureLocalStatusWorker(): Worker {
 }
 
 function stopLocalStatusWorkerIfIdle(): void {
-  if (subscriptions.size > 0 || !localStatusWorker) return
+  if (hasLocalSubscriptions() || !localStatusWorker) return
 
   const worker = localStatusWorker
   localStatusWorker = null
@@ -92,7 +109,7 @@ function trackWebContentsSubscription(webContents: WebContents, sessionId: strin
     const nextSessionIds = webContentsSubscriptions.get(webContents.id)
     webContentsSubscriptions.delete(webContents.id)
     trackedWebContentsIds.delete(webContents.id)
-    nextSessionIds?.forEach(sessionId => unsubscribeLocalStatus(webContents, sessionId))
+    nextSessionIds?.forEach(sessionId => unsubscribeTerminalStatus(webContents, sessionId))
   })
 }
 
@@ -100,31 +117,13 @@ function untrackWebContentsSubscription(webContents: WebContents, sessionId: str
   webContentsSubscriptions.get(webContents.id)?.delete(sessionId)
 }
 
-function subscribeLocalStatus(webContents: WebContents, sessionId: string): void {
-  const metadata = getTerminalSessionMetadata(sessionId, webContents)
-  if (!metadata || metadata.protocol !== 'local') {
-    throw new Error('Only local terminal status is supported')
-  }
-
-  subscriptions.set(getSubscriptionKey(webContents, sessionId), {
-    sessionId,
-    webContents,
-  })
-  trackWebContentsSubscription(webContents, sessionId)
-  ensureLocalStatusWorker()
-}
-
-function unsubscribeLocalStatus(webContents: WebContents, sessionId: string): void {
-  subscriptions.delete(getSubscriptionKey(webContents, sessionId))
-  untrackWebContentsSubscription(webContents, sessionId)
-  stopLocalStatusWorkerIfIdle()
-}
-
 function publishLocalStatusSample(sample: TerminalStatusSample): void {
   subscriptions.forEach(subscription => {
+    if (subscription.protocol !== 'local') return
+
     const metadata = getTerminalSessionMetadata(subscription.sessionId, subscription.webContents)
     if (!metadata || metadata.protocol !== 'local') {
-      unsubscribeLocalStatus(subscription.webContents, subscription.sessionId)
+      unsubscribeTerminalStatus(subscription.webContents, subscription.sessionId)
       return
     }
 
@@ -140,6 +139,8 @@ function publishLocalStatusSample(sample: TerminalStatusSample): void {
 
 function publishLocalStatusError(message: string): void {
   subscriptions.forEach(subscription => {
+    if (subscription.protocol !== 'local') return
+
     sendStatusError(subscription.webContents, {
       sessionId: subscription.sessionId,
       message,
@@ -147,17 +148,122 @@ function publishLocalStatusError(message: string): void {
   })
 }
 
+function stopSshSampler(subscriptionKey: string): void {
+  const samplerTask = sshSamplerTasks.get(subscriptionKey)
+  if (!samplerTask) return
+
+  clearInterval(samplerTask.intervalId)
+  sshSamplerTasks.delete(subscriptionKey)
+}
+
+function sampleSshStatusForSubscription(subscriptionKey: string): void {
+  const samplerTask = sshSamplerTasks.get(subscriptionKey)
+  const subscription = subscriptions.get(subscriptionKey)
+  if (!samplerTask || !subscription) return
+  if (samplerTask.isSampling) return
+
+  samplerTask.isSampling = true
+
+  void (async () => {
+    try {
+      const metadata = getTerminalSessionMetadata(subscription.sessionId, subscription.webContents)
+      if (!metadata || metadata.protocol !== 'ssh') {
+        unsubscribeTerminalStatus(subscription.webContents, subscription.sessionId)
+        return
+      }
+
+      const sample = await sampleSshTerminalStatus(subscription.sessionId, metadata.remoteOs)
+      if (!subscription.webContents.isDestroyed()) {
+        const event: TerminalStatusSampleEvent = {
+          sessionId: subscription.sessionId,
+          sample,
+        }
+        subscription.webContents.send('terminalStatus:sample', event)
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      sendStatusError(subscription.webContents, {
+        sessionId: subscription.sessionId,
+        message,
+      })
+      if (message.includes('currently supported only')) {
+        stopSshSampler(subscriptionKey)
+      }
+    } finally {
+      const nextSamplerTask = sshSamplerTasks.get(subscriptionKey)
+      if (nextSamplerTask) {
+        nextSamplerTask.isSampling = false
+      }
+    }
+  })()
+}
+
+function startSshSampler(webContents: WebContents, sessionId: string): void {
+  const subscriptionKey = getSubscriptionKey(webContents, sessionId)
+  if (sshSamplerTasks.has(subscriptionKey)) return
+
+  const intervalId = setInterval(() => {
+    sampleSshStatusForSubscription(subscriptionKey)
+  }, 1000)
+
+  sshSamplerTasks.set(subscriptionKey, {
+    intervalId,
+    isSampling: false,
+  })
+  sampleSshStatusForSubscription(subscriptionKey)
+}
+
+function subscribeTerminalStatus(webContents: WebContents, sessionId: string): void {
+  const metadata = getTerminalSessionMetadata(sessionId, webContents)
+  if (!metadata || (metadata.protocol !== 'local' && metadata.protocol !== 'ssh')) {
+    throw new Error('Unsupported terminal status session')
+  }
+
+  subscriptions.set(getSubscriptionKey(webContents, sessionId), {
+    sessionId,
+    webContents,
+    protocol: metadata.protocol,
+  })
+  trackWebContentsSubscription(webContents, sessionId)
+
+  if (metadata.protocol === 'local') {
+    ensureLocalStatusWorker()
+    return
+  }
+
+  startSshSampler(webContents, sessionId)
+}
+
+function unsubscribeTerminalStatus(webContents: WebContents, sessionId: string): void {
+  const subscriptionKey = getSubscriptionKey(webContents, sessionId)
+  const subscription = subscriptions.get(subscriptionKey)
+
+  subscriptions.delete(subscriptionKey)
+  untrackWebContentsSubscription(webContents, sessionId)
+
+  if (subscription?.protocol === 'ssh') {
+    stopSshSampler(subscriptionKey)
+    clearSshTerminalStatusState(sessionId)
+  }
+
+  stopLocalStatusWorkerIfIdle()
+}
+
 export function registerTerminalStatusIpcHandlers(): void {
   ipcMain.handle('terminalStatus:subscribe', (event, request: TerminalStatusSubscribeRequest) => {
-    subscribeLocalStatus(event.sender, request.sessionId)
+    subscribeTerminalStatus(event.sender, request.sessionId)
   })
 
   ipcMain.handle('terminalStatus:unsubscribe', (event, request: TerminalStatusSubscribeRequest) => {
-    unsubscribeLocalStatus(event.sender, request.sessionId)
+    unsubscribeTerminalStatus(event.sender, request.sessionId)
   })
 
   app.once('before-quit', () => {
     subscriptions.clear()
+    sshSamplerTasks.forEach(samplerTask => {
+      clearInterval(samplerTask.intervalId)
+    })
+    sshSamplerTasks.clear()
     localStatusWorker?.postMessage({ type: 'stop' })
     localStatusWorker = null
   })

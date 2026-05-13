@@ -182,7 +182,6 @@ export const ConnectionsPanel: FC = () => {
   const groupTree = useMemo(() => buildGroupTree(groups, shells), [groups, shells])
 
   const openShell = useCallback((shell: ShellSummary) => {
-    if (shell.protocol !== 'local') return
     emitOpenShellTab(shell)
   }, [])
 
