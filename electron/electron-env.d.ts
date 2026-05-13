@@ -37,6 +37,7 @@ interface MenuAPI {
 interface ShellAPI {
   saveShell: (record: unknown) => Promise<unknown>
   listGroups: () => Promise<string[]>
+  listShellSummaries: () => Promise<import('../src/shared/shellTypes').ShellSummary[]>
 }
 
 interface DialogAPI {

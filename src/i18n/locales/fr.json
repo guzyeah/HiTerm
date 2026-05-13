@@ -153,5 +153,9 @@
     "closeTab": "Fermer l'onglet",
     "emptyTitle": "Aucun onglet ouvert",
     "emptyDescription": "Créez un nouvel onglet pour continuer."
+  },
+  "shellGroups": {
+    "default": "Par défaut",
+    "local": "Local"
   }
 }

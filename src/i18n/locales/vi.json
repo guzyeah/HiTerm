@@ -153,5 +153,9 @@
     "closeTab": "Đóng thẻ",
     "emptyTitle": "Chưa mở thẻ nào",
     "emptyDescription": "Tạo thẻ mới để tiếp tục."
+  },
+  "shellGroups": {
+    "default": "Mặc định",
+    "local": "Cục bộ"
   }
 }

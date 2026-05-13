@@ -153,5 +153,9 @@
     "closeTab": "關閉標籤",
     "emptyTitle": "暫無標籤頁",
     "emptyDescription": "點擊新增按鈕繼續。"
+  },
+  "shellGroups": {
+    "default": "預設",
+    "local": "本機"
   }
 }

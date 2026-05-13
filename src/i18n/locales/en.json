@@ -153,5 +153,9 @@
     "closeTab": "Close tab",
     "emptyTitle": "No tabs open",
     "emptyDescription": "Create a new tab to continue."
+  },
+  "shellGroups": {
+    "default": "Default",
+    "local": "Local"
   }
 }

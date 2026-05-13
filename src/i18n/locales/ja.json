@@ -153,5 +153,9 @@
     "closeTab": "タブを閉じる",
     "emptyTitle": "開いているタブはありません",
     "emptyDescription": "新しいタブを作成してください。"
+  },
+  "shellGroups": {
+    "default": "デフォルト",
+    "local": "ローカル"
   }
 }

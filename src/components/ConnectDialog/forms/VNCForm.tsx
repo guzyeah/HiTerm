@@ -12,6 +12,7 @@ import {
   Combobox,
   Option,
 } from '@fluentui/react-components'
+import { GroupCombobox } from './GroupCombobox'
 
 const useStyles = makeStyles({
   grid: {
@@ -129,18 +130,13 @@ export function VNCForm({ data, onChange, groupList }: VNCFormProps) {
       />
 
       <Label className={styles.label}>{t('connectDialog.group')}</Label>
-      <Combobox
+      <GroupCombobox
         className={styles.field}
         value={data.group}
-        onOptionSelect={(_, v) => v.optionValue && update('group', v.optionValue)}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => update('group', e.target.value)}
-        freeform
+        groupList={groupList}
         placeholder={t('connectDialog.groupPlaceholder')}
-      >
-        {groupList.map(g => (
-          <Option key={g} value={g}>{g}</Option>
-        ))}
-      </Combobox>
+        onChange={group => update('group', group)}
+      />
     </div>
   )
 }

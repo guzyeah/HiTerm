@@ -153,5 +153,9 @@
     "closeTab": "탭 닫기",
     "emptyTitle": "열린 탭이 없습니다",
     "emptyDescription": "새 탭을 만들어 계속하세요."
+  },
+  "shellGroups": {
+    "default": "기본",
+    "local": "로컬"
   }
 }

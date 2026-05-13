@@ -20,12 +20,6 @@ import {
   tokens,
 } from '@fluentui/react-components'
 import {
-  GlobeRegular,
-  DesktopRegular,
-  PlugConnectedRegular,
-  UsbPlugRegular,
-  ProjectionScreenRegular,
-  RemoteRegular,
   DismissRegular,
 } from '@fluentui/react-icons'
 import type { ProtocolType, ProtocolConfig } from './types'
@@ -35,6 +29,8 @@ import { TelnetForm } from './forms/TelnetForm'
 import { SerialForm } from './forms/SerialForm'
 import { VNCForm } from './forms/VNCForm'
 import { RDPForm } from './forms/RDPForm'
+import { DEFAULT_SHELL_GROUP_NAME } from '@/shared/shellGroups'
+import { PROTOCOL_ICON_MAP } from '@/shared/protocolIcons'
 
 // ==================== 协议配置 ====================
 const PROTOCOLS: ProtocolConfig[] = [
@@ -45,15 +41,6 @@ const PROTOCOLS: ProtocolConfig[] = [
   { id: 'vnc', label: 'VNC', icon: 'vnc', defaultPort: 5900 },
   { id: 'rdp', label: 'RDP', icon: 'rdp', defaultPort: 3389 },
 ]
-
-const PROTOCOL_ICON_MAP: Record<ProtocolType, JSX.Element> = {
-  ssh: <GlobeRegular />,
-  local: <DesktopRegular />,
-  telnet: <PlugConnectedRegular />,
-  serial: <UsbPlugRegular />,
-  vnc: <ProjectionScreenRegular />,
-  rdp: <RemoteRegular />,
-}
 
 // ==================== 样式 ====================
 const useStyles = makeStyles({
@@ -153,14 +140,14 @@ export function ConnectDialog({ open, onOpenChange }: ConnectDialogProps) {
     password: '',
     privateKeyPath: '',
     name: '',
-    group: '',
+    group: DEFAULT_SHELL_GROUP_NAME,
   })
 
   const [localData, setLocalData] = useState({
     terminalPath: '',
     workDir: '',
     name: '',
-    group: '',
+    group: DEFAULT_SHELL_GROUP_NAME,
   })
 
   const [telnetData, setTelnetData] = useState<{
@@ -178,7 +165,7 @@ export function ConnectDialog({ open, onOpenChange }: ConnectDialogProps) {
     authType: 'none' as const,
     password: '',
     name: '',
-    group: '',
+    group: DEFAULT_SHELL_GROUP_NAME,
   })
 
   const [serialData, setSerialData] = useState<{
@@ -198,7 +185,7 @@ export function ConnectDialog({ open, onOpenChange }: ConnectDialogProps) {
     stopBits: 1,
     flowControl: 'none' as const,
     name: '',
-    group: '',
+    group: DEFAULT_SHELL_GROUP_NAME,
   })
 
   const [vncData, setVncData] = useState({
@@ -208,7 +195,7 @@ export function ConnectDialog({ open, onOpenChange }: ConnectDialogProps) {
     colorDepth: '24',
     quality: 'high',
     name: '',
-    group: '',
+    group: DEFAULT_SHELL_GROUP_NAME,
   })
 
   const [rdpData, setRdpData] = useState({
@@ -219,7 +206,7 @@ export function ConnectDialog({ open, onOpenChange }: ConnectDialogProps) {
     domain: '',
     resolution: '1920x1080',
     name: '',
-    group: '',
+    group: DEFAULT_SHELL_GROUP_NAME,
   })
 
   // 分组列表
@@ -446,6 +433,7 @@ export function ConnectDialog({ open, onOpenChange }: ConnectDialogProps) {
     try {
       if (window.shellAPI) {
         await window.shellAPI.saveShell(record)
+        window.dispatchEvent(new CustomEvent('shells:changed'))
         if (connect) {
           console.log('连接:', record)
         }

@@ -38,6 +38,7 @@ contextBridge.exposeInMainWorld('menuAPI', {
 contextBridge.exposeInMainWorld('shellAPI', {
   saveShell: (record: unknown) => ipcRenderer.invoke('shell:save', record),
   listGroups: () => ipcRenderer.invoke('shell:listGroups'),
+  listShellSummaries: () => ipcRenderer.invoke('shell:listSummaries'),
 })
 
 // --------- Expose Dialog API to the Renderer process ---------

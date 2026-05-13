@@ -153,5 +153,9 @@
     "closeTab": "关闭标签",
     "emptyTitle": "暂无标签页",
     "emptyDescription": "点击新建按钮继续。"
+  },
+  "shellGroups": {
+    "default": "默认",
+    "local": "本地"
   }
 }

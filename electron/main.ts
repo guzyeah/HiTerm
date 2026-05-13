@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { getLocale, setLocale, getFontOverride, setFontOverride, getSystemInfo } from './settings'
 import { initNativeMenu, updateNativeMenu, type MenuLabels } from './menu'
-import { saveShell, listGroups } from './shellStore'
+import { initializeShellStore, saveShell, listGroups, listShellSummaries } from './shellStore'
 import { listSerialPorts } from './utils/serialPort'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -79,6 +79,11 @@ function registerIpcHandlers() {
     return listGroups()
   })
 
+  // Shell 列表摘要
+  ipcMain.handle('shell:listSummaries', () => {
+    return listShellSummaries()
+  })
+
   // 系统文件选择对话框
   ipcMain.handle('dialog:openFile', async (_event, options) => {
     const win = BrowserWindow.getFocusedWindow()
@@ -97,6 +102,7 @@ function registerIpcHandlers() {
 }
 
 app.whenReady().then(() => {
+  initializeShellStore()
   registerIpcHandlers()
   createWindow()
 })

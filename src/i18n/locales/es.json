@@ -153,5 +153,9 @@
     "closeTab": "Cerrar pestaña",
     "emptyTitle": "No hay pestañas abiertas",
     "emptyDescription": "Crea una nueva pestaña para continuar."
+  },
+  "shellGroups": {
+    "default": "Predeterminado",
+    "local": "Local"
   }
 }

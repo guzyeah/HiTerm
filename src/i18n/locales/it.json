@@ -153,5 +153,9 @@
     "closeTab": "Chiudi scheda",
     "emptyTitle": "Nessuna scheda aperta",
     "emptyDescription": "Crea una nuova scheda per continuare."
+  },
+  "shellGroups": {
+    "default": "Predefinito",
+    "local": "Locale"
   }
 }
