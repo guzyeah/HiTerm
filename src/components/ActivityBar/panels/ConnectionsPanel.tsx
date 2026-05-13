@@ -19,6 +19,7 @@ import {
   SHELL_GROUP_I18N_KEYS,
 } from '@/shared/shellGroups'
 import { PROTOCOL_ICON_MAP } from '@/shared/protocolIcons'
+import { emitOpenShellTab } from '@/shared/workspaceEvents'
 import type { ShellSummary } from '@/shared/shellTypes'
 
 interface ShellGroupNode {
@@ -180,6 +181,11 @@ export const ConnectionsPanel: FC = () => {
 
   const groupTree = useMemo(() => buildGroupTree(groups, shells), [groups, shells])
 
+  const openShell = useCallback((shell: ShellSummary) => {
+    if (shell.protocol !== 'local') return
+    emitOpenShellTab(shell)
+  }, [])
+
   if (loading) {
     return <div className={styles.status}>{t('common.loading')}</div>
   }
@@ -222,6 +228,7 @@ export const ConnectionsPanel: FC = () => {
                   <TreeItemLayout
                     className={styles.itemLayout}
                     iconBefore={<span className={styles.shellIcon}>{PROTOCOL_ICON_MAP[shell.protocol]}</span>}
+                    onDoubleClick={() => openShell(shell)}
                   >
                     <span className={styles.shellLabel} title={shell.name}>
                       {shell.name}

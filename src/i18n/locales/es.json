@@ -154,6 +154,10 @@
     "emptyTitle": "No hay pestañas abiertas",
     "emptyDescription": "Crea una nueva pestaña para continuar."
   },
+  "terminal": {
+    "processExited": "Proceso finalizado: {{exitCode}}",
+    "startFailed": "No se pudo iniciar el terminal: {{message}}"
+  },
   "shellGroups": {
     "default": "Predeterminado",
     "local": "Local"

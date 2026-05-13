@@ -154,6 +154,10 @@
     "emptyTitle": "開いているタブはありません",
     "emptyDescription": "新しいタブを作成してください。"
   },
+  "terminal": {
+    "processExited": "プロセスが終了しました: {{exitCode}}",
+    "startFailed": "ターミナルの起動に失敗しました: {{message}}"
+  },
   "shellGroups": {
     "default": "デフォルト",
     "local": "ローカル"

@@ -48,6 +48,17 @@ interface SerialAPI {
   listSerialPorts: () => Promise<{ path: string; friendlyName?: string }[]>
 }
 
+interface TerminalAPI {
+  createLocalSession: (
+    request: import('../src/shared/terminalTypes').CreateLocalTerminalSessionRequest
+  ) => Promise<import('../src/shared/terminalTypes').CreateLocalTerminalSessionResult>
+  write: (request: import('../src/shared/terminalTypes').TerminalWriteRequest) => Promise<void>
+  resize: (request: import('../src/shared/terminalTypes').TerminalResizeRequest) => Promise<void>
+  dispose: (request: import('../src/shared/terminalTypes').TerminalSessionRequest) => Promise<void>
+  onData: (callback: (event: import('../src/shared/terminalTypes').TerminalDataEvent) => void) => () => void
+  onExit: (callback: (event: import('../src/shared/terminalTypes').TerminalExitEvent) => void) => () => void
+}
+
 interface Window {
   ipcRenderer: import('electron').IpcRenderer
   settingsAPI: SettingsAPI
@@ -55,4 +66,5 @@ interface Window {
   shellAPI: ShellAPI
   dialogAPI: DialogAPI
   serialAPI: SerialAPI
+  terminalAPI: TerminalAPI
 }

@@ -154,6 +154,10 @@
     "emptyTitle": "Nessuna scheda aperta",
     "emptyDescription": "Crea una nuova scheda per continuare."
   },
+  "terminal": {
+    "processExited": "Processo terminato: {{exitCode}}",
+    "startFailed": "Impossibile avviare il terminale: {{message}}"
+  },
   "shellGroups": {
     "default": "Predefinito",
     "local": "Locale"

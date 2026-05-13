@@ -154,6 +154,10 @@
     "emptyTitle": "Chưa mở thẻ nào",
     "emptyDescription": "Tạo thẻ mới để tiếp tục."
   },
+  "terminal": {
+    "processExited": "Tiến trình đã thoát: {{exitCode}}",
+    "startFailed": "Không thể khởi động terminal: {{message}}"
+  },
   "shellGroups": {
     "default": "Mặc định",
     "local": "Cục bộ"

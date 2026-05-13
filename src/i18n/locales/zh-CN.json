@@ -154,6 +154,10 @@
     "emptyTitle": "暂无标签页",
     "emptyDescription": "点击新建按钮继续。"
   },
+  "terminal": {
+    "processExited": "进程已退出：{{exitCode}}",
+    "startFailed": "终端启动失败：{{message}}"
+  },
   "shellGroups": {
     "default": "默认",
     "local": "本地"

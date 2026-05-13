@@ -1,7 +1,6 @@
 import {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
   type FC,
@@ -24,12 +23,21 @@ import {
   PanelTopExpandRegular,
 } from '@fluentui/react-icons'
 import { useRTL } from '@/hooks/useRTL'
+import { TerminalPane } from '@/components/Terminal/TerminalPane'
+import { subscribeOpenShellTab } from '@/shared/workspaceEvents'
+import type { ShellSummary } from '@/shared/shellTypes'
 
 type WorkspaceLayoutMode = 'horizontal' | 'vertical'
+
+type WorkspaceTabContent =
+  | { type: 'placeholder' }
+  | { type: 'terminal'; shellId: string; shellName: string }
 
 interface WorkspaceTab {
   id: string
   sequence: number
+  title?: string
+  content: WorkspaceTabContent
 }
 
 interface WorkspaceState {
@@ -44,14 +52,21 @@ interface ScrollState {
 
 interface WorkspaceTabPanelProps {
   tab: WorkspaceTab
+  isActive: boolean
 }
 
 const INITIAL_TAB_SEQUENCE = 1
 
-function createWorkspaceTab(sequence: number): WorkspaceTab {
+function createWorkspaceTab(
+  sequence: number,
+  content: WorkspaceTabContent = { type: 'placeholder' },
+  title?: string,
+): WorkspaceTab {
   return {
     id: `workspace-tab-${sequence}`,
     sequence,
+    title,
+    content,
   }
 }
 
@@ -289,6 +304,7 @@ const useStyles = makeStyles({
     pointerEvents: 'none',
   },
   contentArea: {
+    position: 'relative',
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
@@ -298,13 +314,29 @@ const useStyles = makeStyles({
     backgroundColor: tokens.colorNeutralBackground1,
   },
   tabPanel: {
+    position: 'absolute',
+    inset: 0,
     display: 'flex',
     flexDirection: 'column',
     minWidth: 0,
     minHeight: 0,
+    width: '100%',
     height: '100%',
     overflow: 'auto',
     boxSizing: 'border-box',
+  },
+  tabPanelActive: {
+    visibility: 'visible',
+    pointerEvents: 'auto',
+    zIndex: 1,
+  },
+  tabPanelInactive: {
+    visibility: 'hidden',
+    pointerEvents: 'none',
+    zIndex: 0,
+  },
+  terminalTabPanel: {
+    overflow: 'hidden',
   },
   tabPanelInner: {
     display: 'flex',
@@ -390,15 +422,37 @@ const useStyles = makeStyles({
   },
 })
 
-function WorkspaceTabPanel({ tab }: WorkspaceTabPanelProps) {
+function WorkspaceTabPanel({ tab, isActive }: WorkspaceTabPanelProps) {
   const styles = useStyles()
   const { t } = useTranslation()
+
+  if (tab.content.type === 'terminal') {
+    return (
+      <section
+        id={`${tab.id}-panel`}
+        aria-labelledby={`${tab.id}-tab`}
+        aria-hidden={!isActive}
+        className={mergeClasses(
+          styles.tabPanel,
+          styles.terminalTabPanel,
+          isActive ? styles.tabPanelActive : styles.tabPanelInactive,
+        )}
+        role="tabpanel"
+      >
+        <TerminalPane shellId={tab.content.shellId} isActive={isActive} />
+      </section>
+    )
+  }
 
   return (
     <section
       id={`${tab.id}-panel`}
       aria-labelledby={`${tab.id}-tab`}
-      className={styles.tabPanel}
+      aria-hidden={!isActive}
+      className={mergeClasses(
+        styles.tabPanel,
+        isActive ? styles.tabPanelActive : styles.tabPanelInactive,
+      )}
       role="tabpanel"
     >
       <div className={styles.tabPanelInner}>
@@ -462,10 +516,6 @@ export const WorkspacePanel: FC = () => {
 
   const { tabs, activeTabId } = workspaceState
   const isVertical = layoutMode === 'vertical'
-  const activeTab = useMemo(
-    () => tabs.find(tab => tab.id === activeTabId) ?? tabs[0],
-    [activeTabId, tabs],
-  )
   const visibleCloseTabId = hoveredTabId ?? focusedTabId
 
   const setTabButtonRef = useCallback((tabId: string) => (node: HTMLButtonElement | null) => {
@@ -517,6 +567,27 @@ export const WorkspacePanel: FC = () => {
 
   const addTab = useCallback(() => {
     const newTab = createWorkspaceTab(nextSequenceRef.current)
+    nextSequenceRef.current += 1
+
+    setWorkspaceState(prev => ({
+      tabs: [...prev.tabs, newTab],
+      activeTabId: newTab.id,
+    }))
+    focusTab(newTab.id)
+  }, [focusTab])
+
+  const addTerminalTab = useCallback((shell: ShellSummary) => {
+    if (shell.protocol !== 'local') return
+
+    const newTab = createWorkspaceTab(
+      nextSequenceRef.current,
+      {
+        type: 'terminal',
+        shellId: shell.id,
+        shellName: shell.name,
+      },
+      shell.name,
+    )
     nextSequenceRef.current += 1
 
     setWorkspaceState(prev => ({
@@ -672,6 +743,8 @@ export const WorkspacePanel: FC = () => {
     })
   }, [activeTabId, isVertical, layoutMode, tabs.length])
 
+  useEffect(() => subscribeOpenShellTab(addTerminalTab), [addTerminalTab])
+
   const layoutRootClassName = mergeClasses(
     styles.root,
     isVertical ? styles.verticalRoot : styles.horizontalRoot,
@@ -682,7 +755,7 @@ export const WorkspacePanel: FC = () => {
   const showScrollButtons = !isVertical && (scrollState.canScrollLeft || scrollState.canScrollRight)
   const panelTabs = tabs.map(tab => {
     const isActive = tab.id === activeTabId
-    const tabLabel = t('workspace.tabLabel', { index: tab.sequence })
+    const tabLabel = tab.title ?? t('workspace.tabLabel', { index: tab.sequence })
     const isCloseVisible = visibleCloseTabId === tab.id
 
     return (
@@ -788,7 +861,13 @@ export const WorkspacePanel: FC = () => {
             </div>
           </aside>
           <main className={styles.contentArea}>
-            <WorkspaceTabPanel key={activeTab.id} tab={activeTab} />
+            {tabs.map(tab => (
+              <WorkspaceTabPanel
+                key={tab.id}
+                tab={tab}
+                isActive={tab.id === activeTabId}
+              />
+            ))}
           </main>
         </>
       ) : (
@@ -873,7 +952,13 @@ export const WorkspacePanel: FC = () => {
             />
           </div>
           <main className={styles.contentArea}>
-            <WorkspaceTabPanel key={activeTab.id} tab={activeTab} />
+            {tabs.map(tab => (
+              <WorkspaceTabPanel
+                key={tab.id}
+                tab={tab}
+                isActive={tab.id === activeTabId}
+              />
+            ))}
           </main>
         </>
       )}

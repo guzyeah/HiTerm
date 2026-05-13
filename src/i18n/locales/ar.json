@@ -154,6 +154,10 @@
     "emptyTitle": "لا توجد علامات تبويب مفتوحة",
     "emptyDescription": "أنشئ علامة تبويب جديدة للمتابعة."
   },
+  "terminal": {
+    "processExited": "انتهت العملية: {{exitCode}}",
+    "startFailed": "فشل تشغيل الطرفية: {{message}}"
+  },
   "shellGroups": {
     "default": "افتراضي",
     "local": "محلي"

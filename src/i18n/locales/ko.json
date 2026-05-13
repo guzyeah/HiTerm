@@ -154,6 +154,10 @@
     "emptyTitle": "열린 탭이 없습니다",
     "emptyDescription": "새 탭을 만들어 계속하세요."
   },
+  "terminal": {
+    "processExited": "프로세스가 종료되었습니다: {{exitCode}}",
+    "startFailed": "터미널을 시작하지 못했습니다: {{message}}"
+  },
   "shellGroups": {
     "default": "기본",
     "local": "로컬"

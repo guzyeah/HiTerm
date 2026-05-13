@@ -154,6 +154,10 @@
     "emptyTitle": "Aucun onglet ouvert",
     "emptyDescription": "Créez un nouvel onglet pour continuer."
   },
+  "terminal": {
+    "processExited": "Processus terminé : {{exitCode}}",
+    "startFailed": "Échec du démarrage du terminal : {{message}}"
+  },
   "shellGroups": {
     "default": "Par défaut",
     "local": "Local"

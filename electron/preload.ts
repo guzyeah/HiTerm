@@ -1,4 +1,13 @@
 import { ipcRenderer, contextBridge } from 'electron'
+import type {
+  CreateLocalTerminalSessionRequest,
+  CreateLocalTerminalSessionResult,
+  TerminalDataEvent,
+  TerminalExitEvent,
+  TerminalResizeRequest,
+  TerminalSessionRequest,
+  TerminalWriteRequest,
+} from '../src/shared/terminalTypes'
 
 // --------- Expose IPC API to the Renderer process ---------
 contextBridge.exposeInMainWorld('ipcRenderer', {
@@ -50,4 +59,26 @@ contextBridge.exposeInMainWorld('dialogAPI', {
 // --------- Expose Serial API to the Renderer process ---------
 contextBridge.exposeInMainWorld('serialAPI', {
   listSerialPorts: () => ipcRenderer.invoke('serial:listPorts'),
+})
+
+// --------- Expose Terminal API to the Renderer process ---------
+contextBridge.exposeInMainWorld('terminalAPI', {
+  createLocalSession: (request: CreateLocalTerminalSessionRequest): Promise<CreateLocalTerminalSessionResult> =>
+    ipcRenderer.invoke('terminal:createLocalSession', request),
+  write: (request: TerminalWriteRequest): Promise<void> =>
+    ipcRenderer.invoke('terminal:write', request),
+  resize: (request: TerminalResizeRequest): Promise<void> =>
+    ipcRenderer.invoke('terminal:resize', request),
+  dispose: (request: TerminalSessionRequest): Promise<void> =>
+    ipcRenderer.invoke('terminal:dispose', request),
+  onData: (callback: (event: TerminalDataEvent) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, payload: TerminalDataEvent) => callback(payload)
+    ipcRenderer.on('terminal:data', listener)
+    return () => ipcRenderer.off('terminal:data', listener)
+  },
+  onExit: (callback: (event: TerminalExitEvent) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, payload: TerminalExitEvent) => callback(payload)
+    ipcRenderer.on('terminal:exit', listener)
+    return () => ipcRenderer.off('terminal:exit', listener)
+  },
 })

@@ -154,6 +154,10 @@
     "emptyTitle": "Keine offenen Tabs",
     "emptyDescription": "Erstellen Sie einen neuen Tab, um fortzufahren."
   },
+  "terminal": {
+    "processExited": "Prozess beendet: {{exitCode}}",
+    "startFailed": "Terminal konnte nicht gestartet werden: {{message}}"
+  },
   "shellGroups": {
     "default": "Standard",
     "local": "Lokal"

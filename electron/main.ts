@@ -4,6 +4,7 @@ import path from 'node:path'
 import { getLocale, setLocale, getFontOverride, setFontOverride, getSystemInfo } from './settings'
 import { initNativeMenu, updateNativeMenu, type MenuLabels } from './menu'
 import { initializeShellStore, saveShell, listGroups, listShellSummaries } from './shellStore'
+import { registerTerminalIpcHandlers } from './terminalSession'
 import { listSerialPorts } from './utils/serialPort'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -99,6 +100,8 @@ function registerIpcHandlers() {
   ipcMain.handle('serial:listPorts', async () => {
     return listSerialPorts()
   })
+
+  registerTerminalIpcHandlers()
 }
 
 app.whenReady().then(() => {

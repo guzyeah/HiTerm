@@ -154,6 +154,10 @@
     "emptyTitle": "暫無標籤頁",
     "emptyDescription": "點擊新增按鈕繼續。"
   },
+  "terminal": {
+    "processExited": "程序已結束：{{exitCode}}",
+    "startFailed": "終端機啟動失敗：{{message}}"
+  },
   "shellGroups": {
     "default": "預設",
     "local": "本機"

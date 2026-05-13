@@ -154,6 +154,10 @@
     "emptyTitle": "No tabs open",
     "emptyDescription": "Create a new tab to continue."
   },
+  "terminal": {
+    "processExited": "Process exited: {{exitCode}}",
+    "startFailed": "Terminal failed to start: {{message}}"
+  },
   "shellGroups": {
     "default": "Default",
     "local": "Local"
