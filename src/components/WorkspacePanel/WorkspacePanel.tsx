@@ -100,7 +100,7 @@ const useStyles = makeStyles({
     alignItems: 'stretch',
     gap: tokens.spacingHorizontalXS,
     minWidth: '100%',
-    width: 'max-content',
+    width: '100%',
     paddingInlineEnd: tokens.spacingHorizontalXS,
     boxSizing: 'border-box',
   },
@@ -166,9 +166,17 @@ const useStyles = makeStyles({
   },
   tabItem: {
     position: 'relative',
-    flexShrink: 0,
     minWidth: 0,
     boxSizing: 'border-box',
+  },
+  tabItemHorizontal: {
+    flex: '1 1 168px',
+    minWidth: '64px',
+    maxWidth: '240px',
+  },
+  tabItemVertical: {
+    width: '100%',
+    flexShrink: 0,
   },
   tabButton: {
     display: 'flex',
@@ -180,9 +188,10 @@ const useStyles = makeStyles({
     transition: 'background-color 120ms ease, border-color 120ms ease, color 120ms ease, box-shadow 120ms ease',
   },
   tabButtonHorizontal: {
+    width: '100%',
     height: '32px',
-    minWidth: '112px',
-    maxWidth: '240px',
+    minWidth: 0,
+    maxWidth: '100%',
     paddingInlineStart: tokens.spacingHorizontalM,
     paddingInlineEnd: '30px',
     borderRadius: tokens.borderRadiusMedium,
@@ -667,7 +676,10 @@ export const WorkspacePanel: FC = () => {
     return (
       <div
         key={tab.id}
-        className={styles.tabItem}
+        className={mergeClasses(
+          styles.tabItem,
+          isVertical ? styles.tabItemVertical : styles.tabItemHorizontal,
+        )}
         onBlur={event => {
           if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
             setFocusedTabId(current => (current === tab.id ? null : current))
