@@ -83,6 +83,12 @@ const useStyles = makeStyles({
     borderBottom: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke2}`,
     boxSizing: 'border-box',
   },
+  tabScrollFrame: {
+    position: 'relative',
+    flex: 1,
+    minWidth: 0,
+    overflow: 'hidden',
+  },
   tabScrollViewport: {
     flex: 1,
     minWidth: 0,
@@ -94,6 +100,22 @@ const useStyles = makeStyles({
     '&::-webkit-scrollbar': {
       display: 'none',
     },
+  },
+  tabOverflowFade: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: '28px',
+    zIndex: 1,
+    pointerEvents: 'none',
+  },
+  tabOverflowFadeLeft: {
+    left: 0,
+    backgroundImage: `linear-gradient(90deg, ${tokens.colorNeutralBackground2} 0%, transparent 100%)`,
+  },
+  tabOverflowFadeRight: {
+    right: 0,
+    backgroundImage: `linear-gradient(270deg, ${tokens.colorNeutralBackground2} 0%, transparent 100%)`,
   },
   tabStripInner: {
     display: 'flex',
@@ -772,10 +794,24 @@ export const WorkspacePanel: FC = () => {
       ) : (
         <>
           <div className={styles.horizontalBar}>
-            <div className={styles.tabScrollViewport} ref={tabScrollViewportRef}>
-              <div className={styles.tabStripInner} ref={tabStripInnerRef} role="tablist" aria-orientation="horizontal">
-                {panelTabs}
+            <div className={styles.tabScrollFrame}>
+              <div className={styles.tabScrollViewport} ref={tabScrollViewportRef}>
+                <div className={styles.tabStripInner} ref={tabStripInnerRef} role="tablist" aria-orientation="horizontal">
+                  {panelTabs}
+                </div>
               </div>
+              {scrollState.canScrollLeft && (
+                <div
+                  aria-hidden="true"
+                  className={mergeClasses(styles.tabOverflowFade, styles.tabOverflowFadeLeft)}
+                />
+              )}
+              {scrollState.canScrollRight && (
+                <div
+                  aria-hidden="true"
+                  className={mergeClasses(styles.tabOverflowFade, styles.tabOverflowFadeRight)}
+                />
+              )}
             </div>
             <div className={styles.actionGroup}>
               <Button
