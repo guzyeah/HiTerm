@@ -127,7 +127,7 @@ const useStyles = makeStyles({
   },
   verticalSidebar: {
     flex: '0 0 20%',
-    maxWidth: '20%',
+    maxWidth: '300px',
     minWidth: 0,
     display: 'flex',
     flexDirection: 'column',
