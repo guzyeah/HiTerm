@@ -130,5 +130,13 @@
     "groupPlaceholder": "Select or enter group",
     "save": "Save",
     "saveAndConnect": "Save & Connect"
+  },
+  "activityBar": {
+    "connections": "接続リスト",
+    "connectionsPlaceholder": "接続リストはここに表示されます",
+    "files": "ファイル管理",
+    "filesPlaceholder": "ファイル管理はここに表示されます",
+    "history": "コマンド履歴",
+    "historyPlaceholder": "コマンド履歴はここに表示されます"
   }
 }

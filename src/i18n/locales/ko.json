@@ -130,5 +130,13 @@
     "groupPlaceholder": "Select or enter group",
     "save": "Save",
     "saveAndConnect": "Save & Connect"
+  },
+  "activityBar": {
+    "connections": "연결 목록",
+    "connectionsPlaceholder": "연결 목록이 여기에 표시됩니다",
+    "files": "파일 관리",
+    "filesPlaceholder": "파일 관리가 여기에 표시됩니다",
+    "history": "명령 기록",
+    "historyPlaceholder": "명령 기록이 여기에 표시됩니다"
   }
 }

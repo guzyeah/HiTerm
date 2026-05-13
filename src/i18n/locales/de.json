@@ -130,5 +130,13 @@
     "groupPlaceholder": "Select or enter group",
     "save": "Save",
     "saveAndConnect": "Save & Connect"
+  },
+  "activityBar": {
+    "connections": "Verbindungen",
+    "connectionsPlaceholder": "Die Verbindungsliste wird hier angezeigt",
+    "files": "Dateien",
+    "filesPlaceholder": "Der Dateimanager wird hier angezeigt",
+    "history": "Historie",
+    "historyPlaceholder": "Die Befehlshistorie wird hier angezeigt"
   }
 }

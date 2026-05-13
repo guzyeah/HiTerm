@@ -130,5 +130,13 @@
     "groupPlaceholder": "Select or enter group",
     "save": "Save",
     "saveAndConnect": "Save & Connect"
+  },
+  "activityBar": {
+    "connections": "Kết nối",
+    "connectionsPlaceholder": "Danh sách kết nối sẽ xuất hiện ở đây",
+    "files": "Tệp tin",
+    "filesPlaceholder": "Quản lý tệp tin sẽ xuất hiện ở đây",
+    "history": "Lịch sử",
+    "historyPlaceholder": "Lịch sử lệnh sẽ xuất hiện ở đây"
   }
 }

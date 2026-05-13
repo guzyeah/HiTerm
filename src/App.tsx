@@ -4,6 +4,7 @@ import { MenuBar, type MenuItemId } from '@/components/MenuBar/MenuBar'
 import { AboutDialog } from '@/components/AboutDialog/AboutDialog'
 import { ConnectDialog } from '@/components/ConnectDialog'
 import { MainLayout } from '@/components/MainLayout'
+import { ActivityBar } from '@/components/ActivityBar'
 import './App.css'
 
 function App() {
@@ -39,7 +40,7 @@ function App() {
     <div className="app-shell">
       <MenuBar onMenuItemClick={handleMenuItemClick} />
       <MainLayout
-        leftPanel={<div />}
+        leftPanel={<ActivityBar />}
         rightPanel={
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
             <h1>{t('app.name')}</h1>

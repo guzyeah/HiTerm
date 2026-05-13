@@ -130,5 +130,13 @@
     "groupPlaceholder": "Select or enter group",
     "save": "Save",
     "saveAndConnect": "Save & Connect"
+  },
+  "activityBar": {
+    "connections": "الاتصالات",
+    "connectionsPlaceholder": "ستظهر قائمة الاتصالات هنا",
+    "files": "الملفات",
+    "filesPlaceholder": "سيظهر مدير الملفات هنا",
+    "history": "السجل",
+    "historyPlaceholder": "سيظهر سجل الأوامر هنا"
   }
 }

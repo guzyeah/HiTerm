@@ -130,5 +130,13 @@
     "groupPlaceholder": "选择或输入分组",
     "save": "保存",
     "saveAndConnect": "保存并连接"
+  },
+  "activityBar": {
+    "connections": "连接列表",
+    "connectionsPlaceholder": "连接列表将在此处显示",
+    "files": "文件管理",
+    "filesPlaceholder": "文件管理将在此处显示",
+    "history": "历史命令",
+    "historyPlaceholder": "历史命令将在此处显示"
   }
 }
