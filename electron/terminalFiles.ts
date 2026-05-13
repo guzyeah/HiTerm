@@ -1,23 +1,35 @@
 /**
  * Terminal 文件浏览侧信道。
- * 文件读取运行在 worker 中，避免目录扫描阻塞主进程或影响 PTY 交互。
+ * 文件读取和本地传输均运行在 worker 中，避免阻塞主进程或影响 PTY 交互。
  */
 
 import { app, ipcMain, type WebContents } from 'electron'
 import { randomUUID } from 'node:crypto'
+import fsPromises from 'node:fs/promises'
 import path from 'node:path'
 import { Worker } from 'node:worker_threads'
-import { getTerminalSessionMetadata } from './terminalSession'
+import { LOCAL_FILES_TRANSFER_WORKER_SOURCE } from './localFilesTransferWorkerSource'
 import { LOCAL_FILES_WORKER_SOURCE } from './localFilesWorkerSource'
+import { getTerminalSessionMetadata } from './terminalSession'
 import type {
   TerminalFileEntry,
+  TerminalFilesCreateDirectoryRequest,
+  TerminalFilesCreateEntryResult,
+  TerminalFilesCreateFileRequest,
+  TerminalFilesDeleteEntriesRequest,
+  TerminalFilesDeleteEntriesResult,
   TerminalFilesDirectoryEvent,
+  TerminalFilesDownloadRequest,
   TerminalFilesErrorEvent,
   TerminalFilesReadDirectoryRequest,
-  TerminalFilesSetRootPathRequest,
   TerminalFilesSessionRequest,
+  TerminalFilesSetRootPathRequest,
   TerminalFilesSnapshot,
   TerminalFilesSnapshotEvent,
+  TerminalFilesTransferDirection,
+  TerminalFilesTransferState,
+  TerminalFilesTransferStateEvent,
+  TerminalFilesUploadRequest,
 } from '../src/shared/terminalFilesTypes'
 
 interface TerminalFilesSubscription {
@@ -51,6 +63,11 @@ type LocalFilesWorkerMessage =
   | WorkerDirectoryResponse
   | WorkerErrorResponse
 
+interface TransferWorkerStateMessage {
+  type: 'transferState'
+  state: TerminalFilesTransferState
+}
+
 interface PendingSnapshotWorkerRequest {
   subscriptionKey: string
   type: 'snapshot'
@@ -69,10 +86,18 @@ interface PendingDirectoryWorkerRequest {
 
 type PendingWorkerRequest = PendingSnapshotWorkerRequest | PendingDirectoryWorkerRequest
 
+interface TransferTask {
+  sessionId: string
+  webContentsId: number
+  worker: Worker
+  state: TerminalFilesTransferState
+}
+
 const subscriptions = new Map<string, TerminalFilesSubscription>()
 const webContentsSubscriptions = new Map<number, Set<string>>()
 const trackedWebContentsIds = new Set<number>()
 const pendingWorkerRequests = new Map<string, PendingWorkerRequest>()
+const transferTasks = new Map<string, TransferTask>()
 
 let localFilesWorker: Worker | null = null
 
@@ -96,6 +121,49 @@ function isPathWithinRoot(rootPath: string, candidatePath: string): boolean {
     && !path.isAbsolute(relativePath)
 }
 
+function isSamePath(leftPath: string, rightPath: string): boolean {
+  return normalizeComparablePath(leftPath) === normalizeComparablePath(rightPath)
+}
+
+function validateEntryName(name: string): string {
+  const trimmedName = name.trim()
+  if (!trimmedName) {
+    throw new Error('Name is required')
+  }
+
+  if (trimmedName === '.' || trimmedName === '..') {
+    throw new Error('Invalid name')
+  }
+
+  if (trimmedName.includes('/') || trimmedName.includes('\\')) {
+    throw new Error('Name cannot include path separators')
+  }
+
+  return trimmedName
+}
+
+async function ensureExistingDirectory(targetPath: string): Promise<void> {
+  const directoryStats = await fsPromises.stat(targetPath).catch(() => null)
+  if (!directoryStats?.isDirectory()) {
+    throw new Error('Directory does not exist')
+  }
+}
+
+function collapseNestedPaths(targetPaths: string[]): string[] {
+  const sortedPaths = [...targetPaths].sort((leftPath, rightPath) => {
+    const lengthDifference = leftPath.length - rightPath.length
+    if (lengthDifference !== 0) {
+      return lengthDifference
+    }
+
+    return leftPath.localeCompare(rightPath)
+  })
+
+  return sortedPaths.filter((targetPath, index) => {
+    return !sortedPaths.slice(0, index).some(previousPath => isPathWithinRoot(previousPath, targetPath))
+  })
+}
+
 function trackWebContentsSubscription(webContents: WebContents, sessionId: string): void {
   let sessionIds = webContentsSubscriptions.get(webContents.id)
   if (!sessionIds) {
@@ -112,7 +180,8 @@ function trackWebContentsSubscription(webContents: WebContents, sessionId: strin
     const nextSessionIds = webContentsSubscriptions.get(webContents.id)
     webContentsSubscriptions.delete(webContents.id)
     trackedWebContentsIds.delete(webContents.id)
-    nextSessionIds?.forEach(sessionId => unsubscribeTerminalFiles(webContents, sessionId))
+    nextSessionIds?.forEach(nextSessionId => unsubscribeTerminalFiles(webContents, nextSessionId))
+    stopTransferTasksForWebContents(webContents.id)
   })
 }
 
@@ -172,6 +241,20 @@ function sendTerminalFilesError(webContents: WebContents, payload: TerminalFiles
   if (!webContents.isDestroyed()) {
     webContents.send('terminalFiles:error', payload)
   }
+}
+
+function sendTerminalFilesTransferState(
+  subscriptionKey: string,
+  state: TerminalFilesTransferState,
+): void {
+  const subscription = subscriptions.get(subscriptionKey)
+  if (!subscription || subscription.webContents.isDestroyed()) return
+
+  const event: TerminalFilesTransferStateEvent = {
+    sessionId: subscription.sessionId,
+    state,
+  }
+  subscription.webContents.send('terminalFiles:transferState', event)
 }
 
 function sendTerminalFilesSnapshot(subscriptionKey: string, snapshot: TerminalFilesSnapshot): void {
@@ -338,6 +421,98 @@ function queueDirectoryRequest(subscriptionKey: string, targetPath: string): voi
   }).catch(() => undefined)
 }
 
+function stopTransferTask(subscriptionKey: string): void {
+  const transferTask = transferTasks.get(subscriptionKey)
+  if (!transferTask) return
+
+  transferTasks.delete(subscriptionKey)
+  try {
+    transferTask.worker.postMessage({ type: 'stop' })
+  } catch {
+    // worker 已退出时忽略停止异常
+  }
+}
+
+function stopTransferTasksForWebContents(webContentsId: number): void {
+  const subscriptionKeys = [...transferTasks.keys()].filter(
+    subscriptionKey => subscriptionKey.startsWith(`${webContentsId}:`),
+  )
+
+  subscriptionKeys.forEach(stopTransferTask)
+}
+
+function publishActiveTransferState(subscriptionKey: string): void {
+  const transferTask = transferTasks.get(subscriptionKey)
+  if (!transferTask) return
+
+  sendTerminalFilesTransferState(subscriptionKey, transferTask.state)
+}
+
+function handleTransferWorkerStateMessage(
+  subscriptionKey: string,
+  message: TransferWorkerStateMessage,
+): void {
+  const transferTask = transferTasks.get(subscriptionKey)
+  if (!transferTask) return
+
+  transferTask.state = message.state
+  sendTerminalFilesTransferState(subscriptionKey, message.state)
+
+  if (message.state.status === 'completed' || message.state.status === 'failed') {
+    stopTransferTask(subscriptionKey)
+  }
+}
+
+function createTransferWorker(
+  subscriptionKey: string,
+  direction: TerminalFilesTransferDirection,
+): Worker {
+  const worker = new Worker(LOCAL_FILES_TRANSFER_WORKER_SOURCE, { eval: true })
+
+  worker.on('message', (message: TransferWorkerStateMessage) => {
+    if (!message || typeof message !== 'object' || message.type !== 'transferState') return
+    handleTransferWorkerStateMessage(subscriptionKey, message)
+  })
+  worker.on('error', error => {
+    const transferTask = transferTasks.get(subscriptionKey)
+    handleTransferWorkerStateMessage(subscriptionKey, {
+      type: 'transferState',
+      state: {
+        ...(transferTask?.state ?? {
+          taskId: randomUUID(),
+          direction,
+          destinationPath: '',
+          currentItemName: null,
+          completedItems: 0,
+          totalItems: 0,
+          copiedBytes: 0,
+          totalBytes: null,
+          percent: null,
+        }),
+        status: 'failed',
+        errorMessage: error.message,
+      },
+    })
+  })
+  worker.on('exit', code => {
+    const transferTask = transferTasks.get(subscriptionKey)
+    if (!transferTask) return
+
+    if (code !== 0 && transferTask.state.status !== 'completed' && transferTask.state.status !== 'failed') {
+      handleTransferWorkerStateMessage(subscriptionKey, {
+        type: 'transferState',
+        state: {
+          ...transferTask.state,
+          status: 'failed',
+          errorMessage: 'Transfer worker exited unexpectedly',
+        },
+      })
+    }
+  })
+
+  return worker
+}
+
 function getSubscriptionForSender(sessionId: string, webContents: WebContents): TerminalFilesSubscription {
   const subscription = subscriptions.get(getSubscriptionKey(webContents, sessionId))
   if (!subscription) {
@@ -345,6 +520,16 @@ function getSubscriptionForSender(sessionId: string, webContents: WebContents): 
   }
 
   return subscription
+}
+
+function ensureLocalSession(sessionId: string, webContents: WebContents) {
+  const metadata = getTerminalSessionMetadata(sessionId, webContents)
+  if (!metadata || metadata.protocol !== 'local') {
+    unsubscribeTerminalFiles(webContents, sessionId)
+    throw new Error('Only local terminal files are supported')
+  }
+
+  return metadata
 }
 
 function subscribeTerminalFiles(webContents: WebContents, sessionId: string): void {
@@ -362,6 +547,7 @@ function subscribeTerminalFiles(webContents: WebContents, sessionId: string): vo
   })
   trackWebContentsSubscription(webContents, sessionId)
   queueSnapshotRequest(subscriptionKey, metadata.cwd, metadata.homeDir)
+  publishActiveTransferState(subscriptionKey)
 }
 
 function unsubscribeTerminalFiles(webContents: WebContents, sessionId: string): void {
@@ -371,24 +557,14 @@ function unsubscribeTerminalFiles(webContents: WebContents, sessionId: string): 
 }
 
 function refreshTerminalFiles(webContents: WebContents, sessionId: string): void {
-  const metadata = getTerminalSessionMetadata(sessionId, webContents)
-  if (!metadata || metadata.protocol !== 'local') {
-    unsubscribeTerminalFiles(webContents, sessionId)
-    throw new Error('Only local terminal files are supported')
-  }
-
+  const metadata = ensureLocalSession(sessionId, webContents)
   const subscriptionKey = getSubscriptionKey(webContents, sessionId)
   const subscription = getSubscriptionForSender(sessionId, webContents)
   queueSnapshotRequest(subscriptionKey, subscription.rootPath, metadata.homeDir)
 }
 
 function goHomeTerminalFiles(webContents: WebContents, sessionId: string): void {
-  const metadata = getTerminalSessionMetadata(sessionId, webContents)
-  if (!metadata || metadata.protocol !== 'local') {
-    unsubscribeTerminalFiles(webContents, sessionId)
-    throw new Error('Only local terminal files are supported')
-  }
-
+  const metadata = ensureLocalSession(sessionId, webContents)
   const subscriptionKey = getSubscriptionKey(webContents, sessionId)
   queueSnapshotRequest(subscriptionKey, metadata.homeDir, metadata.homeDir)
 }
@@ -418,11 +594,7 @@ async function setRootPathTerminalFiles(
   webContents: WebContents,
   request: TerminalFilesSetRootPathRequest,
 ): Promise<void> {
-  const metadata = getTerminalSessionMetadata(request.sessionId, webContents)
-  if (!metadata || metadata.protocol !== 'local') {
-    unsubscribeTerminalFiles(webContents, request.sessionId)
-    throw new Error('Only local terminal files are supported')
-  }
+  ensureLocalSession(request.sessionId, webContents)
 
   const subscription = getSubscriptionForSender(request.sessionId, webContents)
   const nextRootPath = resolveNextRootPath(subscription, request.path)
@@ -441,11 +613,7 @@ function readTerminalDirectory(
   webContents: WebContents,
   request: TerminalFilesReadDirectoryRequest,
 ): void {
-  const metadata = getTerminalSessionMetadata(request.sessionId, webContents)
-  if (!metadata || metadata.protocol !== 'local') {
-    unsubscribeTerminalFiles(webContents, request.sessionId)
-    throw new Error('Only local terminal files are supported')
-  }
+  ensureLocalSession(request.sessionId, webContents)
 
   const subscription = getSubscriptionForSender(request.sessionId, webContents)
   if (!isPathWithinRoot(subscription.rootPath, request.path)) {
@@ -453,6 +621,196 @@ function readTerminalDirectory(
   }
 
   queueDirectoryRequest(getSubscriptionKey(webContents, request.sessionId), request.path)
+}
+
+async function createTerminalFileEntry(
+  webContents: WebContents,
+  request: TerminalFilesCreateFileRequest | TerminalFilesCreateDirectoryRequest,
+  kind: 'file' | 'directory',
+): Promise<TerminalFilesCreateEntryResult> {
+  ensureLocalSession(request.sessionId, webContents)
+
+  const subscription = getSubscriptionForSender(request.sessionId, webContents)
+  const parentPath = path.resolve(request.parentPath)
+  if (!isPathWithinRoot(subscription.rootPath, parentPath)) {
+    throw new Error('Target directory is outside the current root path')
+  }
+
+  const entryName = validateEntryName(request.name)
+  await ensureExistingDirectory(parentPath)
+
+  const createdPath = path.resolve(parentPath, entryName)
+  if (!isPathWithinRoot(subscription.rootPath, createdPath)) {
+    throw new Error('Target path is outside the current root path')
+  }
+
+  if (kind === 'directory') {
+    await fsPromises.mkdir(createdPath)
+  } else {
+    await fsPromises.writeFile(createdPath, '', { flag: 'wx' })
+  }
+
+  return { createdPath }
+}
+
+async function createTerminalFile(
+  webContents: WebContents,
+  request: TerminalFilesCreateFileRequest,
+): Promise<TerminalFilesCreateEntryResult> {
+  return createTerminalFileEntry(webContents, request, 'file')
+}
+
+async function createTerminalDirectory(
+  webContents: WebContents,
+  request: TerminalFilesCreateDirectoryRequest,
+): Promise<TerminalFilesCreateEntryResult> {
+  return createTerminalFileEntry(webContents, request, 'directory')
+}
+
+async function deleteTerminalEntries(
+  webContents: WebContents,
+  request: TerminalFilesDeleteEntriesRequest,
+): Promise<TerminalFilesDeleteEntriesResult> {
+  ensureLocalSession(request.sessionId, webContents)
+
+  const subscription = getSubscriptionForSender(request.sessionId, webContents)
+  const normalizedTargetPaths = normalizeTransferSourcePaths(request.targetPaths)
+  if (normalizedTargetPaths.length === 0) {
+    throw new Error('No files or directories were selected for deletion')
+  }
+
+  const collapsedTargetPaths = collapseNestedPaths(normalizedTargetPaths)
+  for (const targetPath of collapsedTargetPaths) {
+    if (!isPathWithinRoot(subscription.rootPath, targetPath)) {
+      throw new Error('Delete target is outside the current root path')
+    }
+    if (isSamePath(subscription.rootPath, targetPath)) {
+      throw new Error('The current root directory cannot be deleted')
+    }
+  }
+
+  for (const targetPath of collapsedTargetPaths) {
+    const targetStats = await fsPromises.lstat(targetPath)
+    if (targetStats.isDirectory()) {
+      await fsPromises.rm(targetPath, { recursive: true, force: false })
+      continue
+    }
+
+    await fsPromises.rm(targetPath, { force: false })
+  }
+
+  return {
+    deletedPaths: collapsedTargetPaths,
+  }
+}
+
+function normalizeTransferSourcePaths(sourcePaths: string[]): string[] {
+  const seenPaths = new Set<string>()
+  const normalizedPaths: string[] = []
+
+  sourcePaths.forEach(sourcePath => {
+    const resolvedPath = path.resolve(sourcePath)
+    const comparablePath = normalizeComparablePath(resolvedPath)
+    if (seenPaths.has(comparablePath)) return
+
+    seenPaths.add(comparablePath)
+    normalizedPaths.push(resolvedPath)
+  })
+
+  return normalizedPaths
+}
+
+function createTransferInProgressMessage(direction: TerminalFilesTransferDirection): string {
+  return direction === 'upload'
+    ? 'An upload is already in progress'
+    : 'A download is already in progress'
+}
+
+function createMissingTransferSourcesMessage(direction: TerminalFilesTransferDirection): string {
+  return direction === 'upload'
+    ? 'No upload sources were provided'
+    : 'No download sources were provided'
+}
+
+async function startTerminalFilesTransfer(
+  webContents: WebContents,
+  request: TerminalFilesUploadRequest | TerminalFilesDownloadRequest,
+  direction: TerminalFilesTransferDirection,
+): Promise<void> {
+  ensureLocalSession(request.sessionId, webContents)
+
+  const subscription = getSubscriptionForSender(request.sessionId, webContents)
+  const destinationPath = path.resolve(request.destinationPath)
+  const sourcePaths = normalizeTransferSourcePaths(request.sourcePaths)
+
+  if (direction === 'upload' && !isPathWithinRoot(subscription.rootPath, destinationPath)) {
+    throw new Error('Upload target is outside the current root path')
+  }
+
+  if (sourcePaths.length === 0) {
+    throw new Error(createMissingTransferSourcesMessage(direction))
+  }
+
+  if (direction === 'download') {
+    const hasOutOfRootSource = sourcePaths.some(sourcePath => !isPathWithinRoot(subscription.rootPath, sourcePath))
+    if (hasOutOfRootSource) {
+      throw new Error('Download source is outside the current root path')
+    }
+  }
+
+  const subscriptionKey = getSubscriptionKey(webContents, request.sessionId)
+  const activeTransferTask = transferTasks.get(subscriptionKey)
+  if (activeTransferTask && (
+    activeTransferTask.state.status === 'scanning'
+    || activeTransferTask.state.status === 'transferring'
+  )) {
+    throw new Error(createTransferInProgressMessage(direction))
+  }
+
+  stopTransferTask(subscriptionKey)
+
+  const taskId = randomUUID()
+  const worker = createTransferWorker(subscriptionKey, direction)
+  transferTasks.set(subscriptionKey, {
+    sessionId: request.sessionId,
+    webContentsId: webContents.id,
+    worker,
+    state: {
+      taskId,
+      direction,
+      destinationPath,
+      currentItemName: null,
+      completedItems: 0,
+      totalItems: sourcePaths.length,
+      copiedBytes: 0,
+      totalBytes: null,
+      percent: null,
+      status: 'scanning',
+    },
+  })
+
+  publishActiveTransferState(subscriptionKey)
+  worker.postMessage({
+    type: 'transfer',
+    taskId,
+    direction,
+    destinationPath,
+    sourcePaths,
+  })
+}
+
+function uploadTerminalFiles(
+  webContents: WebContents,
+  request: TerminalFilesUploadRequest,
+): Promise<void> {
+  return startTerminalFilesTransfer(webContents, request, 'upload')
+}
+
+function downloadTerminalFiles(
+  webContents: WebContents,
+  request: TerminalFilesDownloadRequest,
+): Promise<void> {
+  return startTerminalFilesTransfer(webContents, request, 'download')
 }
 
 export function registerTerminalFilesIpcHandlers(): void {
@@ -480,9 +838,33 @@ export function registerTerminalFilesIpcHandlers(): void {
     return setRootPathTerminalFiles(event.sender, request)
   })
 
+  ipcMain.handle('terminalFiles:createFile', (event, request: TerminalFilesCreateFileRequest) => {
+    return createTerminalFile(event.sender, request)
+  })
+
+  ipcMain.handle('terminalFiles:createDirectory', (event, request: TerminalFilesCreateDirectoryRequest) => {
+    return createTerminalDirectory(event.sender, request)
+  })
+
+  ipcMain.handle('terminalFiles:deleteEntries', (event, request: TerminalFilesDeleteEntriesRequest) => {
+    return deleteTerminalEntries(event.sender, request)
+  })
+
+  ipcMain.handle('terminalFiles:upload', (event, request: TerminalFilesUploadRequest) => {
+    return uploadTerminalFiles(event.sender, request)
+  })
+
+  ipcMain.handle('terminalFiles:download', (event, request: TerminalFilesDownloadRequest) => {
+    return downloadTerminalFiles(event.sender, request)
+  })
+
   app.once('before-quit', () => {
     subscriptions.clear()
     pendingWorkerRequests.clear()
+    transferTasks.forEach(transferTask => {
+      transferTask.worker.postMessage({ type: 'stop' })
+    })
+    transferTasks.clear()
     localFilesWorker?.postMessage({ type: 'stop' })
     localFilesWorker = null
   })

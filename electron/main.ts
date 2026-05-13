@@ -8,6 +8,7 @@ import { registerTerminalFilesIpcHandlers } from './terminalFiles'
 import { registerTerminalIpcHandlers } from './terminalSession'
 import { registerTerminalStatusIpcHandlers } from './terminalStatus'
 import { listSerialPorts } from './utils/serialPort'
+import type { OpenPathsDialogOptions } from '../src/shared/dialogTypes'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -96,6 +97,32 @@ function registerIpcHandlers() {
       properties: ['openFile'],
     })
     return result.filePaths[0] ?? null
+  })
+
+  ipcMain.handle('dialog:openPaths', async (_event, options?: OpenPathsDialogOptions) => {
+    const win = BrowserWindow.getFocusedWindow()
+    const properties: Array<'openFile' | 'openDirectory' | 'multiSelections'> = []
+
+    if (options?.allowFiles) {
+      properties.push('openFile')
+    }
+    if (options?.allowDirectories) {
+      properties.push('openDirectory')
+    }
+    if (options?.multiSelections) {
+      properties.push('multiSelections')
+    }
+    if (properties.length === 0) {
+      properties.push('openFile')
+    }
+
+    const result = await dialog.showOpenDialog(win!, {
+      title: options?.title,
+      filters: options?.filters,
+      properties,
+    })
+
+    return result.filePaths
   })
 
   // 串口枚举

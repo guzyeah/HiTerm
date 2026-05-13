@@ -1,4 +1,4 @@
-import { ipcRenderer, contextBridge } from 'electron'
+import { ipcRenderer, contextBridge, webUtils } from 'electron'
 import type {
   CreateLocalTerminalSessionRequest,
   CreateLocalTerminalSessionResult,
@@ -9,18 +9,27 @@ import type {
   TerminalWriteRequest,
 } from '../src/shared/terminalTypes'
 import type {
+  TerminalFilesCreateDirectoryRequest,
+  TerminalFilesCreateEntryResult,
+  TerminalFilesCreateFileRequest,
+  TerminalFilesDeleteEntriesRequest,
+  TerminalFilesDeleteEntriesResult,
   TerminalFilesDirectoryEvent,
+  TerminalFilesDownloadRequest,
   TerminalFilesErrorEvent,
   TerminalFilesReadDirectoryRequest,
   TerminalFilesSessionRequest,
   TerminalFilesSetRootPathRequest,
   TerminalFilesSnapshotEvent,
+  TerminalFilesTransferStateEvent,
+  TerminalFilesUploadRequest,
 } from '../src/shared/terminalFilesTypes'
 import type {
   TerminalStatusErrorEvent,
   TerminalStatusSampleEvent,
   TerminalStatusSubscribeRequest,
 } from '../src/shared/terminalStatusTypes'
+import type { OpenPathsDialogOptions } from '../src/shared/dialogTypes'
 
 // --------- Expose IPC API to the Renderer process ---------
 contextBridge.exposeInMainWorld('ipcRenderer', {
@@ -67,6 +76,10 @@ contextBridge.exposeInMainWorld('shellAPI', {
 contextBridge.exposeInMainWorld('dialogAPI', {
   openFile: (options?: { title?: string; filters?: Electron.FileFilter[] }) =>
     ipcRenderer.invoke('dialog:openFile', options),
+  openPaths: (options?: OpenPathsDialogOptions): Promise<string[]> =>
+    ipcRenderer.invoke('dialog:openPaths', options),
+  getPathsForFiles: (files: File[]): string[] =>
+    files.map(file => webUtils.getPathForFile(file)).filter(Boolean),
 })
 
 // --------- Expose Serial API to the Renderer process ---------
@@ -110,6 +123,16 @@ contextBridge.exposeInMainWorld('terminalFilesAPI', {
     ipcRenderer.invoke('terminalFiles:readDirectory', request),
   setRootPath: (request: TerminalFilesSetRootPathRequest): Promise<void> =>
     ipcRenderer.invoke('terminalFiles:setRootPath', request),
+  createFile: (request: TerminalFilesCreateFileRequest): Promise<TerminalFilesCreateEntryResult> =>
+    ipcRenderer.invoke('terminalFiles:createFile', request),
+  createDirectory: (request: TerminalFilesCreateDirectoryRequest): Promise<TerminalFilesCreateEntryResult> =>
+    ipcRenderer.invoke('terminalFiles:createDirectory', request),
+  deleteEntries: (request: TerminalFilesDeleteEntriesRequest): Promise<TerminalFilesDeleteEntriesResult> =>
+    ipcRenderer.invoke('terminalFiles:deleteEntries', request),
+  upload: (request: TerminalFilesUploadRequest): Promise<void> =>
+    ipcRenderer.invoke('terminalFiles:upload', request),
+  download: (request: TerminalFilesDownloadRequest): Promise<void> =>
+    ipcRenderer.invoke('terminalFiles:download', request),
   onSnapshot: (callback: (event: TerminalFilesSnapshotEvent) => void) => {
     const listener = (_event: Electron.IpcRendererEvent, payload: TerminalFilesSnapshotEvent) => callback(payload)
     ipcRenderer.on('terminalFiles:snapshot', listener)
@@ -124,6 +147,11 @@ contextBridge.exposeInMainWorld('terminalFilesAPI', {
     const listener = (_event: Electron.IpcRendererEvent, payload: TerminalFilesErrorEvent) => callback(payload)
     ipcRenderer.on('terminalFiles:error', listener)
     return () => ipcRenderer.off('terminalFiles:error', listener)
+  },
+  onTransferState: (callback: (event: TerminalFilesTransferStateEvent) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, payload: TerminalFilesTransferStateEvent) => callback(payload)
+    ipcRenderer.on('terminalFiles:transferState', listener)
+    return () => ipcRenderer.off('terminalFiles:transferState', listener)
   },
 })
 

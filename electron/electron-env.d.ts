@@ -42,6 +42,8 @@ interface ShellAPI {
 
 interface DialogAPI {
   openFile: (options?: { title?: string; filters?: Electron.FileFilter[] }) => Promise<string | null>
+  openPaths: (options?: import('../src/shared/dialogTypes').OpenPathsDialogOptions) => Promise<string[]>
+  getPathsForFiles: (files: File[]) => string[]
 }
 
 interface SerialAPI {
@@ -66,9 +68,15 @@ interface TerminalFilesAPI {
   goHome: (request: import('../src/shared/terminalFilesTypes').TerminalFilesSessionRequest) => Promise<void>
   readDirectory: (request: import('../src/shared/terminalFilesTypes').TerminalFilesReadDirectoryRequest) => Promise<void>
   setRootPath: (request: import('../src/shared/terminalFilesTypes').TerminalFilesSetRootPathRequest) => Promise<void>
+  createFile: (request: import('../src/shared/terminalFilesTypes').TerminalFilesCreateFileRequest) => Promise<import('../src/shared/terminalFilesTypes').TerminalFilesCreateEntryResult>
+  createDirectory: (request: import('../src/shared/terminalFilesTypes').TerminalFilesCreateDirectoryRequest) => Promise<import('../src/shared/terminalFilesTypes').TerminalFilesCreateEntryResult>
+  deleteEntries: (request: import('../src/shared/terminalFilesTypes').TerminalFilesDeleteEntriesRequest) => Promise<import('../src/shared/terminalFilesTypes').TerminalFilesDeleteEntriesResult>
+  upload: (request: import('../src/shared/terminalFilesTypes').TerminalFilesUploadRequest) => Promise<void>
+  download: (request: import('../src/shared/terminalFilesTypes').TerminalFilesDownloadRequest) => Promise<void>
   onSnapshot: (callback: (event: import('../src/shared/terminalFilesTypes').TerminalFilesSnapshotEvent) => void) => () => void
   onDirectory: (callback: (event: import('../src/shared/terminalFilesTypes').TerminalFilesDirectoryEvent) => void) => () => void
   onError: (callback: (event: import('../src/shared/terminalFilesTypes').TerminalFilesErrorEvent) => void) => () => void
+  onTransferState: (callback: (event: import('../src/shared/terminalFilesTypes').TerminalFilesTransferStateEvent) => void) => () => void
 }
 
 interface TerminalStatusAPI {
