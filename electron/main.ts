@@ -4,6 +4,7 @@ import path from 'node:path'
 import { getLocale, setLocale, getFontOverride, setFontOverride, getSystemInfo } from './settings'
 import { initNativeMenu, updateNativeMenu, type MenuLabels } from './menu'
 import { initializeShellStore, saveShell, listGroups, listShellSummaries } from './shellStore'
+import { registerTerminalFilesIpcHandlers } from './terminalFiles'
 import { registerTerminalIpcHandlers } from './terminalSession'
 import { registerTerminalStatusIpcHandlers } from './terminalStatus'
 import { listSerialPorts } from './utils/serialPort'
@@ -103,6 +104,7 @@ function registerIpcHandlers() {
   })
 
   registerTerminalIpcHandlers()
+  registerTerminalFilesIpcHandlers()
   registerTerminalStatusIpcHandlers()
 }
 

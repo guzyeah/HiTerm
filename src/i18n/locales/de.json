@@ -137,7 +137,22 @@
     "files": "Dateien",
     "filesPlaceholder": "Der Dateimanager wird hier angezeigt",
     "history": "Historie",
-    "historyPlaceholder": "Die Befehlshistorie wird hier angezeigt"
+    "historyPlaceholder": "Die Befehlshistorie wird hier angezeigt",
+    "filesNoSession": "Open a terminal to browse files",
+    "filesLoading": "Loading files",
+    "filesEmpty": "Directory is empty",
+    "filesUpload": "Upload file",
+    "filesDownload": "Download file",
+    "filesRefresh": "Refresh",
+    "filesGoHome": "Go to home directory",
+    "filesNewFolder": "Create folder",
+    "filesNewFile": "Create file",
+    "filesColumnName": "Name",
+    "filesColumnPermissions": "Permissions",
+    "filesColumnModified": "Modified",
+    "filesEditPathPlaceholder": "Verzeichnispfad eingeben",
+    "filesInvalidPathTitle": "Verzeichnis kann nicht ge?ffnet werden",
+    "filesInvalidPathMessage": "Das Verzeichnis \"{{path}}\" existiert nicht oder ist nicht zug?nglich."
   },
   "workspace": {
     "tabLabel": "Register {{index}}",

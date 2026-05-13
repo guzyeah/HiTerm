@@ -59,6 +59,18 @@ interface TerminalAPI {
   onExit: (callback: (event: import('../src/shared/terminalTypes').TerminalExitEvent) => void) => () => void
 }
 
+interface TerminalFilesAPI {
+  subscribe: (request: import('../src/shared/terminalFilesTypes').TerminalFilesSessionRequest) => Promise<void>
+  unsubscribe: (request: import('../src/shared/terminalFilesTypes').TerminalFilesSessionRequest) => Promise<void>
+  refresh: (request: import('../src/shared/terminalFilesTypes').TerminalFilesSessionRequest) => Promise<void>
+  goHome: (request: import('../src/shared/terminalFilesTypes').TerminalFilesSessionRequest) => Promise<void>
+  readDirectory: (request: import('../src/shared/terminalFilesTypes').TerminalFilesReadDirectoryRequest) => Promise<void>
+  setRootPath: (request: import('../src/shared/terminalFilesTypes').TerminalFilesSetRootPathRequest) => Promise<void>
+  onSnapshot: (callback: (event: import('../src/shared/terminalFilesTypes').TerminalFilesSnapshotEvent) => void) => () => void
+  onDirectory: (callback: (event: import('../src/shared/terminalFilesTypes').TerminalFilesDirectoryEvent) => void) => () => void
+  onError: (callback: (event: import('../src/shared/terminalFilesTypes').TerminalFilesErrorEvent) => void) => () => void
+}
+
 interface TerminalStatusAPI {
   subscribe: (request: import('../src/shared/terminalStatusTypes').TerminalStatusSubscribeRequest) => Promise<void>
   unsubscribe: (request: import('../src/shared/terminalStatusTypes').TerminalStatusSubscribeRequest) => Promise<void>
@@ -74,5 +86,6 @@ interface Window {
   dialogAPI: DialogAPI
   serialAPI: SerialAPI
   terminalAPI: TerminalAPI
+  terminalFilesAPI: TerminalFilesAPI
   terminalStatusAPI: TerminalStatusAPI
 }

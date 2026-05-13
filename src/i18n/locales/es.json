@@ -137,7 +137,22 @@
     "files": "Archivos",
     "filesPlaceholder": "El gestor de archivos aparecerá aquí",
     "history": "Historial",
-    "historyPlaceholder": "El historial de comandos aparecerá aquí"
+    "historyPlaceholder": "El historial de comandos aparecerá aquí",
+    "filesNoSession": "Open a terminal to browse files",
+    "filesLoading": "Loading files",
+    "filesEmpty": "Directory is empty",
+    "filesUpload": "Upload file",
+    "filesDownload": "Download file",
+    "filesRefresh": "Refresh",
+    "filesGoHome": "Go to home directory",
+    "filesNewFolder": "Create folder",
+    "filesNewFile": "Create file",
+    "filesColumnName": "Name",
+    "filesColumnPermissions": "Permissions",
+    "filesColumnModified": "Modified",
+    "filesEditPathPlaceholder": "Introduce la ruta de la carpeta",
+    "filesInvalidPathTitle": "No se puede abrir la carpeta",
+    "filesInvalidPathMessage": "La carpeta \"{{path}}\" no existe o no se puede abrir."
   },
   "workspace": {
     "tabLabel": "Pestaña {{index}}",

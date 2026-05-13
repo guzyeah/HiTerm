@@ -9,6 +9,14 @@ import type {
   TerminalWriteRequest,
 } from '../src/shared/terminalTypes'
 import type {
+  TerminalFilesDirectoryEvent,
+  TerminalFilesErrorEvent,
+  TerminalFilesReadDirectoryRequest,
+  TerminalFilesSessionRequest,
+  TerminalFilesSetRootPathRequest,
+  TerminalFilesSnapshotEvent,
+} from '../src/shared/terminalFilesTypes'
+import type {
   TerminalStatusErrorEvent,
   TerminalStatusSampleEvent,
   TerminalStatusSubscribeRequest,
@@ -85,6 +93,37 @@ contextBridge.exposeInMainWorld('terminalAPI', {
     const listener = (_event: Electron.IpcRendererEvent, payload: TerminalExitEvent) => callback(payload)
     ipcRenderer.on('terminal:exit', listener)
     return () => ipcRenderer.off('terminal:exit', listener)
+  },
+})
+
+// --------- Expose Terminal Files API to the Renderer process ---------
+contextBridge.exposeInMainWorld('terminalFilesAPI', {
+  subscribe: (request: TerminalFilesSessionRequest): Promise<void> =>
+    ipcRenderer.invoke('terminalFiles:subscribe', request),
+  unsubscribe: (request: TerminalFilesSessionRequest): Promise<void> =>
+    ipcRenderer.invoke('terminalFiles:unsubscribe', request),
+  refresh: (request: TerminalFilesSessionRequest): Promise<void> =>
+    ipcRenderer.invoke('terminalFiles:refresh', request),
+  goHome: (request: TerminalFilesSessionRequest): Promise<void> =>
+    ipcRenderer.invoke('terminalFiles:goHome', request),
+  readDirectory: (request: TerminalFilesReadDirectoryRequest): Promise<void> =>
+    ipcRenderer.invoke('terminalFiles:readDirectory', request),
+  setRootPath: (request: TerminalFilesSetRootPathRequest): Promise<void> =>
+    ipcRenderer.invoke('terminalFiles:setRootPath', request),
+  onSnapshot: (callback: (event: TerminalFilesSnapshotEvent) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, payload: TerminalFilesSnapshotEvent) => callback(payload)
+    ipcRenderer.on('terminalFiles:snapshot', listener)
+    return () => ipcRenderer.off('terminalFiles:snapshot', listener)
+  },
+  onDirectory: (callback: (event: TerminalFilesDirectoryEvent) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, payload: TerminalFilesDirectoryEvent) => callback(payload)
+    ipcRenderer.on('terminalFiles:directory', listener)
+    return () => ipcRenderer.off('terminalFiles:directory', listener)
+  },
+  onError: (callback: (event: TerminalFilesErrorEvent) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, payload: TerminalFilesErrorEvent) => callback(payload)
+    ipcRenderer.on('terminalFiles:error', listener)
+    return () => ipcRenderer.off('terminalFiles:error', listener)
   },
 })
 

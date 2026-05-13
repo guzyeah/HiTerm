@@ -137,7 +137,22 @@
     "files": "File",
     "filesPlaceholder": "Il gestore di file apparirà qui",
     "history": "Cronologia",
-    "historyPlaceholder": "La cronologia dei comandi apparirà qui"
+    "historyPlaceholder": "La cronologia dei comandi apparirà qui",
+    "filesNoSession": "Open a terminal to browse files",
+    "filesLoading": "Loading files",
+    "filesEmpty": "Directory is empty",
+    "filesUpload": "Upload file",
+    "filesDownload": "Download file",
+    "filesRefresh": "Refresh",
+    "filesGoHome": "Go to home directory",
+    "filesNewFolder": "Create folder",
+    "filesNewFile": "Create file",
+    "filesColumnName": "Name",
+    "filesColumnPermissions": "Permissions",
+    "filesColumnModified": "Modified",
+    "filesEditPathPlaceholder": "Inserisci un percorso di cartella",
+    "filesInvalidPathTitle": "Impossibile aprire la cartella",
+    "filesInvalidPathMessage": "La cartella \"{{path}}\" non esiste o non ? accessibile."
   },
   "workspace": {
     "tabLabel": "Scheda {{index}}",

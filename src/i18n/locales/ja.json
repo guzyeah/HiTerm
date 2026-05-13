@@ -137,7 +137,22 @@
     "files": "ファイル管理",
     "filesPlaceholder": "ファイル管理はここに表示されます",
     "history": "コマンド履歴",
-    "historyPlaceholder": "コマンド履歴はここに表示されます"
+    "historyPlaceholder": "コマンド履歴はここに表示されます",
+    "filesNoSession": "Open a terminal to browse files",
+    "filesLoading": "Loading files",
+    "filesEmpty": "Directory is empty",
+    "filesUpload": "Upload file",
+    "filesDownload": "Download file",
+    "filesRefresh": "Refresh",
+    "filesGoHome": "Go to home directory",
+    "filesNewFolder": "Create folder",
+    "filesNewFile": "Create file",
+    "filesColumnName": "Name",
+    "filesColumnPermissions": "Permissions",
+    "filesColumnModified": "Modified",
+    "filesEditPathPlaceholder": "?????? ?????",
+    "filesInvalidPathTitle": "????????????",
+    "filesInvalidPathMessage": "???????{{path}}???????????????????"
   },
   "workspace": {
     "tabLabel": "タブ {{index}}",

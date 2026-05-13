@@ -137,7 +137,22 @@
     "files": "Fichiers",
     "filesPlaceholder": "Le gestionnaire de fichiers apparaîtra ici",
     "history": "Historique",
-    "historyPlaceholder": "L'historique des commandes apparaîtra ici"
+    "historyPlaceholder": "L'historique des commandes apparaîtra ici",
+    "filesNoSession": "Open a terminal to browse files",
+    "filesLoading": "Loading files",
+    "filesEmpty": "Directory is empty",
+    "filesUpload": "Upload file",
+    "filesDownload": "Download file",
+    "filesRefresh": "Refresh",
+    "filesGoHome": "Go to home directory",
+    "filesNewFolder": "Create folder",
+    "filesNewFile": "Create file",
+    "filesColumnName": "Name",
+    "filesColumnPermissions": "Permissions",
+    "filesColumnModified": "Modified",
+    "filesEditPathPlaceholder": "Saisir un chemin de dossier",
+    "filesInvalidPathTitle": "Impossible d'ouvrir le dossier",
+    "filesInvalidPathMessage": "Le dossier \"{{path}}\" n'existe pas ou n'est pas accessible."
   },
   "workspace": {
     "tabLabel": "Onglet {{index}}",

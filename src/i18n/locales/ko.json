@@ -137,7 +137,22 @@
     "files": "파일 관리",
     "filesPlaceholder": "파일 관리가 여기에 표시됩니다",
     "history": "명령 기록",
-    "historyPlaceholder": "명령 기록이 여기에 표시됩니다"
+    "historyPlaceholder": "명령 기록이 여기에 표시됩니다",
+    "filesNoSession": "Open a terminal to browse files",
+    "filesLoading": "Loading files",
+    "filesEmpty": "Directory is empty",
+    "filesUpload": "Upload file",
+    "filesDownload": "Download file",
+    "filesRefresh": "Refresh",
+    "filesGoHome": "Go to home directory",
+    "filesNewFolder": "Create folder",
+    "filesNewFile": "Create file",
+    "filesColumnName": "Name",
+    "filesColumnPermissions": "Permissions",
+    "filesColumnModified": "Modified",
+    "filesEditPathPlaceholder": "???? ?? ??",
+    "filesInvalidPathTitle": "????? ? ? ??",
+    "filesInvalidPathMessage": "???? \"{{path}}\"?(?) ??? ???? ? ????."
   },
   "workspace": {
     "tabLabel": "탭 {{index}}",

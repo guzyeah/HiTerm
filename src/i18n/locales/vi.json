@@ -137,7 +137,22 @@
     "files": "Tệp tin",
     "filesPlaceholder": "Quản lý tệp tin sẽ xuất hiện ở đây",
     "history": "Lịch sử",
-    "historyPlaceholder": "Lịch sử lệnh sẽ xuất hiện ở đây"
+    "historyPlaceholder": "Lịch sử lệnh sẽ xuất hiện ở đây",
+    "filesNoSession": "Open a terminal to browse files",
+    "filesLoading": "Loading files",
+    "filesEmpty": "Directory is empty",
+    "filesUpload": "Upload file",
+    "filesDownload": "Download file",
+    "filesRefresh": "Refresh",
+    "filesGoHome": "Go to home directory",
+    "filesNewFolder": "Create folder",
+    "filesNewFile": "Create file",
+    "filesColumnName": "Name",
+    "filesColumnPermissions": "Permissions",
+    "filesColumnModified": "Modified",
+    "filesEditPathPlaceholder": "Nh?p ???ng d?n th? m?c",
+    "filesInvalidPathTitle": "Kh?ng th? m? th? m?c",
+    "filesInvalidPathMessage": "Th? m?c \"{{path}}\" kh?ng t?n t?i ho?c kh?ng th? truy c?p."
   },
   "workspace": {
     "tabLabel": "Thẻ {{index}}",

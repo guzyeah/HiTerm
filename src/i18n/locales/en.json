@@ -137,7 +137,22 @@
     "files": "Files",
     "filesPlaceholder": "File manager will appear here",
     "history": "History",
-    "historyPlaceholder": "Command history will appear here"
+    "historyPlaceholder": "Command history will appear here",
+    "filesNoSession": "Open a terminal to browse files",
+    "filesLoading": "Loading files",
+    "filesEmpty": "Directory is empty",
+    "filesUpload": "Upload file",
+    "filesDownload": "Download file",
+    "filesRefresh": "Refresh",
+    "filesGoHome": "Go to home directory",
+    "filesNewFolder": "Create folder",
+    "filesNewFile": "Create file",
+    "filesColumnName": "Name",
+    "filesColumnPermissions": "Permissions",
+    "filesColumnModified": "Modified",
+    "filesEditPathPlaceholder": "Enter a directory path",
+    "filesInvalidPathTitle": "Unable to open directory",
+    "filesInvalidPathMessage": "The directory \"{{path}}\" does not exist or cannot be accessed."
   },
   "workspace": {
     "tabLabel": "Tab {{index}}",

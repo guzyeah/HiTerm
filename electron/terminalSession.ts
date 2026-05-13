@@ -25,6 +25,8 @@ interface TerminalSession {
   disposables: pty.IDisposable[]
   shellId: string
   protocol: ProtocolType
+  cwd: string
+  homeDir: string
 }
 
 export interface TerminalSessionMetadata {
@@ -32,6 +34,8 @@ export interface TerminalSessionMetadata {
   shellId: string
   protocol: ProtocolType
   webContentsId: number
+  cwd: string
+  homeDir: string
 }
 
 const terminalSessions = new Map<string, TerminalSession>()
@@ -91,6 +95,8 @@ export function getTerminalSessionMetadata(
     shellId: session.shellId,
     protocol: session.protocol,
     webContentsId: session.webContents.id,
+    cwd: session.cwd,
+    homeDir: session.homeDir,
   }
 }
 
@@ -143,6 +149,7 @@ function createLocalSession(
   }
 
   const terminalPath = validateTerminalPath(shell.terminalPath)
+  const homeDir = homedir()
   const cwd = resolveWorkingDirectory(shell.workDir)
   const { cols, rows } = normalizeTerminalSize(request.cols, request.rows)
   const sessionId = randomUUID()
@@ -188,6 +195,8 @@ function createLocalSession(
     disposables,
     shellId: shell.id,
     protocol: shell.protocol,
+    cwd,
+    homeDir,
   })
   trackSessionWebContents(sessionId, webContents)
 
