@@ -138,5 +138,20 @@
     "filesPlaceholder": "文件管理将在此处显示",
     "history": "历史命令",
     "historyPlaceholder": "历史命令将在此处显示"
+  },
+  "workspace": {
+    "tabLabel": "标签 {{index}}",
+    "panelTitle": "工作区",
+    "panelDescription": "每个标签页都对应一个独立内容面板。",
+    "statusReady": "就绪",
+    "addTab": "新建标签",
+    "moreActions": "更多操作",
+    "dockLeft": "切换到左侧分栏",
+    "dockTop": "切换到顶部标签栏",
+    "scrollLeft": "向左滚动标签",
+    "scrollRight": "向右滚动标签",
+    "closeTab": "关闭标签",
+    "emptyTitle": "暂无标签页",
+    "emptyDescription": "点击新建按钮继续。"
   }
 }

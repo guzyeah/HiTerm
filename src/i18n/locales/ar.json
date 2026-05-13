@@ -138,5 +138,20 @@
     "filesPlaceholder": "سيظهر مدير الملفات هنا",
     "history": "السجل",
     "historyPlaceholder": "سيظهر سجل الأوامر هنا"
+  },
+  "workspace": {
+    "tabLabel": "علامة تبويب {{index}}",
+    "panelTitle": "مساحة العمل",
+    "panelDescription": "لكل علامة تبويب لوحة محتوى مستقلة.",
+    "statusReady": "جاهز",
+    "addTab": "علامة تبويب جديدة",
+    "moreActions": "مزيد من الإجراءات",
+    "dockLeft": "إرساء شريط العلامات إلى اليسار",
+    "dockTop": "إرساء شريط العلامات إلى الأعلى",
+    "scrollLeft": "تمرير العلامات إلى اليسار",
+    "scrollRight": "تمرير العلامات إلى اليمين",
+    "closeTab": "إغلاق علامة التبويب",
+    "emptyTitle": "لا توجد علامات تبويب مفتوحة",
+    "emptyDescription": "أنشئ علامة تبويب جديدة للمتابعة."
   }
 }

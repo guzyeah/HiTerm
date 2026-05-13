@@ -138,5 +138,20 @@
     "filesPlaceholder": "Quản lý tệp tin sẽ xuất hiện ở đây",
     "history": "Lịch sử",
     "historyPlaceholder": "Lịch sử lệnh sẽ xuất hiện ở đây"
+  },
+  "workspace": {
+    "tabLabel": "Thẻ {{index}}",
+    "panelTitle": "Không gian làm việc",
+    "panelDescription": "Mỗi thẻ có một bảng nội dung riêng.",
+    "statusReady": "Sẵn sàng",
+    "addTab": "Thẻ mới",
+    "moreActions": "Thêm tuỳ chọn",
+    "dockLeft": "Gắn thanh thẻ sang trái",
+    "dockTop": "Gắn thanh thẻ lên trên",
+    "scrollLeft": "Cuộn thẻ sang trái",
+    "scrollRight": "Cuộn thẻ sang phải",
+    "closeTab": "Đóng thẻ",
+    "emptyTitle": "Chưa mở thẻ nào",
+    "emptyDescription": "Tạo thẻ mới để tiếp tục."
   }
 }

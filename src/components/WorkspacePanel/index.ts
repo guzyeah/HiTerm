@@ -1,0 +1,1 @@
+export { WorkspacePanel } from './WorkspacePanel'

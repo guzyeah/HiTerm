@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { MenuBar, type MenuItemId } from '@/components/MenuBar/MenuBar'
 import { AboutDialog } from '@/components/AboutDialog/AboutDialog'
 import { ConnectDialog } from '@/components/ConnectDialog'
+import { WorkspacePanel } from '@/components/WorkspacePanel'
 import { MainLayout } from '@/components/MainLayout'
 import { ActivityBar } from '@/components/ActivityBar'
 import './App.css'
@@ -41,14 +42,9 @@ function App() {
       <MenuBar onMenuItemClick={handleMenuItemClick} />
       <MainLayout
         leftPanel={<ActivityBar />}
-        rightPanel={
-          <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-            <h1>{t('app.name')}</h1>
-            <p>{t('app.description')}</p>
-          </div>
-        }
+        rightPanel={<WorkspacePanel />}
         leftStatusBar={<span>HiTerm</span>}
-        rightStatusBar={<span>Ready</span>}
+        rightStatusBar={<span>{t('workspace.statusReady')}</span>}
       />
       <AboutDialog open={aboutOpen} onOpenChange={setAboutOpen} />
       <ConnectDialog open={connectOpen} onOpenChange={setConnectOpen} />

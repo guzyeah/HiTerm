@@ -138,5 +138,20 @@
     "filesPlaceholder": "ファイル管理はここに表示されます",
     "history": "コマンド履歴",
     "historyPlaceholder": "コマンド履歴はここに表示されます"
+  },
+  "workspace": {
+    "tabLabel": "タブ {{index}}",
+    "panelTitle": "ワークスペース",
+    "panelDescription": "各タブは独立したコンテンツパネルを持ちます。",
+    "statusReady": "準備完了",
+    "addTab": "新しいタブ",
+    "moreActions": "その他の操作",
+    "dockLeft": "タブバーを左にドック",
+    "dockTop": "タブバーを上にドック",
+    "scrollLeft": "タブを左へスクロール",
+    "scrollRight": "タブを右へスクロール",
+    "closeTab": "タブを閉じる",
+    "emptyTitle": "開いているタブはありません",
+    "emptyDescription": "新しいタブを作成してください。"
   }
 }

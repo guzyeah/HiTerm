@@ -138,5 +138,20 @@
     "filesPlaceholder": "El gestor de archivos aparecerá aquí",
     "history": "Historial",
     "historyPlaceholder": "El historial de comandos aparecerá aquí"
+  },
+  "workspace": {
+    "tabLabel": "Pestaña {{index}}",
+    "panelTitle": "Área de trabajo",
+    "panelDescription": "Cada pestaña tiene su propio panel de contenido.",
+    "statusReady": "Listo",
+    "addTab": "Nueva pestaña",
+    "moreActions": "Más acciones",
+    "dockLeft": "Acoplar la barra de pestañas a la izquierda",
+    "dockTop": "Acoplar la barra de pestañas arriba",
+    "scrollLeft": "Desplazar pestañas a la izquierda",
+    "scrollRight": "Desplazar pestañas a la derecha",
+    "closeTab": "Cerrar pestaña",
+    "emptyTitle": "No hay pestañas abiertas",
+    "emptyDescription": "Crea una nueva pestaña para continuar."
   }
 }

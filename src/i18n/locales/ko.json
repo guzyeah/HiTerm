@@ -138,5 +138,20 @@
     "filesPlaceholder": "파일 관리가 여기에 표시됩니다",
     "history": "명령 기록",
     "historyPlaceholder": "명령 기록이 여기에 표시됩니다"
+  },
+  "workspace": {
+    "tabLabel": "탭 {{index}}",
+    "panelTitle": "작업 영역",
+    "panelDescription": "각 탭에는 독립된 콘텐츠 패널이 있습니다.",
+    "statusReady": "준비됨",
+    "addTab": "새 탭",
+    "moreActions": "기타 작업",
+    "dockLeft": "탭 바를 왼쪽에 배치",
+    "dockTop": "탭 바를 위에 배치",
+    "scrollLeft": "탭을 왼쪽으로 이동",
+    "scrollRight": "탭을 오른쪽으로 이동",
+    "closeTab": "탭 닫기",
+    "emptyTitle": "열린 탭이 없습니다",
+    "emptyDescription": "새 탭을 만들어 계속하세요."
   }
 }

@@ -138,5 +138,20 @@
     "filesPlaceholder": "File manager will appear here",
     "history": "History",
     "historyPlaceholder": "Command history will appear here"
+  },
+  "workspace": {
+    "tabLabel": "Tab {{index}}",
+    "panelTitle": "Workspace",
+    "panelDescription": "Each tab owns an independent content panel.",
+    "statusReady": "Ready",
+    "addTab": "New tab",
+    "moreActions": "More actions",
+    "dockLeft": "Dock tab bar left",
+    "dockTop": "Dock tab bar top",
+    "scrollLeft": "Scroll tabs left",
+    "scrollRight": "Scroll tabs right",
+    "closeTab": "Close tab",
+    "emptyTitle": "No tabs open",
+    "emptyDescription": "Create a new tab to continue."
   }
 }

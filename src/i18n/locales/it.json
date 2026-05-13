@@ -138,5 +138,20 @@
     "filesPlaceholder": "Il gestore di file apparirà qui",
     "history": "Cronologia",
     "historyPlaceholder": "La cronologia dei comandi apparirà qui"
+  },
+  "workspace": {
+    "tabLabel": "Scheda {{index}}",
+    "panelTitle": "Area di lavoro",
+    "panelDescription": "Ogni scheda ha un pannello contenuto indipendente.",
+    "statusReady": "Pronto",
+    "addTab": "Nuova scheda",
+    "moreActions": "Altre azioni",
+    "dockLeft": "Aggancia la barra schede a sinistra",
+    "dockTop": "Aggancia la barra schede in alto",
+    "scrollLeft": "Scorri le schede a sinistra",
+    "scrollRight": "Scorri le schede a destra",
+    "closeTab": "Chiudi scheda",
+    "emptyTitle": "Nessuna scheda aperta",
+    "emptyDescription": "Crea una nuova scheda per continuare."
   }
 }

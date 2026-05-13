@@ -138,5 +138,20 @@
     "filesPlaceholder": "Der Dateimanager wird hier angezeigt",
     "history": "Historie",
     "historyPlaceholder": "Die Befehlshistorie wird hier angezeigt"
+  },
+  "workspace": {
+    "tabLabel": "Register {{index}}",
+    "panelTitle": "Arbeitsbereich",
+    "panelDescription": "Jeder Tab hat ein eigenes Inhaltsfeld.",
+    "statusReady": "Bereit",
+    "addTab": "Neuer Tab",
+    "moreActions": "Weitere Aktionen",
+    "dockLeft": "Tab-Leiste links andocken",
+    "dockTop": "Tab-Leiste oben andocken",
+    "scrollLeft": "Tabs nach links scrollen",
+    "scrollRight": "Tabs nach rechts scrollen",
+    "closeTab": "Tab schließen",
+    "emptyTitle": "Keine offenen Tabs",
+    "emptyDescription": "Erstellen Sie einen neuen Tab, um fortzufahren."
   }
 }

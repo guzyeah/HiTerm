@@ -138,5 +138,20 @@
     "filesPlaceholder": "檔案管理將在此處顯示",
     "history": "歷史命令",
     "historyPlaceholder": "歷史命令將在此處顯示"
+  },
+  "workspace": {
+    "tabLabel": "標籤 {{index}}",
+    "panelTitle": "工作區",
+    "panelDescription": "每個標籤頁都對應一個獨立內容面板。",
+    "statusReady": "就緒",
+    "addTab": "新增標籤",
+    "moreActions": "更多操作",
+    "dockLeft": "切換到左側分欄",
+    "dockTop": "切換到頂部標籤列",
+    "scrollLeft": "向左捲動標籤",
+    "scrollRight": "向右捲動標籤",
+    "closeTab": "關閉標籤",
+    "emptyTitle": "暫無標籤頁",
+    "emptyDescription": "點擊新增按鈕繼續。"
   }
 }

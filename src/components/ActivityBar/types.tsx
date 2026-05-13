@@ -3,7 +3,7 @@
  * 定义工具面板类型枚举、图标映射、i18n键映射
  */
 
-import type { ReactNode } from 'react'
+import type { ReactElement } from 'react'
 import {
   PlugConnectedRegular,
   FolderRegular,
@@ -17,7 +17,7 @@ export type ActivityType = 'connections' | 'files' | 'history'
 export interface ActivityConfig {
   id: ActivityType
   /** FluentUI 图标元素（已渲染的 JSX，非组件类） */
-  icon: ReactNode
+  icon: ReactElement
   /** i18n 翻译键：面板标题 */
   labelKey: string
 }

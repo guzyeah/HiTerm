@@ -138,5 +138,20 @@
     "filesPlaceholder": "Le gestionnaire de fichiers apparaîtra ici",
     "history": "Historique",
     "historyPlaceholder": "L'historique des commandes apparaîtra ici"
+  },
+  "workspace": {
+    "tabLabel": "Onglet {{index}}",
+    "panelTitle": "Espace de travail",
+    "panelDescription": "Chaque onglet possède son propre panneau de contenu.",
+    "statusReady": "Prêt",
+    "addTab": "Nouvel onglet",
+    "moreActions": "Plus d'actions",
+    "dockLeft": "Ancrer la barre d'onglets à gauche",
+    "dockTop": "Ancrer la barre d'onglets en haut",
+    "scrollLeft": "Faire défiler les onglets vers la gauche",
+    "scrollRight": "Faire défiler les onglets vers la droite",
+    "closeTab": "Fermer l'onglet",
+    "emptyTitle": "Aucun onglet ouvert",
+    "emptyDescription": "Créez un nouvel onglet pour continuer."
   }
 }
