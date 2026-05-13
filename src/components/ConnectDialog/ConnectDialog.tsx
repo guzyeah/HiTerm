@@ -18,7 +18,6 @@ import {
   TabList,
   makeStyles,
   tokens,
-  Divider,
 } from '@fluentui/react-components'
 import {
   GlobeRegular,
@@ -47,7 +46,7 @@ const PROTOCOLS: ProtocolConfig[] = [
   { id: 'rdp', label: 'RDP', icon: 'rdp', defaultPort: 3389 },
 ]
 
-const PROTOCOL_ICON_MAP: Record<string, React.ReactNode> = {
+const PROTOCOL_ICON_MAP: Record<ProtocolType, JSX.Element> = {
   ssh: <GlobeRegular />,
   local: <DesktopRegular />,
   telnet: <PlugConnectedRegular />,
@@ -62,12 +61,16 @@ const useStyles = makeStyles({
     maxHeight: '85vh',
     minHeight: '600px',
     width: '640px',
-    display: 'flex',
-    flexDirection: 'column',
+    display: 'grid',
   },
   body: {
+    minHeight: 0,
+    gridTemplateRows: 'auto minmax(0, 1fr) auto',
+  },
+  content: {
     display: 'flex',
     flexDirection: 'column',
+    minHeight: 0,
     overflow: 'hidden',
     padding: 0,
   },
@@ -76,8 +79,9 @@ const useStyles = makeStyles({
     padding: `${tokens.spacingVerticalM} ${tokens.spacingHorizontalL}`,
     flexShrink: 0,
   },
-  content: {
+  formScroll: {
     flex: 1,
+    minHeight: 0,
     overflowY: 'auto',
     overflowX: 'hidden',
     padding: `0 ${tokens.spacingHorizontalL} ${tokens.spacingVerticalM} ${tokens.spacingHorizontalL}`,
@@ -106,10 +110,14 @@ const useStyles = makeStyles({
     margin: `${tokens.spacingVerticalS} 0`,
   },
   actions: {
+    gridColumnStart: 1,
+    gridColumnEnd: 4,
     justifyContent: 'flex-end',
     padding: `${tokens.spacingVerticalM} ${tokens.spacingHorizontalL}`,
     gap: tokens.spacingHorizontalS,
-    flexShrink: 0,
+    borderTopColor: tokens.colorNeutralStroke2,
+    borderTopStyle: 'solid',
+    borderTopWidth: tokens.strokeWidthThin,
   },
 })
 
@@ -439,13 +447,11 @@ export function ConnectDialog({ open, onOpenChange }: ConnectDialogProps) {
       if (window.shellAPI) {
         await window.shellAPI.saveShell(record)
         if (connect) {
-          // eslint-disable-next-line no-console
           console.log('连接:', record)
         }
         onOpenChange(false)
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error('保存失败:', error)
     }
   }
@@ -477,28 +483,29 @@ export function ConnectDialog({ open, onOpenChange }: ConnectDialogProps) {
           <DialogTitle
             action={(
               <DialogTrigger action="close">
-                <Button appearance="subtle" icon={<DismissRegular />} />
+                <Button appearance="subtle" aria-label={t('common.close')} icon={<DismissRegular />} />
               </DialogTrigger>
             )}
           >
             {t('connectDialog.title')}
           </DialogTitle>
-          <TabList
-            className={styles.tabList}
-            selectedValue={activeProtocol}
-            onTabSelect={(_, data) => setActiveProtocol(data.value as ProtocolType)}
-          >
-            {PROTOCOLS.map(p => (
-              <Tab key={p.id} value={p.id} icon={PROTOCOL_ICON_MAP[p.id] as any}>
-                {p.label}
-              </Tab>
-            ))}
-          </TabList>
           <DialogContent className={styles.content}>
-            {renderForm()}
+            <TabList
+              className={styles.tabList}
+              selectedValue={activeProtocol}
+              onTabSelect={(_, data) => setActiveProtocol(data.value as ProtocolType)}
+            >
+              {PROTOCOLS.map(p => (
+                <Tab key={p.id} value={p.id} icon={PROTOCOL_ICON_MAP[p.id]}>
+                  {p.label}
+                </Tab>
+              ))}
+            </TabList>
+            <div className={styles.formScroll}>
+              {renderForm()}
+            </div>
           </DialogContent>
-          <Divider />
-          <DialogActions className={styles.actions}>
+          <DialogActions className={styles.actions} fluid>
             <Button appearance="secondary" onClick={() => onOpenChange(false)}>
               {t('common.cancel')}
             </Button>
