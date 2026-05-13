@@ -382,6 +382,7 @@ export const FilesPanel: FC = () => {
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null)
   const [dragTargetPath, setDragTargetPath] = useState<string | null>(null)
   const [selectedItems, setSelectedItems] = useState<SelectedItemState[]>([])
+  const [selectionAnchorPath, setSelectionAnchorPath] = useState<string | null>(null)
   const rootPathInputRef = useRef<HTMLInputElement | null>(null)
   const contextMenuRef = useRef<HTMLDivElement | null>(null)
   const clearTransferStateRef = useRef<() => void>(() => undefined)
@@ -423,6 +424,34 @@ export const FilesPanel: FC = () => {
     '--files-column-modified-width': `${modifiedWidth}px`,
   } as CSSProperties
   const selectedPathSet = useMemo(() => new Set(selectedItems.map(item => item.path)), [selectedItems])
+  const visibleItems = useMemo<SelectedItemState[]>(() => {
+    if (!rootSnapshot) return []
+
+    const nextVisibleItems: SelectedItemState[] = [{
+      path: rootSnapshot.cwd,
+      kind: 'root',
+    }]
+
+    const appendEntries = (entries: TerminalFileEntry[]): void => {
+      entries.forEach(entry => {
+        nextVisibleItems.push({
+          path: entry.absolutePath,
+          kind: entry.kind,
+        })
+
+        if (entry.kind !== 'directory') return
+        if (!openItems.has(getDirectoryValue(entry.absolutePath))) return
+
+        const childEntries = entriesByParent[entry.absolutePath]
+        if (childEntries) {
+          appendEntries(childEntries)
+        }
+      })
+    }
+
+    appendEntries(rootSnapshot.entries)
+    return nextVisibleItems
+  }, [entriesByParent, openItems, rootSnapshot])
   const parentPathByChild = useMemo(() => {
     const nextMap = new Map<string, string>()
 
@@ -470,6 +499,7 @@ export const FilesPanel: FC = () => {
       setDeleteDialog(null)
       setContextMenu(null)
       setSelectedItems([])
+      setSelectionAnchorPath(null)
       lastRootPathRef.current = null
       return
     }
@@ -482,6 +512,7 @@ export const FilesPanel: FC = () => {
         path: rootSnapshot.cwd,
         kind: 'root',
       }])
+      setSelectionAnchorPath(rootSnapshot.cwd)
     }
   }, [rootSnapshot])
 
@@ -491,6 +522,13 @@ export const FilesPanel: FC = () => {
     rootPathInputRef.current?.focus()
     rootPathInputRef.current?.select()
   }, [isEditingRootPath])
+
+  useEffect(() => {
+    if (!selectionAnchorPath) return
+    if (visibleItems.some(item => item.path === selectionAnchorPath)) return
+
+    setSelectionAnchorPath(selectedItems[0]?.path ?? rootSnapshot?.cwd ?? null)
+  }, [rootSnapshot?.cwd, selectedItems, selectionAnchorPath, visibleItems])
 
   useEffect(() => {
     if (!contextMenu) return
@@ -554,6 +592,43 @@ export const FilesPanel: FC = () => {
     setSelectedItems([{ path, kind }])
   }
 
+  function normalizeSelectedItems(items: SelectedItemState[]): SelectedItemState[] {
+    const nextItemsByPath = new Map<string, SelectedItemState>()
+    items.forEach(item => {
+      nextItemsByPath.set(item.path, item)
+    })
+
+    const nextItems = [...nextItemsByPath.values()]
+    if (nextItems.length <= 1) return nextItems
+
+    return nextItems.filter(item => item.kind !== 'root')
+  }
+
+  function buildRangeSelection(anchorPath: string, targetPath: string): SelectedItemState[] | null {
+    const anchorIndex = visibleItems.findIndex(item => item.path === anchorPath)
+    const targetIndex = visibleItems.findIndex(item => item.path === targetPath)
+    if (anchorIndex < 0 || targetIndex < 0) return null
+
+    const [startIndex, endIndex] = anchorIndex <= targetIndex
+      ? [anchorIndex, targetIndex]
+      : [targetIndex, anchorIndex]
+
+    return normalizeSelectedItems(visibleItems.slice(startIndex, endIndex + 1))
+  }
+
+  function mergeSelections(
+    baseItems: SelectedItemState[],
+    appendedItems: SelectedItemState[],
+  ): SelectedItemState[] {
+    const mergedItems = normalizeSelectedItems([...baseItems, ...appendedItems])
+
+    return mergedItems.sort((leftItem, rightItem) => {
+      const leftIndex = visibleItems.findIndex(item => item.path === leftItem.path)
+      const rightIndex = visibleItems.findIndex(item => item.path === rightItem.path)
+      return leftIndex - rightIndex
+    })
+  }
+
   function toggleItemSelection(path: string, kind: SelectableItemKind): void {
     setSelectedItems(previous => {
       const alreadySelected = previous.some(item => item.path === path)
@@ -578,12 +653,30 @@ export const FilesPanel: FC = () => {
     event.stopPropagation()
     setContextMenu(null)
 
+    if (event.shiftKey) {
+      const nextAnchorPath = selectionAnchorPath ?? selectedItems[0]?.path ?? path
+      const rangeItems = buildRangeSelection(nextAnchorPath, path)
+      if (rangeItems && rangeItems.length > 0) {
+        setSelectedItems(previous => (
+          event.ctrlKey || event.metaKey
+            ? mergeSelections(previous, rangeItems)
+            : rangeItems
+        ))
+        if (!selectionAnchorPath) {
+          setSelectionAnchorPath(nextAnchorPath)
+        }
+        return
+      }
+    }
+
     if (event.ctrlKey || event.metaKey) {
       toggleItemSelection(path, kind)
+      setSelectionAnchorPath(path)
       return
     }
 
     selectSingleItem(path, kind)
+    setSelectionAnchorPath(path)
   }
 
   function handleResizeStart(
@@ -870,6 +963,7 @@ export const FilesPanel: FC = () => {
         path: createdPath,
         kind: createDialog.kind === 'directory' ? 'directory' : 'file',
       }])
+      setSelectionAnchorPath(createdPath)
       setCreateDialog(null)
       setContextMenu(null)
     } catch (nextError) {
@@ -941,8 +1035,10 @@ export const FilesPanel: FC = () => {
           path: rootSnapshot.cwd,
           kind: 'root',
         }])
+        setSelectionAnchorPath(rootSnapshot.cwd)
       } else {
         setSelectedItems(previous => previous.filter(item => !deletedPathSet.has(item.path)))
+        setSelectionAnchorPath(null)
       }
 
       setDeleteDialog(null)
@@ -1031,6 +1127,7 @@ export const FilesPanel: FC = () => {
     event.stopPropagation()
     if (!selectedPathSet.has(targetPath)) {
       selectSingleItem(targetPath, targetKind)
+      setSelectionAnchorPath(targetPath)
     }
     setContextMenu({
       targetKind,
