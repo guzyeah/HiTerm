@@ -1,15 +1,14 @@
 #root {
   height: 100vh;
-  display: flex;
-  flex-direction: column;
 }
 
-.app-content {
-  flex: 1 1 auto;
+/* FluentProvider 在 #root 内插入包裹 div，打断 flex 链，
+   因此布局职责由 .app-shell 承担 */
+.app-shell {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .about-table {
