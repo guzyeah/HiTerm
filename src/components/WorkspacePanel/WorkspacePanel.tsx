@@ -137,16 +137,6 @@ const useStyles = makeStyles({
     borderInlineEndWidth: tokens.strokeWidthThin,
     boxSizing: 'border-box',
   },
-  verticalHeader: {
-    flexShrink: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    minHeight: '40px',
-    paddingInline: tokens.spacingHorizontalXS,
-    paddingBlockStart: tokens.spacingVerticalXS,
-    boxSizing: 'border-box',
-  },
   verticalTabList: {
     flex: 1,
     minHeight: 0,
@@ -739,18 +729,6 @@ export const WorkspacePanel: FC = () => {
       {isVertical ? (
         <>
           <aside className={styles.verticalSidebar}>
-            <div className={styles.verticalHeader}>
-              <Button
-                aria-label={toggleLabel}
-                appearance="subtle"
-                className={styles.tabActionButton}
-                icon={toggleIcon}
-                onClick={toggleLayoutMode}
-                size="small"
-                title={toggleLabel}
-                type="button"
-              />
-            </div>
             <div className={styles.verticalTabList} role="tablist" aria-orientation="vertical">
               {panelTabs}
             </div>
@@ -773,6 +751,16 @@ export const WorkspacePanel: FC = () => {
                 disabled
                 size="small"
                 title={t('workspace.moreActions')}
+                type="button"
+              />
+              <Button
+                aria-label={toggleLabel}
+                appearance="subtle"
+                className={styles.tabActionButton}
+                icon={toggleIcon}
+                onClick={toggleLayoutMode}
+                size="small"
+                title={toggleLabel}
                 type="button"
               />
             </div>
