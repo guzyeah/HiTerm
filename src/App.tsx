@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
 import { MenuBar, type MenuItemId } from '@/components/MenuBar/MenuBar'
 import { AboutDialog } from '@/components/AboutDialog/AboutDialog'
 import { ConnectDialog } from '@/components/ConnectDialog'
-import { WorkspacePanel } from '@/components/WorkspacePanel'
+import { WorkspacePanel, WorkspaceRuntimeProvider } from '@/components/WorkspacePanel'
 import { MainLayout } from '@/components/MainLayout'
 import { ActivityBar } from '@/components/ActivityBar'
+import { TerminalStatusBar } from '@/components/StatusBar'
 import './App.css'
 
 function App() {
-  const { t } = useTranslation()
   const [aboutOpen, setAboutOpen] = useState(false)
   const [connectOpen, setConnectOpen] = useState(false)
 
@@ -40,12 +39,14 @@ function App() {
   return (
     <div className="app-shell">
       <MenuBar onMenuItemClick={handleMenuItemClick} />
-      <MainLayout
-        leftPanel={<ActivityBar />}
-        rightPanel={<WorkspacePanel />}
-        leftStatusBar={<span>HiTerm</span>}
-        rightStatusBar={<span>{t('workspace.statusReady')}</span>}
-      />
+      <WorkspaceRuntimeProvider>
+        <MainLayout
+          leftPanel={<ActivityBar />}
+          rightPanel={<WorkspacePanel />}
+          leftStatusBar={<span>HiTerm</span>}
+          rightStatusBar={<TerminalStatusBar />}
+        />
+      </WorkspaceRuntimeProvider>
       <AboutDialog open={aboutOpen} onOpenChange={setAboutOpen} />
       <ConnectDialog open={connectOpen} onOpenChange={setConnectOpen} />
     </div>

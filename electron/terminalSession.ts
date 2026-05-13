@@ -17,11 +17,21 @@ import type {
   TerminalSessionRequest,
   TerminalWriteRequest,
 } from '../src/shared/terminalTypes'
+import type { ProtocolType } from '../src/shared/shellTypes'
 
 interface TerminalSession {
   ptyProcess: pty.IPty
   webContents: WebContents
   disposables: pty.IDisposable[]
+  shellId: string
+  protocol: ProtocolType
+}
+
+export interface TerminalSessionMetadata {
+  sessionId: string
+  shellId: string
+  protocol: ProtocolType
+  webContentsId: number
 }
 
 const terminalSessions = new Map<string, TerminalSession>()
@@ -65,6 +75,23 @@ function getSessionForSender(sessionId: string, sender: WebContents): TerminalSe
   }
 
   return session
+}
+
+export function getTerminalSessionMetadata(
+  sessionId: string,
+  sender?: WebContents,
+): TerminalSessionMetadata | null {
+  const session = terminalSessions.get(sessionId)
+  if (!session || (sender && session.webContents.id !== sender.id)) {
+    return null
+  }
+
+  return {
+    sessionId,
+    shellId: session.shellId,
+    protocol: session.protocol,
+    webContentsId: session.webContents.id,
+  }
 }
 
 function trackSessionWebContents(sessionId: string, webContents: WebContents): void {
@@ -159,6 +186,8 @@ function createLocalSession(
     ptyProcess,
     webContents,
     disposables,
+    shellId: shell.id,
+    protocol: shell.protocol,
   })
   trackSessionWebContents(sessionId, webContents)
 

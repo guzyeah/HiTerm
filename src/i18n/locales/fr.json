@@ -158,6 +158,20 @@
     "processExited": "Processus terminé : {{exitCode}}",
     "startFailed": "Échec du démarrage du terminal : {{message}}"
   },
+  "status": {
+    "cpu": "CPU",
+    "memory": "Mémoire",
+    "upload": "Envoi",
+    "download": "Réception",
+    "diskRead": "Lecture disque",
+    "diskWrite": "Écriture disque",
+    "diskUsage": "Utilisation du disque",
+    "diskName": "Disque",
+    "mountPoint": "Point de montage",
+    "totalSize": "Total",
+    "freeSize": "Libre",
+    "unavailable": "Indisponible"
+  },
   "shellGroups": {
     "default": "Par défaut",
     "local": "Local"

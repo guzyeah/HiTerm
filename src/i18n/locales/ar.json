@@ -158,6 +158,20 @@
     "processExited": "انتهت العملية: {{exitCode}}",
     "startFailed": "فشل تشغيل الطرفية: {{message}}"
   },
+  "status": {
+    "cpu": "CPU",
+    "memory": "الذاكرة",
+    "upload": "رفع",
+    "download": "تنزيل",
+    "diskRead": "قراءة القرص",
+    "diskWrite": "كتابة القرص",
+    "diskUsage": "استخدام القرص",
+    "diskName": "القرص",
+    "mountPoint": "نقطة التركيب",
+    "totalSize": "الإجمالي",
+    "freeSize": "المتاح",
+    "unavailable": "غير متاح"
+  },
   "shellGroups": {
     "default": "افتراضي",
     "local": "محلي"

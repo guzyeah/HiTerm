@@ -158,6 +158,20 @@
     "processExited": "Process exited: {{exitCode}}",
     "startFailed": "Terminal failed to start: {{message}}"
   },
+  "status": {
+    "cpu": "CPU",
+    "memory": "Memory",
+    "upload": "Upload",
+    "download": "Download",
+    "diskRead": "Disk read",
+    "diskWrite": "Disk write",
+    "diskUsage": "Disk usage",
+    "diskName": "Disk",
+    "mountPoint": "Mount point",
+    "totalSize": "Total",
+    "freeSize": "Free",
+    "unavailable": "Unavailable"
+  },
   "shellGroups": {
     "default": "Default",
     "local": "Local"

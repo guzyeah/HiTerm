@@ -25,13 +25,14 @@ import {
 import { useRTL } from '@/hooks/useRTL'
 import { TerminalPane } from '@/components/Terminal/TerminalPane'
 import { subscribeOpenShellTab } from '@/shared/workspaceEvents'
+import { useWorkspaceRuntime } from './workspaceRuntimeContext'
 import type { ShellSummary } from '@/shared/shellTypes'
 
 type WorkspaceLayoutMode = 'horizontal' | 'vertical'
 
 type WorkspaceTabContent =
   | { type: 'placeholder' }
-  | { type: 'terminal'; shellId: string; shellName: string }
+  | { type: 'terminal'; shellId: string; shellName: string; sessionId?: string }
 
 interface WorkspaceTab {
   id: string
@@ -51,6 +52,8 @@ interface ScrollState {
 }
 
 interface WorkspaceTabPanelProps {
+  onTerminalSessionDisposed: (tabId: string, sessionId: string) => void
+  onTerminalSessionReady: (tabId: string, sessionId: string) => void
   tab: WorkspaceTab
   isActive: boolean
 }
@@ -422,7 +425,12 @@ const useStyles = makeStyles({
   },
 })
 
-function WorkspaceTabPanel({ tab, isActive }: WorkspaceTabPanelProps) {
+function WorkspaceTabPanel({
+  isActive,
+  onTerminalSessionDisposed,
+  onTerminalSessionReady,
+  tab,
+}: WorkspaceTabPanelProps) {
   const styles = useStyles()
   const { t } = useTranslation()
 
@@ -439,7 +447,12 @@ function WorkspaceTabPanel({ tab, isActive }: WorkspaceTabPanelProps) {
         )}
         role="tabpanel"
       >
-        <TerminalPane shellId={tab.content.shellId} isActive={isActive} />
+        <TerminalPane
+          shellId={tab.content.shellId}
+          isActive={isActive}
+          onSessionDisposed={sessionId => onTerminalSessionDisposed(tab.id, sessionId)}
+          onSessionReady={sessionId => onTerminalSessionReady(tab.id, sessionId)}
+        />
       </section>
     )
   }
@@ -495,6 +508,7 @@ export const WorkspacePanel: FC = () => {
   const styles = useStyles()
   const { t } = useTranslation()
   const { isRTL } = useRTL()
+  const { setActiveTerminalSession } = useWorkspaceRuntime()
   const [layoutMode, setLayoutMode] = useState<WorkspaceLayoutMode>('horizontal')
   const [workspaceState, setWorkspaceState] = useState<WorkspaceState>(() => {
     const firstTab = createWorkspaceTab(INITIAL_TAB_SEQUENCE)
@@ -596,6 +610,50 @@ export const WorkspacePanel: FC = () => {
     }))
     focusTab(newTab.id)
   }, [focusTab])
+
+  const updateTerminalTabSession = useCallback((tabId: string, sessionId?: string) => {
+    setWorkspaceState(prev => ({
+      tabs: prev.tabs.map(tab => {
+        if (tab.id !== tabId || tab.content.type !== 'terminal') return tab
+
+        return {
+          ...tab,
+          content: {
+            ...tab.content,
+            sessionId,
+          },
+        }
+      }),
+      activeTabId: prev.activeTabId,
+    }))
+  }, [])
+
+  const handleTerminalSessionReady = useCallback((tabId: string, sessionId: string) => {
+    updateTerminalTabSession(tabId, sessionId)
+  }, [updateTerminalTabSession])
+
+  const handleTerminalSessionDisposed = useCallback((tabId: string, sessionId: string) => {
+    setWorkspaceState(prev => ({
+      tabs: prev.tabs.map(tab => {
+        if (
+          tab.id !== tabId
+          || tab.content.type !== 'terminal'
+          || tab.content.sessionId !== sessionId
+        ) {
+          return tab
+        }
+
+        return {
+          ...tab,
+          content: {
+            ...tab.content,
+            sessionId: undefined,
+          },
+        }
+      }),
+      activeTabId: prev.activeTabId,
+    }))
+  }, [])
 
   const closeTab = useCallback((tabId: string) => {
     let nextActiveId = activeTabId
@@ -745,6 +803,25 @@ export const WorkspacePanel: FC = () => {
 
   useEffect(() => subscribeOpenShellTab(addTerminalTab), [addTerminalTab])
 
+  useEffect(() => {
+    const activeTab = tabs.find(tab => tab.id === activeTabId)
+    if (
+      activeTab?.content.type === 'terminal'
+      && activeTab.content.sessionId
+    ) {
+      setActiveTerminalSession({
+        tabId: activeTab.id,
+        sessionId: activeTab.content.sessionId,
+        shellName: activeTab.content.shellName,
+      })
+      return
+    }
+
+    setActiveTerminalSession(null)
+  }, [activeTabId, setActiveTerminalSession, tabs])
+
+  useEffect(() => () => setActiveTerminalSession(null), [setActiveTerminalSession])
+
   const layoutRootClassName = mergeClasses(
     styles.root,
     isVertical ? styles.verticalRoot : styles.horizontalRoot,
@@ -866,6 +943,8 @@ export const WorkspacePanel: FC = () => {
                 key={tab.id}
                 tab={tab}
                 isActive={tab.id === activeTabId}
+                onTerminalSessionDisposed={handleTerminalSessionDisposed}
+                onTerminalSessionReady={handleTerminalSessionReady}
               />
             ))}
           </main>
@@ -957,6 +1036,8 @@ export const WorkspacePanel: FC = () => {
                 key={tab.id}
                 tab={tab}
                 isActive={tab.id === activeTabId}
+                onTerminalSessionDisposed={handleTerminalSessionDisposed}
+                onTerminalSessionReady={handleTerminalSessionReady}
               />
             ))}
           </main>

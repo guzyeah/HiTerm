@@ -8,6 +8,11 @@ import type {
   TerminalSessionRequest,
   TerminalWriteRequest,
 } from '../src/shared/terminalTypes'
+import type {
+  TerminalStatusErrorEvent,
+  TerminalStatusSampleEvent,
+  TerminalStatusSubscribeRequest,
+} from '../src/shared/terminalStatusTypes'
 
 // --------- Expose IPC API to the Renderer process ---------
 contextBridge.exposeInMainWorld('ipcRenderer', {
@@ -80,5 +85,23 @@ contextBridge.exposeInMainWorld('terminalAPI', {
     const listener = (_event: Electron.IpcRendererEvent, payload: TerminalExitEvent) => callback(payload)
     ipcRenderer.on('terminal:exit', listener)
     return () => ipcRenderer.off('terminal:exit', listener)
+  },
+})
+
+// --------- Expose Terminal Status API to the Renderer process ---------
+contextBridge.exposeInMainWorld('terminalStatusAPI', {
+  subscribe: (request: TerminalStatusSubscribeRequest): Promise<void> =>
+    ipcRenderer.invoke('terminalStatus:subscribe', request),
+  unsubscribe: (request: TerminalStatusSubscribeRequest): Promise<void> =>
+    ipcRenderer.invoke('terminalStatus:unsubscribe', request),
+  onSample: (callback: (event: TerminalStatusSampleEvent) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, payload: TerminalStatusSampleEvent) => callback(payload)
+    ipcRenderer.on('terminalStatus:sample', listener)
+    return () => ipcRenderer.off('terminalStatus:sample', listener)
+  },
+  onError: (callback: (event: TerminalStatusErrorEvent) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, payload: TerminalStatusErrorEvent) => callback(payload)
+    ipcRenderer.on('terminalStatus:error', listener)
+    return () => ipcRenderer.off('terminalStatus:error', listener)
   },
 })

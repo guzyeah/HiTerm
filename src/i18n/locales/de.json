@@ -158,6 +158,20 @@
     "processExited": "Prozess beendet: {{exitCode}}",
     "startFailed": "Terminal konnte nicht gestartet werden: {{message}}"
   },
+  "status": {
+    "cpu": "CPU",
+    "memory": "Speicher",
+    "upload": "Upload",
+    "download": "Download",
+    "diskRead": "Datenträger lesen",
+    "diskWrite": "Datenträger schreiben",
+    "diskUsage": "Datenträgernutzung",
+    "diskName": "Datenträger",
+    "mountPoint": "Einhängepunkt",
+    "totalSize": "Gesamt",
+    "freeSize": "Frei",
+    "unavailable": "Nicht verfügbar"
+  },
   "shellGroups": {
     "default": "Standard",
     "local": "Lokal"

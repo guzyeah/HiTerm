@@ -158,6 +158,20 @@
     "processExited": "プロセスが終了しました: {{exitCode}}",
     "startFailed": "ターミナルの起動に失敗しました: {{message}}"
   },
+  "status": {
+    "cpu": "CPU",
+    "memory": "メモリ",
+    "upload": "アップロード",
+    "download": "ダウンロード",
+    "diskRead": "ディスク読み取り",
+    "diskWrite": "ディスク書き込み",
+    "diskUsage": "ディスク使用率",
+    "diskName": "ディスク",
+    "mountPoint": "マウント先",
+    "totalSize": "合計",
+    "freeSize": "空き",
+    "unavailable": "利用不可"
+  },
   "shellGroups": {
     "default": "デフォルト",
     "local": "ローカル"

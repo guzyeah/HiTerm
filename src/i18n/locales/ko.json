@@ -158,6 +158,20 @@
     "processExited": "프로세스가 종료되었습니다: {{exitCode}}",
     "startFailed": "터미널을 시작하지 못했습니다: {{message}}"
   },
+  "status": {
+    "cpu": "CPU",
+    "memory": "메모리",
+    "upload": "업로드",
+    "download": "다운로드",
+    "diskRead": "디스크 읽기",
+    "diskWrite": "디스크 쓰기",
+    "diskUsage": "디스크 사용률",
+    "diskName": "디스크",
+    "mountPoint": "마운트 지점",
+    "totalSize": "전체",
+    "freeSize": "여유",
+    "unavailable": "사용 불가"
+  },
   "shellGroups": {
     "default": "기본",
     "local": "로컬"

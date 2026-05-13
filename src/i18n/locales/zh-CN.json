@@ -158,6 +158,20 @@
     "processExited": "进程已退出：{{exitCode}}",
     "startFailed": "终端启动失败：{{message}}"
   },
+  "status": {
+    "cpu": "CPU",
+    "memory": "内存",
+    "upload": "上传",
+    "download": "下载",
+    "diskRead": "磁盘读取",
+    "diskWrite": "磁盘写入",
+    "diskUsage": "磁盘使用率",
+    "diskName": "磁盘",
+    "mountPoint": "挂载点",
+    "totalSize": "总大小",
+    "freeSize": "剩余",
+    "unavailable": "不可用"
+  },
   "shellGroups": {
     "default": "默认",
     "local": "本地"

@@ -9,6 +9,8 @@ import { terminalFontFamily, terminalTheme } from './terminalTheme'
 interface TerminalPaneProps {
   shellId: string
   isActive: boolean
+  onSessionDisposed?: (sessionId: string) => void
+  onSessionReady?: (sessionId: string) => void
 }
 
 const useStyles = makeStyles({
@@ -46,10 +48,17 @@ function fitTerminal(fitAddon: FitAddon, sessionId: string | null): void {
   }
 }
 
-export const TerminalPane: FC<TerminalPaneProps> = ({ shellId, isActive }) => {
+export const TerminalPane: FC<TerminalPaneProps> = ({
+  shellId,
+  isActive,
+  onSessionDisposed,
+  onSessionReady,
+}) => {
   const styles = useStyles()
   const { t } = useTranslation()
   const tRef = useRef(t)
+  const onSessionDisposedRef = useRef(onSessionDisposed)
+  const onSessionReadyRef = useRef(onSessionReady)
   const hostRef = useRef<HTMLDivElement | null>(null)
   const terminalRef = useRef<Terminal | null>(null)
   const fitAddonRef = useRef<FitAddon | null>(null)
@@ -59,6 +68,14 @@ export const TerminalPane: FC<TerminalPaneProps> = ({ shellId, isActive }) => {
   useEffect(() => {
     tRef.current = t
   }, [t])
+
+  useEffect(() => {
+    onSessionDisposedRef.current = onSessionDisposed
+  }, [onSessionDisposed])
+
+  useEffect(() => {
+    onSessionReadyRef.current = onSessionReady
+  }, [onSessionReady])
 
   useEffect(() => {
     const host = hostRef.current
@@ -99,6 +116,7 @@ export const TerminalPane: FC<TerminalPaneProps> = ({ shellId, isActive }) => {
     const removeExitListener = window.terminalAPI.onExit(event => {
       if (event.sessionId === sessionIdRef.current) {
         sessionIdRef.current = null
+        onSessionDisposedRef.current?.(event.sessionId)
         terminal.write(`\r\n${tRef.current('terminal.processExited', { exitCode: event.exitCode })}\r\n`)
       }
     })
@@ -134,6 +152,7 @@ export const TerminalPane: FC<TerminalPaneProps> = ({ shellId, isActive }) => {
         }
 
         sessionIdRef.current = result.sessionId
+        onSessionReadyRef.current?.(result.sessionId)
         fitTerminal(fitAddon, result.sessionId)
         terminal.focus()
       } catch (error) {
@@ -163,6 +182,7 @@ export const TerminalPane: FC<TerminalPaneProps> = ({ shellId, isActive }) => {
       const sessionId = sessionIdRef.current
       if (sessionId) {
         window.terminalAPI.dispose({ sessionId })
+        onSessionDisposedRef.current?.(sessionId)
         sessionIdRef.current = null
       }
 

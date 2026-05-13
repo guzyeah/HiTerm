@@ -158,6 +158,20 @@
     "processExited": "Tiến trình đã thoát: {{exitCode}}",
     "startFailed": "Không thể khởi động terminal: {{message}}"
   },
+  "status": {
+    "cpu": "CPU",
+    "memory": "Bộ nhớ",
+    "upload": "Tải lên",
+    "download": "Tải xuống",
+    "diskRead": "Đọc ổ đĩa",
+    "diskWrite": "Ghi ổ đĩa",
+    "diskUsage": "Mức dùng ổ đĩa",
+    "diskName": "Ổ đĩa",
+    "mountPoint": "Điểm gắn",
+    "totalSize": "Tổng",
+    "freeSize": "Còn trống",
+    "unavailable": "Không khả dụng"
+  },
   "shellGroups": {
     "default": "Mặc định",
     "local": "Cục bộ"

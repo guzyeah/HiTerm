@@ -5,6 +5,7 @@ import { getLocale, setLocale, getFontOverride, setFontOverride, getSystemInfo }
 import { initNativeMenu, updateNativeMenu, type MenuLabels } from './menu'
 import { initializeShellStore, saveShell, listGroups, listShellSummaries } from './shellStore'
 import { registerTerminalIpcHandlers } from './terminalSession'
+import { registerTerminalStatusIpcHandlers } from './terminalStatus'
 import { listSerialPorts } from './utils/serialPort'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -102,6 +103,7 @@ function registerIpcHandlers() {
   })
 
   registerTerminalIpcHandlers()
+  registerTerminalStatusIpcHandlers()
 }
 
 app.whenReady().then(() => {

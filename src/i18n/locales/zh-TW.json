@@ -158,6 +158,20 @@
     "processExited": "程序已結束：{{exitCode}}",
     "startFailed": "終端機啟動失敗：{{message}}"
   },
+  "status": {
+    "cpu": "CPU",
+    "memory": "記憶體",
+    "upload": "上傳",
+    "download": "下載",
+    "diskRead": "磁碟讀取",
+    "diskWrite": "磁碟寫入",
+    "diskUsage": "磁碟使用率",
+    "diskName": "磁碟",
+    "mountPoint": "掛載點",
+    "totalSize": "總大小",
+    "freeSize": "剩餘",
+    "unavailable": "不可用"
+  },
   "shellGroups": {
     "default": "預設",
     "local": "本機"

@@ -59,6 +59,13 @@ interface TerminalAPI {
   onExit: (callback: (event: import('../src/shared/terminalTypes').TerminalExitEvent) => void) => () => void
 }
 
+interface TerminalStatusAPI {
+  subscribe: (request: import('../src/shared/terminalStatusTypes').TerminalStatusSubscribeRequest) => Promise<void>
+  unsubscribe: (request: import('../src/shared/terminalStatusTypes').TerminalStatusSubscribeRequest) => Promise<void>
+  onSample: (callback: (event: import('../src/shared/terminalStatusTypes').TerminalStatusSampleEvent) => void) => () => void
+  onError: (callback: (event: import('../src/shared/terminalStatusTypes').TerminalStatusErrorEvent) => void) => () => void
+}
+
 interface Window {
   ipcRenderer: import('electron').IpcRenderer
   settingsAPI: SettingsAPI
@@ -67,4 +74,5 @@ interface Window {
   dialogAPI: DialogAPI
   serialAPI: SerialAPI
   terminalAPI: TerminalAPI
+  terminalStatusAPI: TerminalStatusAPI
 }
