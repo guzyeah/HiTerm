@@ -11,6 +11,7 @@ import {
   DialogBody,
   DialogTitle,
   DialogActions,
+  DialogTrigger,
   DialogContent,
   Button,
   Tab,
@@ -26,6 +27,7 @@ import {
   UsbPlugRegular,
   ProjectionScreenRegular,
   RemoteRegular,
+  DismissRegular,
 } from '@fluentui/react-icons'
 import type { ProtocolType, ProtocolConfig } from './types'
 import { SSHForm } from './forms/SSHForm'
@@ -57,8 +59,8 @@ const PROTOCOL_ICON_MAP: Record<string, React.ReactNode> = {
 // ==================== 样式 ====================
 const useStyles = makeStyles({
   surface: {
-    maxHeight: '60vh',
-    minHeight: '400px',
+    maxHeight: '85vh',
+    minHeight: '600px',
     width: '640px',
     display: 'flex',
     flexDirection: 'column',
@@ -472,7 +474,15 @@ export function ConnectDialog({ open, onOpenChange }: ConnectDialogProps) {
     <Dialog open={open} onOpenChange={(_, data) => onOpenChange(data.open)}>
       <DialogSurface className={styles.surface}>
         <DialogBody className={styles.body}>
-          <DialogTitle>{t('connectDialog.title')}</DialogTitle>
+          <DialogTitle
+            action={(
+              <DialogTrigger action="close">
+                <Button appearance="subtle" icon={<DismissRegular />} />
+              </DialogTrigger>
+            )}
+          >
+            {t('connectDialog.title')}
+          </DialogTitle>
           <TabList
             className={styles.tabList}
             selectedValue={activeProtocol}
