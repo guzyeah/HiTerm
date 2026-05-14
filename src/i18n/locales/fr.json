@@ -242,5 +242,36 @@
   "shellGroups": {
     "default": "Par défaut",
     "local": "Local"
+  },
+  "preferences": {
+    "title": "Pr?f?rences",
+    "navigation": {
+      "appearance": "Apparence",
+      "terminal": "Terminal"
+    },
+    "option": {
+      "system": "Suivre le syst?me"
+    },
+    "theme": {
+      "system": "Suivre le syst?me",
+      "light": "Mode clair",
+      "dark": "Mode sombre"
+    },
+    "appearance": {
+      "section": "Apparence",
+      "appTheme": "Th?me de l?application",
+      "language": "Langue d?affichage"
+    },
+    "terminal": {
+      "fontSection": "Police du terminal",
+      "fontFamily": "Police",
+      "fontSize": "Taille de police",
+      "fontLigatures": "Activer les ligatures",
+      "themeSection": "Th?me du terminal",
+      "terminalTheme": "Th?me du terminal",
+      "defaultShellSection": "Shell par d?faut",
+      "defaultShell": "Shell par d?faut",
+      "defaultShellAuto": "Automatique (priorit? syst?me)"
+    }
   }
 }

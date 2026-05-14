@@ -7,10 +7,13 @@ import { useContext } from 'react'
 import { LocaleContext } from '@/contexts/LocaleContext'
 import type { SupportedLocale, TextDirection, Platform } from '@/i18n/types'
 import type { FontStack, FontOverride } from '@/i18n/fontConfig'
+import type { LocalePreference } from '@/shared/preferencesTypes'
 
 interface LocaleContextValue {
   currentLocale: SupportedLocale
   setCurrentLocale: (locale: SupportedLocale) => void
+  localePreference: LocalePreference
+  setLocalePreference: (preference: LocalePreference) => void
   direction: TextDirection
   fontStack: FontStack
   fontOverride: FontOverride

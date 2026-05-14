@@ -242,5 +242,36 @@
   "shellGroups": {
     "default": "Standard",
     "local": "Lokal"
+  },
+  "preferences": {
+    "title": "Voreinstellungen",
+    "navigation": {
+      "appearance": "Darstellung",
+      "terminal": "Terminal"
+    },
+    "option": {
+      "system": "System folgen"
+    },
+    "theme": {
+      "system": "System folgen",
+      "light": "Heller Modus",
+      "dark": "Dunkler Modus"
+    },
+    "appearance": {
+      "section": "Darstellung",
+      "appTheme": "App-Design",
+      "language": "Anzeigesprache"
+    },
+    "terminal": {
+      "fontSection": "Terminal-Schriftart",
+      "fontFamily": "Schriftart",
+      "fontSize": "Schriftgr??e",
+      "fontLigatures": "Ligaturen aktivieren",
+      "themeSection": "Terminal-Design",
+      "terminalTheme": "Terminal-Design",
+      "defaultShellSection": "Standard-Shell",
+      "defaultShell": "Standard-Shell",
+      "defaultShellAuto": "Automatisch (Systempriorit?t)"
+    }
   }
 }

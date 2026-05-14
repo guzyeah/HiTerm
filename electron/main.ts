@@ -8,6 +8,16 @@ import {
   setFontOverride,
   getDefaultLocalShellId,
   setDefaultLocalShellId,
+  getAppThemePreference,
+  setAppThemePreference,
+  getTerminalFontFamily,
+  setTerminalFontFamily,
+  getTerminalFontSize,
+  setTerminalFontSize,
+  getTerminalFontLigatures,
+  setTerminalFontLigatures,
+  getTerminalThemeId,
+  setTerminalThemeId,
   getSystemInfo,
 } from './settings'
 import { initNativeMenu, updateNativeMenu, type MenuLabels } from './menu'
@@ -83,6 +93,16 @@ function registerIpcHandlers() {
   ipcMain.handle('settings:setFontOverride', (_event, override: string | null) => setFontOverride(override))
   ipcMain.handle('settings:getDefaultLocalShellId', () => getDefaultLocalShellId())
   ipcMain.handle('settings:setDefaultLocalShellId', (_event, shellId: string | null) => setDefaultLocalShellId(shellId))
+  ipcMain.handle('settings:getAppThemePreference', () => getAppThemePreference())
+  ipcMain.handle('settings:setAppThemePreference', (_event, preference) => setAppThemePreference(preference))
+  ipcMain.handle('settings:getTerminalFontFamily', () => getTerminalFontFamily())
+  ipcMain.handle('settings:setTerminalFontFamily', (_event, fontFamily: string) => setTerminalFontFamily(fontFamily))
+  ipcMain.handle('settings:getTerminalFontSize', () => getTerminalFontSize())
+  ipcMain.handle('settings:setTerminalFontSize', (_event, fontSize: number) => setTerminalFontSize(fontSize))
+  ipcMain.handle('settings:getTerminalFontLigatures', () => getTerminalFontLigatures())
+  ipcMain.handle('settings:setTerminalFontLigatures', (_event, enabled: boolean) => setTerminalFontLigatures(enabled))
+  ipcMain.handle('settings:getTerminalThemeId', () => getTerminalThemeId())
+  ipcMain.handle('settings:setTerminalThemeId', (_event, themeId: string) => setTerminalThemeId(themeId))
   ipcMain.handle('settings:getSystemInfo', () => getSystemInfo())
 
   // renderer发送i18n菜单标签到主进程，macOS上重建原生菜单

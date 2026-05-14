@@ -8,9 +8,10 @@ import { createContext, useEffect, useState, useCallback, type ReactNode } from 
 import i18n from '@/i18n'
 import type { SupportedLocale, TextDirection, Platform } from '@/i18n/types'
 import { getTextDirection, SUPPORTED_LOCALES } from '@/i18n/types'
-import { isValidLocale } from '@/i18n/localeDetector'
+import { detectSystemLocale, isValidLocale, mapOSLocaleToSupported } from '@/i18n/localeDetector'
 import type { FontStack, FontOverride } from '@/i18n/fontConfig'
 import { getEffectiveFontStack } from '@/i18n/fontConfig'
+import { DEFAULT_LOCALE_PREFERENCE, type LocalePreference } from '@/shared/preferencesTypes'
 
 /** 从i18next收集当前语言的所有菜单标签，用于发送到主进程更新macOS原生菜单 */
 function collectMenuLabels(): Record<string, string> {
@@ -40,6 +41,8 @@ function collectMenuLabels(): Record<string, string> {
 interface LocaleContextValue {
   currentLocale: SupportedLocale
   setCurrentLocale: (locale: SupportedLocale) => void
+  localePreference: LocalePreference
+  setLocalePreference: (preference: LocalePreference) => void
   direction: TextDirection
   fontStack: FontStack
   fontOverride: FontOverride
@@ -63,6 +66,19 @@ function detectPlatform(): Platform {
   return 'win32'
 }
 
+async function resolveSystemLocale(): Promise<SupportedLocale> {
+  try {
+    const systemInfo = await window.settingsAPI?.getSystemInfo()
+    if (systemInfo?.locale) {
+      return mapOSLocaleToSupported(systemInfo.locale)
+    }
+  } catch {
+    // Renderer 无法访问主进程信息时回退到浏览器侧语言检测。
+  }
+
+  return detectSystemLocale()
+}
+
 /** LocaleProvider属性 */
 interface LocaleProviderProps {
   children: ReactNode
@@ -72,6 +88,7 @@ export function LocaleProvider({ children }: LocaleProviderProps) {
   const [currentLocale, setCurrentLocaleState] = useState<SupportedLocale>(
     () => (isValidLocale(i18n.language) ? i18n.language : 'en') as SupportedLocale,
   )
+  const [localePreference, setLocalePreferenceState] = useState<LocalePreference>(DEFAULT_LOCALE_PREFERENCE)
   const [fontOverride, setFontOverrideState] = useState<FontOverride>(null)
   const [platform] = useState<Platform>(() => detectPlatform())
 
@@ -82,17 +99,26 @@ export function LocaleProvider({ children }: LocaleProviderProps) {
   useEffect(() => {
     async function loadStoredPreferences() {
       try {
-        if (!window.ipcRenderer) return
-        const storedLocale = await window.ipcRenderer.invoke('settings:getLocale')
+        if (!window.settingsAPI) return
+        const storedLocale = await window.settingsAPI.getLocale()
         if (storedLocale && isValidLocale(storedLocale)) {
+          setLocalePreferenceState(storedLocale)
           setCurrentLocaleState(storedLocale as SupportedLocale)
           await i18n.changeLanguage(storedLocale)
           // 初始化后同步macOS原生菜单标签
           if (window.menuAPI) {
             window.menuAPI.updateLabels(collectMenuLabels())
           }
+        } else {
+          const systemLocale = await resolveSystemLocale()
+          setLocalePreferenceState(DEFAULT_LOCALE_PREFERENCE)
+          setCurrentLocaleState(systemLocale)
+          await i18n.changeLanguage(systemLocale)
+          if (window.menuAPI) {
+            window.menuAPI.updateLabels(collectMenuLabels())
+          }
         }
-        const storedFontOverride = await window.ipcRenderer.invoke('settings:getFontOverride')
+        const storedFontOverride = await window.settingsAPI.getFontOverride()
         if (storedFontOverride !== undefined) {
           setFontOverrideState(storedFontOverride as FontOverride)
         }
@@ -109,6 +135,7 @@ export function LocaleProvider({ children }: LocaleProviderProps) {
 
   // 切换语言时同步更新所有相关状态
   const setCurrentLocale = useCallback(async (locale: SupportedLocale) => {
+    setLocalePreferenceState(locale)
     setCurrentLocaleState(locale)
     await i18n.changeLanguage(locale)
 
@@ -121,9 +148,7 @@ export function LocaleProvider({ children }: LocaleProviderProps) {
 
     // 持久化到electron-store
     try {
-      if (window.ipcRenderer) {
-        await window.ipcRenderer.invoke('settings:setLocale', locale)
-      }
+      await window.settingsAPI?.setLocale(locale)
     } catch {
       // 持久化失败时忽略
     }
@@ -138,6 +163,38 @@ export function LocaleProvider({ children }: LocaleProviderProps) {
     }
   }, [platform, fontOverride])
 
+  // 切换语言偏好；system 会重新解析当前系统语言。
+  const setLocalePreference = useCallback(async (preference: LocalePreference) => {
+    setLocalePreferenceState(preference)
+
+    if (preference === 'system') {
+      const systemLocale = await resolveSystemLocale()
+      setCurrentLocaleState(systemLocale)
+      await i18n.changeLanguage(systemLocale)
+      document.documentElement.lang = systemLocale
+      document.documentElement.dir = getTextDirection(systemLocale)
+      document.documentElement.style.setProperty(
+        '--app-font-family',
+        getEffectiveFontStack(systemLocale, platform, fontOverride),
+      )
+
+      try {
+        await window.settingsAPI?.setLocale('')
+      } catch {
+        // 持久化失败时忽略。
+      }
+
+      try {
+        window.menuAPI?.updateLabels(collectMenuLabels())
+      } catch {
+        // 主进程不可用时忽略。
+      }
+      return
+    }
+
+    await setCurrentLocale(preference)
+  }, [fontOverride, platform, setCurrentLocale])
+
   // 切换字体覆盖时同步更新CSS变量和持久化
   const setFontOverride = useCallback(async (override: FontOverride) => {
     setFontOverrideState(override)
@@ -148,9 +205,7 @@ export function LocaleProvider({ children }: LocaleProviderProps) {
 
     // 持久化到electron-store
     try {
-      if (window.ipcRenderer) {
-        await window.ipcRenderer.invoke('settings:setFontOverride', override)
-      }
+      await window.settingsAPI?.setFontOverride(override)
     } catch {
       // 持久化失败时忽略
     }
@@ -166,6 +221,8 @@ export function LocaleProvider({ children }: LocaleProviderProps) {
   const value: LocaleContextValue = {
     currentLocale,
     setCurrentLocale,
+    localePreference,
+    setLocalePreference,
     direction,
     fontStack,
     fontOverride,

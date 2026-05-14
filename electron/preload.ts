@@ -69,6 +69,16 @@ contextBridge.exposeInMainWorld('settingsAPI', {
   setFontOverride: (override: string | null) => ipcRenderer.invoke('settings:setFontOverride', override),
   getDefaultLocalShellId: () => ipcRenderer.invoke('settings:getDefaultLocalShellId'),
   setDefaultLocalShellId: (shellId: string | null) => ipcRenderer.invoke('settings:setDefaultLocalShellId', shellId),
+  getAppThemePreference: () => ipcRenderer.invoke('settings:getAppThemePreference'),
+  setAppThemePreference: (preference: string) => ipcRenderer.invoke('settings:setAppThemePreference', preference),
+  getTerminalFontFamily: () => ipcRenderer.invoke('settings:getTerminalFontFamily'),
+  setTerminalFontFamily: (fontFamily: string) => ipcRenderer.invoke('settings:setTerminalFontFamily', fontFamily),
+  getTerminalFontSize: () => ipcRenderer.invoke('settings:getTerminalFontSize'),
+  setTerminalFontSize: (fontSize: number) => ipcRenderer.invoke('settings:setTerminalFontSize', fontSize),
+  getTerminalFontLigatures: () => ipcRenderer.invoke('settings:getTerminalFontLigatures'),
+  setTerminalFontLigatures: (enabled: boolean) => ipcRenderer.invoke('settings:setTerminalFontLigatures', enabled),
+  getTerminalThemeId: () => ipcRenderer.invoke('settings:getTerminalThemeId'),
+  setTerminalThemeId: (themeId: string) => ipcRenderer.invoke('settings:setTerminalThemeId', themeId),
   getSystemInfo: () => ipcRenderer.invoke('settings:getSystemInfo'),
 })
 

@@ -242,5 +242,36 @@
   "shellGroups": {
     "default": "기본",
     "local": "로컬"
+  },
+  "preferences": {
+    "title": "?? ??",
+    "navigation": {
+      "appearance": "??",
+      "terminal": "???"
+    },
+    "option": {
+      "system": "??? ???"
+    },
+    "theme": {
+      "system": "??? ???",
+      "light": "??? ??",
+      "dark": "?? ??"
+    },
+    "appearance": {
+      "section": "??",
+      "appTheme": "? ??",
+      "language": "?? ??"
+    },
+    "terminal": {
+      "fontSection": "??? ??",
+      "fontFamily": "??",
+      "fontSize": "?? ??",
+      "fontLigatures": "?? ??",
+      "themeSection": "??? ??",
+      "terminalTheme": "??? ??",
+      "defaultShellSection": "?? Shell",
+      "defaultShell": "?? Shell",
+      "defaultShellAuto": "??(??? ????)"
+    }
   }
 }

@@ -242,5 +242,36 @@
   "shellGroups": {
     "default": "默认",
     "local": "本地"
+  },
+  "preferences": {
+    "title": "???",
+    "navigation": {
+      "appearance": "??",
+      "terminal": "??"
+    },
+    "option": {
+      "system": "????"
+    },
+    "theme": {
+      "system": "????",
+      "light": "????",
+      "dark": "????"
+    },
+    "appearance": {
+      "section": "??",
+      "appTheme": "????",
+      "language": "????"
+    },
+    "terminal": {
+      "fontSection": "????",
+      "fontFamily": "??",
+      "fontSize": "????",
+      "fontLigatures": "????",
+      "themeSection": "????",
+      "terminalTheme": "????",
+      "defaultShellSection": "?? Shell",
+      "defaultShell": "?? Shell",
+      "defaultShellAuto": "?????????"
+    }
   }
 }

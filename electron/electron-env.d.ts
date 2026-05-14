@@ -29,6 +29,16 @@ interface SettingsAPI {
   setFontOverride: (override: string | null) => Promise<void>
   getDefaultLocalShellId: () => Promise<string | null>
   setDefaultLocalShellId: (shellId: string | null) => Promise<void>
+  getAppThemePreference: () => Promise<import('../src/shared/preferencesTypes').AppThemePreference>
+  setAppThemePreference: (preference: import('../src/shared/preferencesTypes').AppThemePreference) => Promise<void>
+  getTerminalFontFamily: () => Promise<string>
+  setTerminalFontFamily: (fontFamily: string) => Promise<void>
+  getTerminalFontSize: () => Promise<number>
+  setTerminalFontSize: (fontSize: number) => Promise<void>
+  getTerminalFontLigatures: () => Promise<boolean>
+  setTerminalFontLigatures: (enabled: boolean) => Promise<void>
+  getTerminalThemeId: () => Promise<string>
+  setTerminalThemeId: (themeId: string) => Promise<void>
   getSystemInfo: () => Promise<{ locale: string; platform: string }>
 }
 

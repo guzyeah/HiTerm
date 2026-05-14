@@ -242,5 +242,36 @@
   "shellGroups": {
     "default": "Default",
     "local": "Local"
+  },
+  "preferences": {
+    "title": "Preferences",
+    "navigation": {
+      "appearance": "Appearance",
+      "terminal": "Terminal"
+    },
+    "option": {
+      "system": "Follow system"
+    },
+    "theme": {
+      "system": "Follow system",
+      "light": "Light mode",
+      "dark": "Dark mode"
+    },
+    "appearance": {
+      "section": "Appearance",
+      "appTheme": "Application theme",
+      "language": "Display language"
+    },
+    "terminal": {
+      "fontSection": "Terminal font",
+      "fontFamily": "Font",
+      "fontSize": "Font size",
+      "fontLigatures": "Enable ligatures",
+      "themeSection": "Terminal theme",
+      "terminalTheme": "Terminal theme",
+      "defaultShellSection": "Default Shell",
+      "defaultShell": "Default Shell",
+      "defaultShellAuto": "Automatic (system priority)"
+    }
   }
 }

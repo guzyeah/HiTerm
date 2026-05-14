@@ -21,7 +21,10 @@ import {
 import { Terminal } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import '@xterm/xterm/css/xterm.css'
-import { terminalFontFamily, terminalTheme } from './terminalTheme'
+import { usePreferences } from '@/hooks/usePreferences'
+import { terminalTheme } from './terminalTheme'
+import { getTerminalThemeById } from './terminalThemes'
+import type { TerminalPreferences } from '@/shared/preferencesTypes'
 
 interface TerminalPaneProps {
   shellId: string
@@ -95,6 +98,16 @@ function fitTerminal(fitAddon: FitAddon, sessionId: string | null): void {
   }
 }
 
+function applyTerminalPreferences(terminal: Terminal, preferences: TerminalPreferences): void {
+  terminal.options.fontFamily = preferences.fontFamily
+  terminal.options.fontSize = preferences.fontSize
+  terminal.options.theme = getTerminalThemeById(preferences.themeId).theme
+  terminal.element?.style.setProperty(
+    'font-variant-ligatures',
+    preferences.fontLigatures ? 'contextual common-ligatures' : 'none',
+  )
+}
+
 function isPrimaryShortcutModifier(event: KeyboardEvent): boolean {
   const isMacPlatform = navigator.platform.toUpperCase().includes('MAC')
   return event.ctrlKey || (isMacPlatform && event.metaKey)
@@ -132,7 +145,10 @@ export const TerminalPane: FC<TerminalPaneProps> = ({
 }) => {
   const styles = useStyles()
   const { t } = useTranslation()
+  const { terminalPreferences } = usePreferences()
+  const activeTerminalTheme = getTerminalThemeById(terminalPreferences.themeId).theme
   const tRef = useRef(t)
+  const terminalPreferencesRef = useRef(terminalPreferences)
   const onSessionDisposedRef = useRef(onSessionDisposed)
   const onSessionReadyRef = useRef(onSessionReady)
   const hostRef = useRef<HTMLDivElement | null>(null)
@@ -230,6 +246,10 @@ export const TerminalPane: FC<TerminalPaneProps> = ({
   }, [t])
 
   useEffect(() => {
+    terminalPreferencesRef.current = terminalPreferences
+  }, [terminalPreferences])
+
+  useEffect(() => {
     onSessionDisposedRef.current = onSessionDisposed
   }, [onSessionDisposed])
 
@@ -319,16 +339,17 @@ export const TerminalPane: FC<TerminalPaneProps> = ({
       convertEol: false,
       cursorBlink: true,
       cursorStyle: 'block',
-      fontFamily: terminalFontFamily,
-      fontSize: 13,
+      fontFamily: terminalPreferencesRef.current.fontFamily,
+      fontSize: terminalPreferencesRef.current.fontSize,
       lineHeight: 1.2,
       scrollback: 10000,
-      theme: terminalTheme,
+      theme: getTerminalThemeById(terminalPreferencesRef.current.themeId).theme,
     })
     const fitAddon = new FitAddon()
 
     terminal.loadAddon(fitAddon)
     terminal.open(host)
+    applyTerminalPreferences(terminal, terminalPreferencesRef.current)
 
     terminalRef.current = terminal
     fitAddonRef.current = fitAddon
@@ -487,11 +508,26 @@ export const TerminalPane: FC<TerminalPaneProps> = ({
     })
   }, [isActive])
 
+  useEffect(() => {
+    const terminal = terminalRef.current
+    const fitAddon = fitAddonRef.current
+    if (!terminal || !fitAddon) return
+
+    applyTerminalPreferences(terminal, terminalPreferences)
+    const frameId = window.requestAnimationFrame(() => {
+      fitTerminal(fitAddon, sessionIdRef.current)
+    })
+
+    return () => {
+      window.cancelAnimationFrame(frameId)
+    }
+  }, [terminalPreferences])
+
   const canCopySelection = hasSelection
   const canPaste = isSessionReady
 
   return (
-    <div className={styles.root}>
+    <div className={styles.root} style={{ backgroundColor: activeTerminalTheme.background }}>
       <div className={styles.terminalHost} ref={hostRef} />
 
       {contextMenu && (

@@ -242,5 +242,36 @@
   "shellGroups": {
     "default": "Mặc định",
     "local": "Cục bộ"
+  },
+  "preferences": {
+    "title": "Tu? ch?n",
+    "navigation": {
+      "appearance": "Giao di?n",
+      "terminal": "Terminal"
+    },
+    "option": {
+      "system": "Theo h? th?ng"
+    },
+    "theme": {
+      "system": "Theo h? th?ng",
+      "light": "Ch? ?? s?ng",
+      "dark": "Ch? ?? t?i"
+    },
+    "appearance": {
+      "section": "Giao di?n",
+      "appTheme": "Ch? ?? ?ng d?ng",
+      "language": "Ng?n ng? hi?n th?"
+    },
+    "terminal": {
+      "fontSection": "Ph?ng ch? terminal",
+      "fontFamily": "Ph?ng ch?",
+      "fontSize": "C? ch?",
+      "fontLigatures": "B?t ch? gh?p",
+      "themeSection": "Ch? ?? terminal",
+      "terminalTheme": "Ch? ?? terminal",
+      "defaultShellSection": "Shell m?c ??nh",
+      "defaultShell": "Shell m?c ??nh",
+      "defaultShellAuto": "T? ??ng (?u ti?n h? th?ng)"
+    }
   }
 }

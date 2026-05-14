@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { MenuBar, type MenuItemId } from '@/components/MenuBar/MenuBar'
 import { AboutDialog } from '@/components/AboutDialog/AboutDialog'
 import { ConnectDialog } from '@/components/ConnectDialog'
+import { PreferencesDialog } from '@/components/PreferencesDialog'
 import { WorkspacePanel, WorkspaceRuntimeProvider } from '@/components/WorkspacePanel'
 import { MainLayout } from '@/components/MainLayout'
 import { ActivityBar } from '@/components/ActivityBar'
@@ -11,12 +12,15 @@ import './App.css'
 function App() {
   const [aboutOpen, setAboutOpen] = useState(false)
   const [connectOpen, setConnectOpen] = useState(false)
+  const [preferencesOpen, setPreferencesOpen] = useState(false)
 
   const handleMenuItemClick = (itemId: MenuItemId) => {
     if (itemId === 'help.about') {
       setAboutOpen(true)
     } else if (itemId === 'shell.connect') {
       setConnectOpen(true)
+    } else if (itemId === 'settings.preferences') {
+      setPreferencesOpen(true)
     }
   }
 
@@ -28,6 +32,8 @@ function App() {
         setAboutOpen(true)
       } else if (itemId === 'shell.connect') {
         setConnectOpen(true)
+      } else if (itemId === 'settings.preferences') {
+        setPreferencesOpen(true)
       }
     }
     window.ipcRenderer.on('menu:click', handler)
@@ -49,6 +55,7 @@ function App() {
       </WorkspaceRuntimeProvider>
       <AboutDialog open={aboutOpen} onOpenChange={setAboutOpen} />
       <ConnectDialog open={connectOpen} onOpenChange={setConnectOpen} />
+      <PreferencesDialog open={preferencesOpen} onOpenChange={setPreferencesOpen} />
     </div>
   )
 }
