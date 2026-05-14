@@ -26,6 +26,11 @@ function Root() {
   const { resolvedAppTheme } = usePreferences()
   const fluentTheme = resolvedAppTheme === 'dark' ? webDarkTheme : webLightTheme
 
+  React.useEffect(() => {
+    document.documentElement.dataset.appTheme = resolvedAppTheme
+    document.documentElement.style.colorScheme = resolvedAppTheme
+  }, [resolvedAppTheme])
+
   // 根据字体栈动态创建Fluent UI主题
   const theme = {
     ...fluentTheme,
@@ -34,7 +39,7 @@ function Root() {
   }
 
   return (
-    <FluentProvider theme={theme} dir={direction}>
+    <FluentProvider theme={theme} dir={direction} data-app-theme={resolvedAppTheme}>
       <App />
     </FluentProvider>
   )
