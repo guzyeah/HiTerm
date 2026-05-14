@@ -27,6 +27,8 @@ interface SettingsAPI {
   setLocale: (locale: string) => Promise<void>
   getFontOverride: () => Promise<string | null>
   setFontOverride: (override: string | null) => Promise<void>
+  getDefaultLocalShellId: () => Promise<string | null>
+  setDefaultLocalShellId: (shellId: string | null) => Promise<void>
   getSystemInfo: () => Promise<{ locale: string; platform: string }>
 }
 
@@ -38,6 +40,7 @@ interface ShellAPI {
   saveShell: (record: unknown) => Promise<unknown>
   listGroups: () => Promise<string[]>
   listShellSummaries: () => Promise<import('../src/shared/shellTypes').ShellSummary[]>
+  getStartupLocalShell: (preferredShellId?: string | null) => Promise<import('../src/shared/shellTypes').ShellSummary | null>
 }
 
 interface DialogAPI {

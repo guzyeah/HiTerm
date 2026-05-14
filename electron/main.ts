@@ -1,9 +1,23 @@
 import electron from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
-import { getLocale, setLocale, getFontOverride, setFontOverride, getSystemInfo } from './settings'
+import {
+  getLocale,
+  setLocale,
+  getFontOverride,
+  setFontOverride,
+  getDefaultLocalShellId,
+  setDefaultLocalShellId,
+  getSystemInfo,
+} from './settings'
 import { initNativeMenu, updateNativeMenu, type MenuLabels } from './menu'
-import { initializeShellStore, saveShell, listGroups, listShellSummaries } from './shellStore'
+import {
+  initializeShellStore,
+  saveShell,
+  listGroups,
+  listShellSummaries,
+  getStartupLocalShellSummary,
+} from './shellStore'
 import { registerTerminalFilesIpcHandlers } from './terminalFiles'
 import { registerTerminalIpcHandlers } from './terminalSession'
 import { registerTerminalStatusIpcHandlers } from './terminalStatus'
@@ -67,6 +81,8 @@ function registerIpcHandlers() {
   ipcMain.handle('settings:setLocale', (_event, locale: string) => setLocale(locale))
   ipcMain.handle('settings:getFontOverride', () => getFontOverride())
   ipcMain.handle('settings:setFontOverride', (_event, override: string | null) => setFontOverride(override))
+  ipcMain.handle('settings:getDefaultLocalShellId', () => getDefaultLocalShellId())
+  ipcMain.handle('settings:setDefaultLocalShellId', (_event, shellId: string | null) => setDefaultLocalShellId(shellId))
   ipcMain.handle('settings:getSystemInfo', () => getSystemInfo())
 
   // renderer发送i18n菜单标签到主进程，macOS上重建原生菜单
@@ -89,6 +105,10 @@ function registerIpcHandlers() {
   // Shell 列表摘要
   ipcMain.handle('shell:listSummaries', () => {
     return listShellSummaries()
+  })
+
+  ipcMain.handle('shell:getStartupLocalShell', (_event, preferredShellId?: string | null) => {
+    return getStartupLocalShellSummary(preferredShellId)
   })
 
   // 系统文件选择对话框

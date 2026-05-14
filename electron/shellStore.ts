@@ -74,9 +74,21 @@ interface ShellStoreSchema {
 }
 
 interface BuiltinLocalShell {
+  kind: BuiltinLocalShellKind
   name: string
   terminalPath: string
 }
+
+type BuiltinLocalShellKind = 'git-bash' | 'powershell' | 'cmd' | 'zsh' | 'bash' | 'sh'
+
+const BUILTIN_LOCAL_SHELL_KIND_SET = new Set<BuiltinLocalShellKind>([
+  'git-bash',
+  'powershell',
+  'cmd',
+  'zsh',
+  'bash',
+  'sh',
+])
 
 const store = new ElectronStore<ShellStoreSchema>({
   defaults: {
@@ -112,6 +124,21 @@ function uniqueBy<T>(items: T[], getKey: (item: T) => string): T[] {
     seen.add(key)
     return true
   })
+}
+
+/** 判断扩展字段中的内置 Shell 类型是否有效 */
+function isBuiltinLocalShellKind(value: unknown): value is BuiltinLocalShellKind {
+  return typeof value === 'string' && BUILTIN_LOCAL_SHELL_KIND_SET.has(value as BuiltinLocalShellKind)
+}
+
+/** 将完整记录裁剪为渲染侧可见摘要 */
+function toShellSummary(shell: ShellRecord): ShellSummary {
+  return {
+    id: shell.id,
+    protocol: shell.protocol,
+    name: shell.name,
+    group: shell.group,
+  }
 }
 
 /** 从现有 Shell 记录迁移历史分组名到独立 groups 集合 */
@@ -206,6 +233,51 @@ function getWindowsGitBashCandidates(): string[] {
     .flatMap(drive => gitBashRelativePaths.map(relativePath => `${drive}:\\${relativePath}`))
 }
 
+/** 根据操作系统返回默认启动本地 Shell 的优先级 */
+function getStartupLocalShellPriority(): BuiltinLocalShellKind[] {
+  if (process.platform === 'win32') {
+    return ['git-bash', 'powershell', 'cmd']
+  }
+
+  if (process.platform === 'darwin') {
+    return ['zsh']
+  }
+
+  if (process.platform === 'linux') {
+    return ['zsh', 'bash', 'sh']
+  }
+
+  return []
+}
+
+/** 根据已存储字段或终端路径推断内置本地 Shell 类型 */
+function inferBuiltinLocalShellKind(shell: Pick<ShellRecord, 'protocol' | 'name' | 'terminalPath' | 'extraParams'>): BuiltinLocalShellKind | null {
+  if (shell.protocol !== 'local') return null
+
+  const storedKind = shell.extraParams?.['builtinLocalShellKind']
+  if (isBuiltinLocalShellKind(storedKind)) {
+    return storedKind
+  }
+
+  const normalizedPath = normalizeTerminalPath(shell.terminalPath)
+  const normalizedName = shell.name.trim().toLowerCase()
+  if (!normalizedPath) return null
+
+  if (process.platform === 'win32') {
+    if (normalizedPath.endsWith('\\powershell.exe')) return 'powershell'
+    if (normalizedPath.endsWith('\\cmd.exe')) return 'cmd'
+    if (normalizedPath.endsWith('\\git\\bin\\bash.exe') || normalizedName === 'git bash') return 'git-bash'
+    return null
+  }
+
+  const executableName = path.basename(normalizedPath).toLowerCase()
+  if (executableName === 'zsh') return 'zsh'
+  if (executableName === 'bash') return 'bash'
+  if (executableName === 'sh') return 'sh'
+
+  return null
+}
+
 /** 扫描当前系统常见的本地 Shell */
 function detectBuiltinLocalShells(): BuiltinLocalShell[] {
   if (process.platform === 'win32') {
@@ -218,26 +290,32 @@ function detectBuiltinLocalShells(): BuiltinLocalShell[] {
     ])
     const gitBashPaths = getWindowsGitBashCandidates().filter(candidate => existsSync(candidate))
 
-    return uniqueBy([
-      ...(powershellPath ? [{ name: 'PowerShell', terminalPath: powershellPath }] : []),
-      ...(cmdPath ? [{ name: 'CMD', terminalPath: cmdPath }] : []),
-      ...gitBashPaths.map(terminalPath => ({ name: 'Git Bash', terminalPath })),
+    const builtinShells: BuiltinLocalShell[] = uniqueBy([
+      ...(powershellPath ? [{ kind: 'powershell' as const, name: 'PowerShell', terminalPath: powershellPath }] : []),
+      ...(cmdPath ? [{ kind: 'cmd' as const, name: 'CMD', terminalPath: cmdPath }] : []),
+      ...gitBashPaths.map(terminalPath => ({ kind: 'git-bash' as const, name: 'Git Bash', terminalPath })),
     ], shell => normalizeTerminalPath(shell.terminalPath) ?? shell.terminalPath)
+
+    return builtinShells
   }
 
   if (process.platform === 'darwin') {
     const zshPath = findFirstExistingPath(['/bin/zsh', '/usr/bin/zsh'])
-    return zshPath ? [{ name: 'zsh', terminalPath: zshPath }] : []
+    return zshPath ? [{ kind: 'zsh' as const, name: 'zsh', terminalPath: zshPath }] : []
   }
 
   if (process.platform === 'linux') {
     const bashPath = findFirstExistingPath(['/bin/bash', '/usr/bin/bash'])
     const zshPath = findFirstExistingPath(['/bin/zsh', '/usr/bin/zsh', '/usr/local/bin/zsh'])
+    const shPath = findFirstExistingPath(['/bin/sh', '/usr/bin/sh'])
 
-    return [
-      ...(bashPath ? [{ name: 'bash', terminalPath: bashPath }] : []),
-      ...(zshPath ? [{ name: 'zsh', terminalPath: zshPath }] : []),
+    const builtinShells: BuiltinLocalShell[] = [
+      ...(bashPath ? [{ kind: 'bash' as const, name: 'bash', terminalPath: bashPath }] : []),
+      ...(zshPath ? [{ kind: 'zsh' as const, name: 'zsh', terminalPath: zshPath }] : []),
+      ...(shPath ? [{ kind: 'sh' as const, name: 'sh', terminalPath: shPath }] : []),
     ]
+
+    return builtinShells
   }
 
   return []
@@ -271,6 +349,7 @@ function seedBuiltinLocalShells(): void {
     workDir: null,
     extraParams: {
       builtinLocalShell: true,
+      builtinLocalShellKind: shell.kind,
     },
     createdAt: now,
     updatedAt: now,
@@ -375,12 +454,7 @@ export function listShells(): ShellRecord[] {
 
 /** 获取 Shell 列表摘要，不向渲染进程暴露敏感字段 */
 export function listShellSummaries(): ShellSummary[] {
-  return store.get('shells', []).map(shell => ({
-    id: shell.id,
-    protocol: shell.protocol,
-    name: shell.name,
-    group: shell.group,
-  }))
+  return store.get('shells', []).map(toShellSummary)
 }
 
 /** 按协议获取 Shell 连接记录 */
@@ -398,4 +472,39 @@ export function getShellById(id: string): ShellRecord | null {
   const shells = store.get('shells', [])
   const record = shells.find(s => s.id === id)
   return record ? decryptSecrets(record) : null
+}
+
+/** 解析应用启动时应优先打开的本地 Shell */
+export function resolveStartupLocalShell(preferredShellId?: string | null): ShellRecord | null {
+  const localShells = listShells().filter(shell => shell.protocol === 'local')
+  if (!localShells.length) return null
+
+  if (preferredShellId) {
+    const preferredShell = localShells.find(shell => shell.id === preferredShellId)
+    if (preferredShell) {
+      return preferredShell
+    }
+  }
+
+  for (const kind of getStartupLocalShellPriority()) {
+    const matchedShell = localShells.find(shell => inferBuiltinLocalShellKind(shell) === kind)
+    if (matchedShell) {
+      return matchedShell
+    }
+  }
+
+  return [...localShells].sort((left, right) => {
+    const nameComparison = left.name.localeCompare(right.name)
+    if (nameComparison !== 0) return nameComparison
+
+    const leftPath = left.terminalPath ?? ''
+    const rightPath = right.terminalPath ?? ''
+    return leftPath.localeCompare(rightPath)
+  })[0] ?? null
+}
+
+/** 获取应用启动时应优先打开的本地 Shell 摘要 */
+export function getStartupLocalShellSummary(preferredShellId?: string | null): ShellSummary | null {
+  const shell = resolveStartupLocalShell(preferredShellId)
+  return shell ? toShellSummary(shell) : null
 }

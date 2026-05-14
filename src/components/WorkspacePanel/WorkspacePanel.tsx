@@ -11,6 +11,7 @@ import {
   Button,
   makeStyles,
   mergeClasses,
+  Spinner,
   tokens,
 } from '@fluentui/react-components'
 import {
@@ -30,9 +31,7 @@ import type { ShellSummary } from '@/shared/shellTypes'
 
 type WorkspaceLayoutMode = 'horizontal' | 'vertical'
 
-type WorkspaceTabContent =
-  | { type: 'placeholder' }
-  | { type: 'terminal'; shellId: string; shellName: string; sessionId?: string }
+type WorkspaceTabContent = { type: 'terminal'; shellId: string; shellName: string; sessionId?: string }
 
 interface WorkspaceTab {
   id: string
@@ -62,7 +61,7 @@ const INITIAL_TAB_SEQUENCE = 1
 
 function createWorkspaceTab(
   sequence: number,
-  content: WorkspaceTabContent = { type: 'placeholder' },
+  content: WorkspaceTabContent,
   title?: string,
 ): WorkspaceTab {
   return {
@@ -341,86 +340,31 @@ const useStyles = makeStyles({
   terminalTabPanel: {
     overflow: 'hidden',
   },
-  tabPanelInner: {
+  emptyState: {
+    flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    minHeight: '100%',
-    boxSizing: 'border-box',
-    padding: `${tokens.spacingVerticalL} ${tokens.spacingHorizontalL} ${tokens.spacingHorizontalL}`,
-    gap: tokens.spacingVerticalM,
-  },
-  panelHeader: {
-    display: 'flex',
-    alignItems: 'baseline',
-    justifyContent: 'space-between',
-    gap: tokens.spacingHorizontalM,
-  },
-  panelHeaderText: {
-    minWidth: 0,
-  },
-  panelTitle: {
-    margin: 0,
-    fontSize: tokens.fontSizeBase500,
-    lineHeight: tokens.lineHeightBase500,
-    fontWeight: tokens.fontWeightSemibold,
-    color: tokens.colorNeutralForeground1,
-  },
-  panelDescription: {
-    margin: `${tokens.spacingVerticalXS} 0 0`,
-    maxWidth: '72ch',
-    fontSize: tokens.fontSizeBase300,
-    lineHeight: tokens.lineHeightBase300,
-    color: tokens.colorNeutralForeground2,
-  },
-  panelBadge: {
-    display: 'inline-flex',
     alignItems: 'center',
-    minHeight: '24px',
-    paddingInline: tokens.spacingHorizontalS,
-    borderRadius: tokens.borderRadiusMedium,
-    border: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke2}`,
-    backgroundColor: tokens.colorNeutralBackground2,
-    color: tokens.colorNeutralForeground2,
-    fontSize: tokens.fontSizeBase200,
-    whiteSpace: 'nowrap',
-  },
-  panelFrame: {
-    flex: 1,
+    justifyContent: 'center',
+    gap: tokens.spacingVerticalM,
     minHeight: 0,
-    borderRadius: tokens.borderRadiusMedium,
-    border: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke2}`,
-    backgroundColor: tokens.colorNeutralBackground2,
     padding: tokens.spacingHorizontalL,
     boxSizing: 'border-box',
+  },
+  emptyStateText: {
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'space-between',
-    gap: tokens.spacingVerticalM,
+    alignItems: 'center',
+    gap: tokens.spacingVerticalXS,
+    color: tokens.colorNeutralForeground2,
+    textAlign: 'center',
   },
-  panelFrameContent: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalS,
-    minWidth: 0,
-  },
-  panelFrameTitle: {
+  emptyStateTitle: {
     fontSize: tokens.fontSizeBase300,
     fontWeight: tokens.fontWeightSemibold,
     color: tokens.colorNeutralForeground1,
   },
-  panelChipRow: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: tokens.spacingHorizontalS,
-  },
-  panelChip: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    minHeight: '24px',
-    paddingInline: tokens.spacingHorizontalS,
-    borderRadius: tokens.borderRadiusMedium,
-    backgroundColor: tokens.colorNeutralBackground1,
-    color: tokens.colorNeutralForeground2,
+  emptyStateDescription: {
     fontSize: tokens.fontSizeBase200,
   },
 })
@@ -432,30 +376,6 @@ function WorkspaceTabPanel({
   tab,
 }: WorkspaceTabPanelProps) {
   const styles = useStyles()
-  const { t } = useTranslation()
-
-  if (tab.content.type === 'terminal') {
-    return (
-      <section
-        id={`${tab.id}-panel`}
-        aria-labelledby={`${tab.id}-tab`}
-        aria-hidden={!isActive}
-        className={mergeClasses(
-          styles.tabPanel,
-          styles.terminalTabPanel,
-          isActive ? styles.tabPanelActive : styles.tabPanelInactive,
-        )}
-        role="tabpanel"
-      >
-        <TerminalPane
-          shellId={tab.content.shellId}
-          isActive={isActive}
-          onSessionDisposed={sessionId => onTerminalSessionDisposed(tab.id, sessionId)}
-          onSessionReady={sessionId => onTerminalSessionReady(tab.id, sessionId)}
-        />
-      </section>
-    )
-  }
 
   return (
     <section
@@ -464,42 +384,17 @@ function WorkspaceTabPanel({
       aria-hidden={!isActive}
       className={mergeClasses(
         styles.tabPanel,
+        styles.terminalTabPanel,
         isActive ? styles.tabPanelActive : styles.tabPanelInactive,
       )}
       role="tabpanel"
     >
-      <div className={styles.tabPanelInner}>
-        <div className={styles.panelHeader}>
-          <div className={styles.panelHeaderText}>
-            <h2 className={styles.panelTitle}>
-              {t('workspace.panelTitle')}
-            </h2>
-            <p className={styles.panelDescription}>
-              {t('workspace.panelDescription')}
-            </p>
-          </div>
-          <span className={styles.panelBadge}>
-            {t('workspace.tabLabel', { index: tab.sequence })}
-          </span>
-        </div>
-
-        <div className={styles.panelFrame}>
-          <div className={styles.panelFrameContent}>
-            <div className={styles.panelFrameTitle}>
-              {t('workspace.statusReady')}
-            </div>
-          </div>
-
-          <div className={styles.panelChipRow}>
-            <span className={styles.panelChip}>
-              {t('workspace.tabLabel', { index: tab.sequence })}
-            </span>
-            <span className={styles.panelChip}>
-              {t('workspace.statusReady')}
-            </span>
-          </div>
-        </div>
-      </div>
+      <TerminalPane
+        shellId={tab.content.shellId}
+        isActive={isActive}
+        onSessionDisposed={sessionId => onTerminalSessionDisposed(tab.id, sessionId)}
+        onSessionReady={sessionId => onTerminalSessionReady(tab.id, sessionId)}
+      />
     </section>
   )
 }
@@ -510,20 +405,19 @@ export const WorkspacePanel: FC = () => {
   const { isRTL } = useRTL()
   const { setActiveTerminalSession } = useWorkspaceRuntime()
   const [layoutMode, setLayoutMode] = useState<WorkspaceLayoutMode>('horizontal')
-  const [workspaceState, setWorkspaceState] = useState<WorkspaceState>(() => {
-    const firstTab = createWorkspaceTab(INITIAL_TAB_SEQUENCE)
-    return {
-      tabs: [firstTab],
-      activeTabId: firstTab.id,
-    }
+  const [workspaceState, setWorkspaceState] = useState<WorkspaceState>({
+    tabs: [],
+    activeTabId: '',
   })
+  const [startupState, setStartupState] = useState<'idle' | 'loading' | 'unavailable'>('idle')
   const [hoveredTabId, setHoveredTabId] = useState<string | null>(null)
   const [focusedTabId, setFocusedTabId] = useState<string | null>(null)
   const [scrollState, setScrollState] = useState<ScrollState>({
     canScrollLeft: false,
     canScrollRight: false,
   })
-  const nextSequenceRef = useRef(INITIAL_TAB_SEQUENCE + 1)
+  const nextSequenceRef = useRef(INITIAL_TAB_SEQUENCE)
+  const isResolvingDefaultTabRef = useRef(false)
   const tabButtonRefs = useRef(new Map<string, HTMLButtonElement | null>())
   const tabScrollViewportRef = useRef<HTMLDivElement | null>(null)
   const tabStripInnerRef = useRef<HTMLDivElement | null>(null)
@@ -545,6 +439,72 @@ export const WorkspacePanel: FC = () => {
       tabButtonRefs.current.get(tabId)?.focus({ preventScroll: true })
     })
   }, [])
+
+  const openTerminalTab = useCallback((shell: ShellSummary, onlyWhenEmpty = false) => {
+    let openedTabId: string | null = null
+
+    setWorkspaceState(prev => {
+      if (onlyWhenEmpty && prev.tabs.length > 0) {
+        return prev
+      }
+
+      const nextTab = createWorkspaceTab(
+        nextSequenceRef.current,
+        {
+          type: 'terminal',
+          shellId: shell.id,
+          shellName: shell.name,
+        },
+        shell.name,
+      )
+      nextSequenceRef.current += 1
+      openedTabId = nextTab.id
+
+      return {
+        tabs: [...prev.tabs, nextTab],
+        activeTabId: nextTab.id,
+      }
+    })
+
+    if (openedTabId) {
+      focusTab(openedTabId)
+    }
+
+    return openedTabId
+  }, [focusTab])
+
+  const openStartupTerminalTab = useCallback(async (onlyWhenEmpty = false) => {
+    if (onlyWhenEmpty && isResolvingDefaultTabRef.current) {
+      return
+    }
+
+    isResolvingDefaultTabRef.current = true
+    if (onlyWhenEmpty) {
+      setStartupState('loading')
+    }
+
+    try {
+      const preferredShellId = await window.settingsAPI.getDefaultLocalShellId()
+      const shell = await window.shellAPI.getStartupLocalShell(preferredShellId)
+      if (!shell) {
+        if (onlyWhenEmpty) {
+          setStartupState('unavailable')
+        }
+        return
+      }
+
+      openTerminalTab(shell, onlyWhenEmpty)
+      if (onlyWhenEmpty) {
+        setStartupState('idle')
+      }
+    } catch {
+      if (onlyWhenEmpty) {
+        setStartupState('unavailable')
+      }
+    } finally {
+      isResolvingDefaultTabRef.current = false
+    }
+  }, [openTerminalTab])
 
   const updateScrollState = useCallback(() => {
     if (isVertical) {
@@ -579,40 +539,10 @@ export const WorkspacePanel: FC = () => {
     ))
   }, [isVertical, tabs])
 
-  const addTab = useCallback(() => {
-    const newTab = createWorkspaceTab(nextSequenceRef.current)
-    nextSequenceRef.current += 1
-
-    setWorkspaceState(prev => ({
-      tabs: [...prev.tabs, newTab],
-      activeTabId: newTab.id,
-    }))
-    focusTab(newTab.id)
-  }, [focusTab])
-
-  const addTerminalTab = useCallback((shell: ShellSummary) => {
-    const newTab = createWorkspaceTab(
-      nextSequenceRef.current,
-      {
-        type: 'terminal',
-        shellId: shell.id,
-        shellName: shell.name,
-      },
-      shell.name,
-    )
-    nextSequenceRef.current += 1
-
-    setWorkspaceState(prev => ({
-      tabs: [...prev.tabs, newTab],
-      activeTabId: newTab.id,
-    }))
-    focusTab(newTab.id)
-  }, [focusTab])
-
   const updateTerminalTabSession = useCallback((tabId: string, sessionId?: string) => {
     setWorkspaceState(prev => ({
       tabs: prev.tabs.map(tab => {
-        if (tab.id !== tabId || tab.content.type !== 'terminal') return tab
+        if (tab.id !== tabId) return tab
 
         return {
           ...tab,
@@ -635,7 +565,6 @@ export const WorkspacePanel: FC = () => {
       tabs: prev.tabs.map(tab => {
         if (
           tab.id !== tabId
-          || tab.content.type !== 'terminal'
           || tab.content.sessionId !== sessionId
         ) {
           return tab
@@ -665,13 +594,10 @@ export const WorkspacePanel: FC = () => {
 
       const nextTabs = prev.tabs.filter(tab => tab.id !== tabId)
       if (nextTabs.length === 0) {
-        // 保持至少一个工作标签，避免右侧内容区进入不可操作的空状态。
-        const replacement = createWorkspaceTab(nextSequenceRef.current)
-        nextSequenceRef.current += 1
-        nextActiveId = replacement.id
+        nextActiveId = ''
         return {
-          tabs: [replacement],
-          activeTabId: replacement.id,
+          tabs: [],
+          activeTabId: '',
         }
       }
 
@@ -799,7 +725,20 @@ export const WorkspacePanel: FC = () => {
     })
   }, [activeTabId, isVertical, layoutMode, tabs.length])
 
-  useEffect(() => subscribeOpenShellTab(addTerminalTab), [addTerminalTab])
+  useEffect(() => subscribeOpenShellTab(shell => openTerminalTab(shell)), [openTerminalTab])
+
+  useEffect(() => {
+    if (tabs.length === 0) {
+      if (startupState === 'idle' && !isResolvingDefaultTabRef.current) {
+        void openStartupTerminalTab(true)
+      }
+      return
+    }
+
+    if (startupState !== 'idle') {
+      setStartupState('idle')
+    }
+  }, [openStartupTerminalTab, startupState, tabs.length])
 
   useEffect(() => {
     const activeTab = tabs.find(tab => tab.id === activeTabId)
@@ -828,6 +767,7 @@ export const WorkspacePanel: FC = () => {
   const toggleLabel = isVertical ? t('workspace.dockTop') : t('workspace.dockLeft')
   const toggleIcon = isVertical ? <PanelTopExpandRegular /> : <PanelLeftRegular />
   const showScrollButtons = !isVertical && (scrollState.canScrollLeft || scrollState.canScrollRight)
+  const showEmptyState = tabs.length === 0
   const panelTabs = tabs.map(tab => {
     const isActive = tab.id === activeTabId
     const tabLabel = tab.title ?? t('workspace.tabLabel', { index: tab.sequence })
@@ -908,7 +848,7 @@ export const WorkspacePanel: FC = () => {
                 appearance="subtle"
                 className={styles.tabActionButton}
                 icon={<AddRegular />}
-                onClick={addTab}
+                onClick={() => void openStartupTerminalTab(false)}
                 size="small"
                 title={t('workspace.addTab')}
                 type="button"
@@ -975,7 +915,7 @@ export const WorkspacePanel: FC = () => {
                 appearance="subtle"
                 className={styles.tabActionButton}
                 icon={<AddRegular />}
-                onClick={addTab}
+                onClick={() => void openStartupTerminalTab(false)}
                 size="small"
                 title={t('workspace.addTab')}
                 type="button"
@@ -1029,15 +969,33 @@ export const WorkspacePanel: FC = () => {
             />
           </div>
           <main className={styles.contentArea}>
-            {tabs.map(tab => (
-              <WorkspaceTabPanel
-                key={tab.id}
-                tab={tab}
-                isActive={tab.id === activeTabId}
-                onTerminalSessionDisposed={handleTerminalSessionDisposed}
-                onTerminalSessionReady={handleTerminalSessionReady}
-              />
-            ))}
+            {showEmptyState ? (
+              <div className={styles.emptyState}>
+                {startupState === 'loading' ? (
+                  <>
+                    <Spinner size="medium" />
+                    <div className={styles.emptyStateText}>
+                      <span className={styles.emptyStateTitle}>{t('common.loading')}</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className={styles.emptyStateText}>
+                    <span className={styles.emptyStateTitle}>{t('status.unavailable')}</span>
+                    <span className={styles.emptyStateDescription}>{t('status.unavailable')}</span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              tabs.map(tab => (
+                <WorkspaceTabPanel
+                  key={tab.id}
+                  tab={tab}
+                  isActive={tab.id === activeTabId}
+                  onTerminalSessionDisposed={handleTerminalSessionDisposed}
+                  onTerminalSessionReady={handleTerminalSessionReady}
+                />
+              ))
+            )}
           </main>
         </>
       )}

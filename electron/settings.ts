@@ -11,12 +11,14 @@ const { app } = electron
 interface SettingsSchema {
   locale: string
   fontOverride: string | null
+  defaultLocalShellId: string | null
 }
 
 const store = new ElectronStore<SettingsSchema>({
   defaults: {
     locale: '',
     fontOverride: null,
+    defaultLocalShellId: null,
   },
 })
 
@@ -38,6 +40,16 @@ export function getFontOverride(): string | null {
 /** 设置字体覆盖偏好 */
 export function setFontOverride(override: string | null): void {
   store.set('fontOverride', override)
+}
+
+/** 获取存储的默认本地 Shell 标识，null 表示跟随系统优先级自动选择 */
+export function getDefaultLocalShellId(): string | null {
+  return store.get('defaultLocalShellId', null)
+}
+
+/** 设置默认本地 Shell 标识，null 表示清除覆盖并回退到系统优先级 */
+export function setDefaultLocalShellId(shellId: string | null): void {
+  store.set('defaultLocalShellId', shellId)
 }
 
 /** 获取系统信息：OS locale + platform */

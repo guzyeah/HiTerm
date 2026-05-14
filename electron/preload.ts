@@ -67,6 +67,8 @@ contextBridge.exposeInMainWorld('settingsAPI', {
   setLocale: (locale: string) => ipcRenderer.invoke('settings:setLocale', locale),
   getFontOverride: () => ipcRenderer.invoke('settings:getFontOverride'),
   setFontOverride: (override: string | null) => ipcRenderer.invoke('settings:setFontOverride', override),
+  getDefaultLocalShellId: () => ipcRenderer.invoke('settings:getDefaultLocalShellId'),
+  setDefaultLocalShellId: (shellId: string | null) => ipcRenderer.invoke('settings:setDefaultLocalShellId', shellId),
   getSystemInfo: () => ipcRenderer.invoke('settings:getSystemInfo'),
 })
 
@@ -80,6 +82,8 @@ contextBridge.exposeInMainWorld('shellAPI', {
   saveShell: (record: unknown) => ipcRenderer.invoke('shell:save', record),
   listGroups: () => ipcRenderer.invoke('shell:listGroups'),
   listShellSummaries: () => ipcRenderer.invoke('shell:listSummaries'),
+  getStartupLocalShell: (preferredShellId?: string | null) =>
+    ipcRenderer.invoke('shell:getStartupLocalShell', preferredShellId),
 })
 
 // --------- Expose Dialog API to the Renderer process ---------
