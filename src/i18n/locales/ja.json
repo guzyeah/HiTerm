@@ -219,7 +219,11 @@
   },
   "terminal": {
     "processExited": "プロセスが終了しました: {{exitCode}}",
-    "startFailed": "ターミナルの起動に失敗しました: {{message}}"
+    "startFailed": "ターミナルの起動に失敗しました: {{message}}",
+    "contextMenu": "ターミナルコンテキストメニュー",
+    "clearScreen": "画面をクリア",
+    "shortcutCopy": "Ctrl+Shift+C",
+    "shortcutPaste": "Ctrl+Shift+V"
   },
   "status": {
     "cpu": "CPU",

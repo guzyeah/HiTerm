@@ -219,7 +219,11 @@
   },
   "terminal": {
     "processExited": "进程已退出：{{exitCode}}",
-    "startFailed": "终端启动失败：{{message}}"
+    "startFailed": "终端启动失败：{{message}}",
+    "contextMenu": "终端上下文菜单",
+    "clearScreen": "清屏",
+    "shortcutCopy": "Ctrl+Shift+C",
+    "shortcutPaste": "Ctrl+Shift+V"
   },
   "status": {
     "cpu": "CPU",

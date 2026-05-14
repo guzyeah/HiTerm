@@ -219,7 +219,11 @@
   },
   "terminal": {
     "processExited": "Proceso finalizado: {{exitCode}}",
-    "startFailed": "No se pudo iniciar el terminal: {{message}}"
+    "startFailed": "No se pudo iniciar el terminal: {{message}}",
+    "contextMenu": "Menú contextual del terminal",
+    "clearScreen": "Limpiar pantalla",
+    "shortcutCopy": "Ctrl+Shift+C",
+    "shortcutPaste": "Ctrl+Shift+V"
   },
   "status": {
     "cpu": "CPU",

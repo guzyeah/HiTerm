@@ -96,6 +96,12 @@ contextBridge.exposeInMainWorld('dialogAPI', {
     files.map(file => webUtils.getPathForFile(file)).filter(Boolean),
 })
 
+// --------- Expose Clipboard API to the Renderer process ---------
+contextBridge.exposeInMainWorld('clipboardAPI', {
+  readText: (): Promise<string> => ipcRenderer.invoke('clipboard:readText'),
+  writeText: (text: string): Promise<void> => ipcRenderer.invoke('clipboard:writeText', text),
+})
+
 // --------- Expose Serial API to the Renderer process ---------
 contextBridge.exposeInMainWorld('serialAPI', {
   listSerialPorts: () => ipcRenderer.invoke('serial:listPorts'),

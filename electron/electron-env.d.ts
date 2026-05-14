@@ -49,6 +49,11 @@ interface DialogAPI {
   getPathsForFiles: (files: File[]) => string[]
 }
 
+interface ClipboardAPI {
+  readText: () => Promise<string>
+  writeText: (text: string) => Promise<void>
+}
+
 interface SerialAPI {
   listSerialPorts: () => Promise<{ path: string; friendlyName?: string }[]>
 }
@@ -102,6 +107,7 @@ interface Window {
   menuAPI: MenuAPI
   shellAPI: ShellAPI
   dialogAPI: DialogAPI
+  clipboardAPI: ClipboardAPI
   serialAPI: SerialAPI
   terminalAPI: TerminalAPI
   terminalFilesAPI: TerminalFilesAPI

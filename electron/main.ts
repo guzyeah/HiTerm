@@ -25,7 +25,7 @@ import { registerTerminalHistoryIpcHandlers } from './terminalHistory'
 import { listSerialPorts } from './utils/serialPort'
 import type { OpenPathsDialogOptions } from '../src/shared/dialogTypes'
 
-const { app, BrowserWindow, ipcMain, Menu, dialog } = electron
+const { app, BrowserWindow, ipcMain, Menu, dialog, clipboard } = electron
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -146,6 +146,11 @@ function registerIpcHandlers() {
     })
 
     return result.filePaths
+  })
+
+  ipcMain.handle('clipboard:readText', () => clipboard.readText())
+  ipcMain.handle('clipboard:writeText', (_event, text: string) => {
+    clipboard.writeText(text)
   })
 
   // 串口枚举

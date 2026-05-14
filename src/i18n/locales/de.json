@@ -219,7 +219,11 @@
   },
   "terminal": {
     "processExited": "Prozess beendet: {{exitCode}}",
-    "startFailed": "Terminal konnte nicht gestartet werden: {{message}}"
+    "startFailed": "Terminal konnte nicht gestartet werden: {{message}}",
+    "contextMenu": "Terminal-Kontextmenü",
+    "clearScreen": "Bildschirm leeren",
+    "shortcutCopy": "Ctrl+Shift+C",
+    "shortcutPaste": "Ctrl+Shift+V"
   },
   "status": {
     "cpu": "CPU",

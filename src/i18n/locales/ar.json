@@ -219,7 +219,11 @@
   },
   "terminal": {
     "processExited": "انتهت العملية: {{exitCode}}",
-    "startFailed": "فشل تشغيل الطرفية: {{message}}"
+    "startFailed": "فشل تشغيل الطرفية: {{message}}",
+    "contextMenu": "القائمة السياقية للطرفية",
+    "clearScreen": "مسح الشاشة",
+    "shortcutCopy": "Ctrl+Shift+C",
+    "shortcutPaste": "Ctrl+Shift+V"
   },
   "status": {
     "cpu": "CPU",

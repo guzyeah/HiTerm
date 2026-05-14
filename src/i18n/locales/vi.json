@@ -219,7 +219,11 @@
   },
   "terminal": {
     "processExited": "Tiến trình đã thoát: {{exitCode}}",
-    "startFailed": "Không thể khởi động terminal: {{message}}"
+    "startFailed": "Không thể khởi động terminal: {{message}}",
+    "contextMenu": "Menu ngữ cảnh của terminal",
+    "clearScreen": "Xóa màn hình",
+    "shortcutCopy": "Ctrl+Shift+C",
+    "shortcutPaste": "Ctrl+Shift+V"
   },
   "status": {
     "cpu": "CPU",

@@ -219,7 +219,11 @@
   },
   "terminal": {
     "processExited": "Processo terminato: {{exitCode}}",
-    "startFailed": "Impossibile avviare il terminale: {{message}}"
+    "startFailed": "Impossibile avviare il terminale: {{message}}",
+    "contextMenu": "Menu contestuale del terminale",
+    "clearScreen": "Pulisci schermo",
+    "shortcutCopy": "Ctrl+Shift+C",
+    "shortcutPaste": "Ctrl+Shift+V"
   },
   "status": {
     "cpu": "CPU",

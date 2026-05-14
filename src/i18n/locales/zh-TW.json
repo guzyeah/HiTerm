@@ -219,7 +219,11 @@
   },
   "terminal": {
     "processExited": "程序已結束：{{exitCode}}",
-    "startFailed": "終端機啟動失敗：{{message}}"
+    "startFailed": "終端機啟動失敗：{{message}}",
+    "contextMenu": "終端內容選單",
+    "clearScreen": "清除畫面",
+    "shortcutCopy": "Ctrl+Shift+C",
+    "shortcutPaste": "Ctrl+Shift+V"
   },
   "status": {
     "cpu": "CPU",

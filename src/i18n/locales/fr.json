@@ -219,7 +219,11 @@
   },
   "terminal": {
     "processExited": "Processus terminé : {{exitCode}}",
-    "startFailed": "Échec du démarrage du terminal : {{message}}"
+    "startFailed": "Échec du démarrage du terminal : {{message}}",
+    "contextMenu": "Menu contextuel du terminal",
+    "clearScreen": "Effacer l'écran",
+    "shortcutCopy": "Ctrl+Shift+C",
+    "shortcutPaste": "Ctrl+Shift+V"
   },
   "status": {
     "cpu": "CPU",

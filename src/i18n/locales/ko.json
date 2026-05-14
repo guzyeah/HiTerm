@@ -219,7 +219,11 @@
   },
   "terminal": {
     "processExited": "프로세스가 종료되었습니다: {{exitCode}}",
-    "startFailed": "터미널을 시작하지 못했습니다: {{message}}"
+    "startFailed": "터미널을 시작하지 못했습니다: {{message}}",
+    "contextMenu": "터미널 컨텍스트 메뉴",
+    "clearScreen": "화면 지우기",
+    "shortcutCopy": "Ctrl+Shift+C",
+    "shortcutPaste": "Ctrl+Shift+V"
   },
   "status": {
     "cpu": "CPU",
