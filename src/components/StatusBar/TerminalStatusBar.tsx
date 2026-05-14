@@ -325,7 +325,7 @@ export function TerminalStatusBar() {
         value={sample?.diskIo.writeBytesPerSecond}
         withDivider
       />
-      <Popover withArrow openOnHover>
+      <Popover openOnHover positioning="above-end" withArrow>
         <PopoverTrigger disableButtonEnhancement>
           <button className={mergeClasses(styles.diskButton, styles.itemDivider)} type="button">
             <span className={styles.icon}><HardDriveRegular /></span>
