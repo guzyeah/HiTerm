@@ -1,3 +1,13 @@
+/*
+ * HiTerm - A beautiful and easy-to-use integrated remote connection tool
+ * Copyright (c) 2026 Guzyeah Software
+ *
+ * This software is released under a dual licensing model:
+ * 1. AGPL-3.0-only (see LICENSE.AGPL for details)
+ * 2. Commercial Proprietary License (please contact to guzyeah@foxmail.com)
+ *
+ * You may choose the license that best suits your needs.
+ */
 /**
  * AES-256-GCM 加密/解密工具
  * 密钥固定为 'hiterm-secret'，用于加密存储密码、私钥等敏感信息

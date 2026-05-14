@@ -1,3 +1,13 @@
+/*
+ * HiTerm - A beautiful and easy-to-use integrated remote connection tool
+ * Copyright (c) 2026 Guzyeah Software
+ *
+ * This software is released under a dual licensing model:
+ * 1. AGPL-3.0-only (see LICENSE.AGPL for details)
+ * 2. Commercial Proprietary License (please contact to guzyeah@foxmail.com)
+ *
+ * You may choose the license that best suits your needs.
+ */
 /**
  * 系统串口枚举工具
  * 使用系统命令枚举可用串口，避免引入原生模块依赖

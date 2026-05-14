@@ -1,3 +1,13 @@
+/*
+ * HiTerm - A beautiful and easy-to-use integrated remote connection tool
+ * Copyright (c) 2026 Guzyeah Software
+ *
+ * This software is released under a dual licensing model:
+ * 1. AGPL-3.0-only (see LICENSE.AGPL for details)
+ * 2. Commercial Proprietary License (please contact to guzyeah@foxmail.com)
+ *
+ * You may choose the license that best suits your needs.
+ */
 /**
  * 渲染字体运行时检测工具
  * 使用canvas文本测量法检测当前--app-font-family中实际渲染的字体

@@ -1,3 +1,13 @@
+/*
+ * HiTerm - A beautiful and easy-to-use integrated remote connection tool
+ * Copyright (c) 2026 Guzyeah Software
+ *
+ * This software is released under a dual licensing model:
+ * 1. AGPL-3.0-only (see LICENSE.AGPL for details)
+ * 2. Commercial Proprietary License (please contact to guzyeah@foxmail.com)
+ *
+ * You may choose the license that best suits your needs.
+ */
 /**
  * macOS原生菜单构建与更新模块
  * 使用Electron Menu API构建原生菜单栏

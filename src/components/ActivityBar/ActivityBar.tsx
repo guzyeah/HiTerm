@@ -1,3 +1,13 @@
+/*
+ * HiTerm - A beautiful and easy-to-use integrated remote connection tool
+ * Copyright (c) 2026 Guzyeah Software
+ *
+ * This software is released under a dual licensing model:
+ * 1. AGPL-3.0-only (see LICENSE.AGPL for details)
+ * 2. Commercial Proprietary License (please contact to guzyeah@foxmail.com)
+ *
+ * You may choose the license that best suits your needs.
+ */
 /**
  * ActivityBar 组件
  * 左侧面板的顶部 icon-only TabList + 面板标题 + 内容切换
