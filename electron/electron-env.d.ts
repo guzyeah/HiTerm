@@ -86,6 +86,13 @@ interface TerminalStatusAPI {
   onError: (callback: (event: import('../src/shared/terminalStatusTypes').TerminalStatusErrorEvent) => void) => () => void
 }
 
+interface TerminalHistoryAPI {
+  list: (request?: import('../src/shared/terminalHistoryTypes').TerminalHistoryListRequest) => Promise<import('../src/shared/terminalHistoryTypes').TerminalHistoryListResult>
+  deleteRecord: (request: import('../src/shared/terminalHistoryTypes').TerminalHistoryDeleteRequest) => Promise<import('../src/shared/terminalHistoryTypes').TerminalHistoryDeleteResult>
+  onRecorded: (callback: (event: import('../src/shared/terminalHistoryTypes').TerminalHistoryRecordEvent) => void) => () => void
+  onDeleted: (callback: (event: import('../src/shared/terminalHistoryTypes').TerminalHistoryDeletedEvent) => void) => () => void
+}
+
 interface Window {
   ipcRenderer: import('electron').IpcRenderer
   settingsAPI: SettingsAPI
@@ -96,4 +103,5 @@ interface Window {
   terminalAPI: TerminalAPI
   terminalFilesAPI: TerminalFilesAPI
   terminalStatusAPI: TerminalStatusAPI
+  terminalHistoryAPI: TerminalHistoryAPI
 }

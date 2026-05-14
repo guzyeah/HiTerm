@@ -29,6 +29,14 @@ import type {
   TerminalStatusSampleEvent,
   TerminalStatusSubscribeRequest,
 } from '../src/shared/terminalStatusTypes'
+import type {
+  TerminalHistoryDeleteRequest,
+  TerminalHistoryDeleteResult,
+  TerminalHistoryListRequest,
+  TerminalHistoryListResult,
+  TerminalHistoryRecordEvent,
+  TerminalHistoryDeletedEvent,
+} from '../src/shared/terminalHistoryTypes'
 import type { OpenPathsDialogOptions } from '../src/shared/dialogTypes'
 
 const { ipcRenderer, contextBridge, webUtils } = electron
@@ -172,5 +180,23 @@ contextBridge.exposeInMainWorld('terminalStatusAPI', {
     const listener = (_event: Electron.IpcRendererEvent, payload: TerminalStatusErrorEvent) => callback(payload)
     ipcRenderer.on('terminalStatus:error', listener)
     return () => ipcRenderer.off('terminalStatus:error', listener)
+  },
+})
+
+// --------- Expose Terminal History API to the Renderer process ---------
+contextBridge.exposeInMainWorld('terminalHistoryAPI', {
+  list: (request?: TerminalHistoryListRequest): Promise<TerminalHistoryListResult> =>
+    ipcRenderer.invoke('terminalHistory:list', request),
+  deleteRecord: (request: TerminalHistoryDeleteRequest): Promise<TerminalHistoryDeleteResult> =>
+    ipcRenderer.invoke('terminalHistory:delete', request),
+  onRecorded: (callback: (event: TerminalHistoryRecordEvent) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, payload: TerminalHistoryRecordEvent) => callback(payload)
+    ipcRenderer.on('terminalHistory:recorded', listener)
+    return () => ipcRenderer.off('terminalHistory:recorded', listener)
+  },
+  onDeleted: (callback: (event: TerminalHistoryDeletedEvent) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, payload: TerminalHistoryDeletedEvent) => callback(payload)
+    ipcRenderer.on('terminalHistory:deleted', listener)
+    return () => ipcRenderer.off('terminalHistory:deleted', listener)
   },
 })

@@ -7,6 +7,7 @@ import { initializeShellStore, saveShell, listGroups, listShellSummaries } from 
 import { registerTerminalFilesIpcHandlers } from './terminalFiles'
 import { registerTerminalIpcHandlers } from './terminalSession'
 import { registerTerminalStatusIpcHandlers } from './terminalStatus'
+import { registerTerminalHistoryIpcHandlers } from './terminalHistory'
 import { listSerialPorts } from './utils/serialPort'
 import type { OpenPathsDialogOptions } from '../src/shared/dialogTypes'
 
@@ -135,6 +136,7 @@ function registerIpcHandlers() {
   registerTerminalIpcHandlers()
   registerTerminalFilesIpcHandlers()
   registerTerminalStatusIpcHandlers()
+  registerTerminalHistoryIpcHandlers()
 }
 
 app.whenReady().then(() => {

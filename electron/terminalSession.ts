@@ -11,6 +11,7 @@ import electron, { type WebContents } from 'electron'
 import * as pty from 'node-pty'
 import { Client, type ClientChannel, type ConnectConfig, type SFTPWrapper } from 'ssh2'
 import { getShellById } from './shellStore'
+import { recordTerminalCommand } from './terminalHistory'
 import type {
   CreateTerminalSessionRequest,
   CreateTerminalSessionResult,
@@ -24,6 +25,13 @@ const { app, ipcMain } = electron
 
 export type RemoteOs = 'linux' | 'darwin' | 'unknown'
 
+interface CommandCaptureState {
+  lineBuffer: string
+  escapeBuffer: string
+  isAlternateScreen: boolean
+  recentOutput: string
+}
+
 interface TerminalSessionBase {
   webContents: WebContents
   shellId: string
@@ -31,6 +39,7 @@ interface TerminalSessionBase {
   cwd: string
   homeDir: string
   remoteOs: RemoteOs | null
+  commandCapture: CommandCaptureState
 }
 
 interface LocalTerminalSession extends TerminalSessionBase {
@@ -70,12 +79,159 @@ export interface SshCommandResult {
 const terminalSessions = new Map<string, TerminalSession>()
 const webContentsSessionIds = new Map<number, Set<string>>()
 const trackedWebContentsIds = new Set<number>()
+const ESCAPE_PATTERN = '\\x' + '1b'
+const BELL_PATTERN = '\\x' + '07'
+const ALTERNATE_SCREEN_ENABLE_PATTERN = new RegExp(`${ESCAPE_PATTERN}\\[\\?(?:47|1047|1049)h`)
+const ALTERNATE_SCREEN_DISABLE_PATTERN = new RegExp(`${ESCAPE_PATTERN}\\[\\?(?:47|1047|1049)l`)
+const ANSI_CONTROL_PATTERN = new RegExp(
+  `${ESCAPE_PATTERN}(?:\\[[0-?]*[ -/]*[@-~]|\\][^${BELL_PATTERN}${ESCAPE_PATTERN}]*(?:${BELL_PATTERN}|${ESCAPE_PATTERN}\\\\)|[@-Z\\\\-_])`,
+  'g',
+)
+const SENSITIVE_PROMPT_PATTERN = /(?:password|passphrase|verification code|otp|pin|密码|口令)\s*[:：]\s*$/i
 
 function normalizeTerminalSize(cols: number, rows: number): { cols: number; rows: number } {
   return {
     cols: Math.max(2, Math.floor(cols) || 80),
     rows: Math.max(1, Math.floor(rows) || 24),
   }
+}
+
+function createCommandCaptureState(): CommandCaptureState {
+  return {
+    lineBuffer: '',
+    escapeBuffer: '',
+    isAlternateScreen: false,
+    recentOutput: '',
+  }
+}
+
+function stripAnsiSequences(value: string): string {
+  return value.replace(ANSI_CONTROL_PATTERN, '')
+}
+
+function removeLastWord(value: string): string {
+  return value.replace(/\s*[\S\u00A0]+$/u, '')
+}
+
+function looksLikeSensitivePrompt(recentOutput: string): boolean {
+  return SENSITIVE_PROMPT_PATTERN.test(recentOutput.trimEnd())
+}
+
+function clearCapturedLine(state: CommandCaptureState): void {
+  state.lineBuffer = ''
+  state.escapeBuffer = ''
+}
+
+function finalizeCapturedCommand(sessionId: string, session: TerminalSession): void {
+  const command = session.commandCapture.lineBuffer.trim()
+  clearCapturedLine(session.commandCapture)
+
+  if (!command || session.commandCapture.isAlternateScreen) return
+  if (looksLikeSensitivePrompt(session.commandCapture.recentOutput)) return
+
+  recordTerminalCommand(session.webContents, {
+    sessionId,
+    shellId: session.shellId,
+    protocol: session.protocol,
+    command,
+  })
+}
+
+function consumeEscapeSequence(state: CommandCaptureState, character: string): boolean {
+  if (!state.escapeBuffer) return false
+
+  state.escapeBuffer += character
+
+  if (state.escapeBuffer.startsWith('\u001b[')) {
+    const lastCharacter = state.escapeBuffer[state.escapeBuffer.length - 1] ?? ''
+    if (/[@-~]/.test(lastCharacter)) {
+      state.escapeBuffer = ''
+    }
+    return true
+  }
+
+  if (state.escapeBuffer.startsWith('\u001bO')) {
+    if (state.escapeBuffer.length >= 3) {
+      state.escapeBuffer = ''
+    }
+    return true
+  }
+
+  if (state.escapeBuffer.length >= 2) {
+    state.escapeBuffer = ''
+  }
+
+  return true
+}
+
+function captureTerminalInput(sessionId: string, session: TerminalSession, data: string): void {
+  const state = session.commandCapture
+
+  for (let index = 0; index < data.length; index += 1) {
+    const character = data[index] ?? ''
+    if (!character) continue
+
+    if (consumeEscapeSequence(state, character)) {
+      continue
+    }
+
+    if (character === '\u001b') {
+      state.escapeBuffer = character
+      continue
+    }
+
+    if (character === '\r' || character === '\n') {
+      if (!(character === '\n' && data[index - 1] === '\r')) {
+        finalizeCapturedCommand(sessionId, session)
+      }
+      continue
+    }
+
+    if (character === '\u007f' || character === '\b') {
+      state.lineBuffer = state.lineBuffer.slice(0, -1)
+      continue
+    }
+
+    if (character === '\u0015') {
+      state.lineBuffer = ''
+      continue
+    }
+
+    if (character === '\u0017') {
+      state.lineBuffer = removeLastWord(state.lineBuffer)
+      continue
+    }
+
+    if (character === '\u0003') {
+      clearCapturedLine(state)
+      continue
+    }
+
+    if (character < ' ' || character === '\u0000') {
+      continue
+    }
+
+    state.lineBuffer += character
+    if (state.lineBuffer.length > 8192) {
+      state.lineBuffer = state.lineBuffer.slice(-8192)
+    }
+  }
+}
+
+function captureTerminalOutput(session: TerminalSession, data: string): void {
+  const state = session.commandCapture
+
+  if (ALTERNATE_SCREEN_ENABLE_PATTERN.test(data)) {
+    state.isAlternateScreen = true
+    clearCapturedLine(state)
+  }
+
+  if (ALTERNATE_SCREEN_DISABLE_PATTERN.test(data)) {
+    state.isAlternateScreen = false
+  }
+
+  const normalizedOutput = stripAnsiSequences(data).replace(/\r/g, '')
+  state.recentOutput = `${state.recentOutput}${normalizedOutput}`.slice(-256)
 }
 
 function resolveWorkingDirectory(workDir: string | null | undefined): string {
@@ -506,6 +662,11 @@ function createLocalSession(
 
   const disposables = [
     ptyProcess.onData(data => {
+      const session = terminalSessions.get(sessionId)
+      if (session) {
+        captureTerminalOutput(session, data)
+      }
+
       if (!webContents.isDestroyed()) {
         webContents.send('terminal:data', { sessionId, data })
       }
@@ -537,6 +698,7 @@ function createLocalSession(
     cwd,
     homeDir,
     remoteOs: null,
+    commandCapture: createCommandCaptureState(),
   })
   trackSessionWebContents(sessionId, webContents)
 
@@ -575,21 +737,28 @@ async function createSshSession(
     sftp: null,
     sftpPromise: null,
     isClosing: false,
+    commandCapture: createCommandCaptureState(),
   }
 
   shellChannel.on('data', (chunk: Buffer | string) => {
+    const data = chunk.toString('utf8')
+    captureTerminalOutput(session, data)
+
     if (!webContents.isDestroyed()) {
       webContents.send('terminal:data', {
         sessionId,
-        data: chunk.toString('utf8'),
+        data,
       })
     }
   })
   shellChannel.stderr.on('data', (chunk: Buffer | string) => {
+    const data = chunk.toString('utf8')
+    captureTerminalOutput(session, data)
+
     if (!webContents.isDestroyed()) {
       webContents.send('terminal:data', {
         sessionId,
-        data: chunk.toString('utf8'),
+        data,
       })
     }
   })
@@ -685,6 +854,8 @@ export function registerTerminalIpcHandlers(): void {
 
   ipcMain.handle('terminal:write', (event, request: TerminalWriteRequest) => {
     const session = getSessionForSender(request.sessionId, event.sender)
+    captureTerminalInput(request.sessionId, session, request.data)
+
     if (session.protocol === 'local') {
       session.ptyProcess.write(request.data)
       return
