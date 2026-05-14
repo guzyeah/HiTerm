@@ -237,7 +237,8 @@
     "mountPoint": "Point de montage",
     "totalSize": "Taille totale",
     "freeSize": "Libre",
-    "unavailable": "Indisponible"
+    "unavailable": "Indisponible",
+    "donate": "Faire un don"
   },
   "shellGroups": {
     "default": "Par défaut",

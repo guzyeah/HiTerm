@@ -237,7 +237,8 @@
     "mountPoint": "掛載點",
     "totalSize": "總大小",
     "freeSize": "剩餘",
-    "unavailable": "不可用"
+    "unavailable": "不可用",
+    "donate": "捐贈"
   },
   "shellGroups": {
     "default": "預設",

@@ -237,7 +237,8 @@
     "mountPoint": "Einhängepunkt",
     "totalSize": "Gesamt",
     "freeSize": "Frei",
-    "unavailable": "Nicht verfügbar"
+    "unavailable": "Nicht verfügbar",
+    "donate": "Spenden"
   },
   "shellGroups": {
     "default": "Standard",

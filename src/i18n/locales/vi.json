@@ -237,7 +237,8 @@
     "mountPoint": "Điểm gắn",
     "totalSize": "Tổng",
     "freeSize": "Còn trống",
-    "unavailable": "Không khả dụng"
+    "unavailable": "Không khả dụng",
+    "donate": "Ủng hộ"
   },
   "shellGroups": {
     "default": "Mặc định",

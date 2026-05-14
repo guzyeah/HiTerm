@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react'
+import { Link, makeStyles, tokens } from '@fluentui/react-components'
+import { useTranslation } from 'react-i18next'
 import { MenuBar, type MenuItemId } from '@/components/MenuBar/MenuBar'
 import { AboutDialog } from '@/components/AboutDialog/AboutDialog'
 import { ConnectDialog } from '@/components/ConnectDialog'
@@ -9,7 +11,35 @@ import { ActivityBar } from '@/components/ActivityBar'
 import { TerminalStatusBar } from '@/components/StatusBar'
 import './App.css'
 
+const DONATE_URL = 'https://www.guzyeah.cn/donate'
+
+const useStyles = makeStyles({
+  leftStatusBar: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    columnGap: tokens.spacingHorizontalS,
+    width: '100%',
+    minWidth: 0,
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+  },
+  leftStatusText: {
+    flex: 1,
+    minWidth: 0,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    fontSize: tokens.fontSizeBase100,
+  },
+  donateLink: {
+    flexShrink: 0,
+    fontSize: tokens.fontSizeBase200,
+  },
+})
+
 function App() {
+  const styles = useStyles()
+  const { t } = useTranslation()
   const [aboutOpen, setAboutOpen] = useState(false)
   const [connectOpen, setConnectOpen] = useState(false)
   const [preferencesOpen, setPreferencesOpen] = useState(false)
@@ -49,7 +79,19 @@ function App() {
         <MainLayout
           leftPanel={<ActivityBar />}
           rightPanel={<WorkspacePanel />}
-          leftStatusBar={<span>HiTerm</span>}
+          leftStatusBar={(
+            <span className={styles.leftStatusBar} dir="ltr">
+              <span className={styles.leftStatusText}>{`${t('app.name')} by Guzyeah, Free for Everyone`}</span>
+              <Link
+                className={styles.donateLink}
+                href={DONATE_URL}
+                rel="noreferrer"
+                target="_blank"
+              >
+                {t('status.donate')}
+              </Link>
+            </span>
+          )}
           rightStatusBar={<TerminalStatusBar />}
         />
       </WorkspaceRuntimeProvider>

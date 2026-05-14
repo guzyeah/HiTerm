@@ -237,7 +237,8 @@
     "mountPoint": "نقطة التركيب",
     "totalSize": "الإجمالي",
     "freeSize": "المتاح",
-    "unavailable": "غير متاح"
+    "unavailable": "غير متاح",
+    "donate": "تبرع"
   },
   "shellGroups": {
     "default": "افتراضي",

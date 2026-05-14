@@ -237,7 +237,8 @@
     "mountPoint": "マウント先",
     "totalSize": "合計",
     "freeSize": "空き",
-    "unavailable": "利用不可"
+    "unavailable": "利用不可",
+    "donate": "寄付"
   },
   "shellGroups": {
     "default": "デフォルト",

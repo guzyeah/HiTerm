@@ -237,7 +237,8 @@
     "mountPoint": "마운트 지점",
     "totalSize": "전체",
     "freeSize": "여유",
-    "unavailable": "사용 불가"
+    "unavailable": "사용 불가",
+    "donate": "기부"
   },
   "shellGroups": {
     "default": "기본",
