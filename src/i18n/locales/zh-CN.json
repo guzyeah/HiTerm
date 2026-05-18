@@ -239,6 +239,7 @@
     "freeSize": "剩余",
     "unavailable": "不可用",
     "donate": "捐赠",
+    "feedback": "反馈",
     "voiceInput": "语音输入",
     "voiceInputActive": "正在聆听...",
     "voiceInputUnsupported": "当前环境不支持语音输入",

@@ -239,6 +239,7 @@
     "freeSize": "空き",
     "unavailable": "利用不可",
     "donate": "寄付",
+    "feedback": "フィードバック",
     "voiceInput": "音声入力",
     "voiceInputActive": "聴取中...",
     "voiceInputUnsupported": "音声入力はサポートされていません",

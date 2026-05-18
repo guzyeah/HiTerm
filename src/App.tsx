@@ -11,7 +11,7 @@
 import { useCallback, useState, useEffect } from 'react'
 import { Link, makeStyles, tokens } from '@fluentui/react-components'
 import { useTranslation } from 'react-i18next'
-import { MenuBar, type MenuItemId } from '@/components/MenuBar/MenuBar'
+import { MenuBar } from '@/components/MenuBar/MenuBar'
 import { AboutDialog } from '@/components/AboutDialog/AboutDialog'
 import { ConnectDialog } from '@/components/ConnectDialog'
 import { PreferencesDialog } from '@/components/PreferencesDialog'
@@ -56,15 +56,19 @@ function App() {
   const [preferencesOpen, setPreferencesOpen] = useState(false)
   const [terminalViewMode, setTerminalViewMode] = useState<TerminalViewMode>('normal')
 
-  const handleMenuItemClick = (itemId: MenuItemId) => {
+  const handleOpenPreferences = useCallback(() => {
+    setPreferencesOpen(true)
+  }, [])
+
+  const handleMenuItemClick = useCallback((itemId: string) => {
     if (itemId === 'help.about') {
       setAboutOpen(true)
     } else if (itemId === 'shell.connect') {
       setConnectOpen(true)
     } else if (itemId === 'settings.preferences') {
-      setPreferencesOpen(true)
+      handleOpenPreferences()
     }
-  }
+  }, [handleOpenPreferences])
 
   const handleTerminalViewModeChange = useCallback((mode: TerminalViewMode) => {
     setTerminalViewMode(mode)
@@ -75,19 +79,13 @@ function App() {
   useEffect(() => {
     if (!window.ipcRenderer) return
     const handler = (_event: Electron.IpcRendererEvent, itemId: string) => {
-      if (itemId === 'help.about') {
-        setAboutOpen(true)
-      } else if (itemId === 'shell.connect') {
-        setConnectOpen(true)
-      } else if (itemId === 'settings.preferences') {
-        setPreferencesOpen(true)
-      }
+      handleMenuItemClick(itemId)
     }
     window.ipcRenderer.on('menu:click', handler)
     return () => {
       window.ipcRenderer.off('menu:click', handler)
     }
-  }, [])
+  }, [handleMenuItemClick])
 
   useEffect(() => {
     if (!window.windowAPI) return
@@ -137,6 +135,7 @@ function App() {
           )}
           rightStatusBar={(
             <TerminalStatusBar
+              onOpenPreferences={handleOpenPreferences}
               terminalViewMode={terminalViewMode}
               onTerminalViewModeChange={handleTerminalViewModeChange}
             />

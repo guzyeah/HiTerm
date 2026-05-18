@@ -239,6 +239,7 @@
     "freeSize": "Free",
     "unavailable": "Unavailable",
     "donate": "Donate",
+    "feedback": "Feedback",
     "voiceInput": "Voice input",
     "voiceInputActive": "Listening...",
     "voiceInputUnsupported": "Voice input is not supported",

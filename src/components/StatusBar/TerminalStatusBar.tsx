@@ -35,6 +35,8 @@ import {
   FullScreenMinimizeRegular,
   HardDriveRegular,
   MicOffRegular,
+  PersonFeedbackRegular,
+  SettingsRegular,
 } from '@fluentui/react-icons'
 import { useTerminalStatus } from '@/hooks/useTerminalStatus'
 import { useWorkspaceRuntime } from '@/components/WorkspacePanel/workspaceRuntimeContext'
@@ -44,6 +46,7 @@ import type { TerminalViewMode } from '@/shared/terminalViewTypes'
 
 interface TerminalStatusBarProps {
   terminalViewMode: TerminalViewMode
+  onOpenPreferences: () => void
   onTerminalViewModeChange: (mode: TerminalViewMode) => void
 }
 
@@ -85,13 +88,25 @@ const useStyles = makeStyles({
     minWidth: 0,
     overflow: 'hidden',
   },
-  actionsGroup: {
+  actionsRegion: {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
     gap: tokens.spacingHorizontalXXS,
     flexShrink: 0,
     marginInlineStart: tokens.spacingHorizontalM,
+  },
+  actionsGroup: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: tokens.spacingHorizontalXXS,
+  },
+  actionsDivider: {
+    width: tokens.strokeWidthThin,
+    height: '16px',
+    marginInline: tokens.spacingHorizontalXXS,
+    backgroundColor: tokens.colorNeutralStrokeAccessible,
+    opacity: 0.72,
   },
   metric: {
     display: 'inline-flex',
@@ -315,6 +330,7 @@ function DiskPopoverContent({ disks }: { disks: TerminalStatusDisk[] }) {
 }
 
 export function TerminalStatusBar({
+  onOpenPreferences,
   terminalViewMode,
   onTerminalViewModeChange,
 }: TerminalStatusBarProps) {
@@ -345,54 +361,87 @@ export function TerminalStatusBar({
     window.requestAnimationFrame(() => focusActiveTerminal())
   }, [focusActiveTerminal, onTerminalViewModeChange, terminalViewMode])
 
+  const handlePreferencesClick = useCallback(() => {
+    onOpenPreferences()
+  }, [onOpenPreferences])
+
   const hasActiveTerminal = Boolean(activeTerminalSession)
   const canToggleTerminalView = hasActiveTerminal || terminalViewMode !== 'normal'
   const isMaximized = terminalViewMode === 'maximized'
   const isFullscreen = terminalViewMode === 'fullscreen'
+  const feedbackLabel = t('status.feedback')
+  const preferencesLabel = t('menu.settings.preferences')
   const voiceInputLabel = t('status.voiceInputUnsupported')
   const maximizeLabel = isMaximized ? t('status.exitZoomTerminal') : t('status.zoomTerminal')
   const fullscreenLabel = isFullscreen ? t('status.exitFullscreenTerminal') : t('status.fullscreenTerminal')
 
   const actionButtons = (
-    <div className={styles.actionsGroup}>
-      <Tooltip content={voiceInputLabel} relationship="label">
-        <Button
-          appearance="subtle"
-          aria-pressed={false}
-          className={styles.actionButton}
-          disabled
-          icon={<MicOffRegular />}
-          size="small"
-          title={voiceInputLabel}
-          type="button"
-        />
-      </Tooltip>
-      <Tooltip content={maximizeLabel} relationship="label">
-        <Button
-          appearance="subtle"
-          aria-pressed={isMaximized}
-          className={mergeClasses(styles.actionButton, isMaximized ? styles.actionButtonActive : undefined)}
-          disabled={!canToggleTerminalView}
-          icon={isMaximized ? <ArrowMinimizeRegular /> : <ArrowMaximizeRegular />}
-          onClick={handleMaximizeClick}
-          size="small"
-          title={maximizeLabel}
-          type="button"
-        />
-      </Tooltip>
-      <Tooltip content={fullscreenLabel} relationship="label">
-        <Button
-          appearance="subtle"
-          aria-pressed={isFullscreen}
-          className={mergeClasses(styles.actionButton, isFullscreen ? styles.actionButtonActive : undefined)}
-          disabled={!canToggleTerminalView}
-          icon={isFullscreen ? <FullScreenMinimizeRegular /> : <FullScreenMaximizeRegular />}
-          onClick={handleFullscreenClick}
-          size="small"
-          title={fullscreenLabel}
-          type="button"
-        />
-      </Tooltip>
+    <div className={styles.actionsRegion}>
+      <div className={styles.actionsGroup}>
+        <Tooltip content={feedbackLabel} relationship="label">
+          <Button
+            appearance="subtle"
+            className={styles.actionButton}
+            disabled
+            icon={<PersonFeedbackRegular />}
+            size="small"
+            title={feedbackLabel}
+            type="button"
+          />
+        </Tooltip>
+        <Tooltip content={preferencesLabel} relationship="label">
+          <Button
+            appearance="subtle"
+            className={styles.actionButton}
+            icon={<SettingsRegular />}
+            onClick={handlePreferencesClick}
+            size="small"
+            title={preferencesLabel}
+            type="button"
+          />
+        </Tooltip>
+      </div>
+      <span aria-hidden className={styles.actionsDivider} />
+      <div className={styles.actionsGroup}>
+        <Tooltip content={voiceInputLabel} relationship="label">
+          <Button
+            appearance="subtle"
+            aria-pressed={false}
+            className={styles.actionButton}
+            disabled
+            icon={<MicOffRegular />}
+            size="small"
+            title={voiceInputLabel}
+            type="button"
+          />
+        </Tooltip>
+        <Tooltip content={maximizeLabel} relationship="label">
+          <Button
+            appearance="subtle"
+            aria-pressed={isMaximized}
+            className={mergeClasses(styles.actionButton, isMaximized ? styles.actionButtonActive : undefined)}
+            disabled={!canToggleTerminalView}
+            icon={isMaximized ? <ArrowMinimizeRegular /> : <ArrowMaximizeRegular />}
+            onClick={handleMaximizeClick}
+            size="small"
+            title={maximizeLabel}
+            type="button"
+          />
+        </Tooltip>
+        <Tooltip content={fullscreenLabel} relationship="label">
+          <Button
+            appearance="subtle"
+            aria-pressed={isFullscreen}
+            className={mergeClasses(styles.actionButton, isFullscreen ? styles.actionButtonActive : undefined)}
+            disabled={!canToggleTerminalView}
+            icon={isFullscreen ? <FullScreenMinimizeRegular /> : <FullScreenMaximizeRegular />}
+            onClick={handleFullscreenClick}
+            size="small"
+            title={fullscreenLabel}
+            type="button"
+          />
+        </Tooltip>
+      </div>
     </div>
   )
 
