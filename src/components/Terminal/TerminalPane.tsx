@@ -32,12 +32,14 @@ import { Terminal } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
 import '@xterm/xterm/css/xterm.css'
 import { usePreferences } from '@/hooks/usePreferences'
+import { useWorkspaceRuntime } from '@/components/WorkspacePanel/workspaceRuntimeContext'
 import { terminalTheme } from './terminalTheme'
 import { getTerminalThemeById } from './terminalThemes'
 import type { TerminalPreferences } from '@/shared/preferencesTypes'
 
 interface TerminalPaneProps {
   shellId: string
+  tabId: string
   isActive: boolean
   onSessionDisposed?: (sessionId: string) => void
   onSessionReady?: (sessionId: string) => void
@@ -149,6 +151,7 @@ function stopTerminalBrowserEvent(event: Event): void {
 
 export const TerminalPane: FC<TerminalPaneProps> = ({
   shellId,
+  tabId,
   isActive,
   onSessionDisposed,
   onSessionReady,
@@ -156,6 +159,7 @@ export const TerminalPane: FC<TerminalPaneProps> = ({
   const styles = useStyles()
   const { t } = useTranslation()
   const { terminalPreferences } = usePreferences()
+  const { registerTerminalController } = useWorkspaceRuntime()
   const activeTerminalTheme = getTerminalThemeById(terminalPreferences.themeId).theme
   const tRef = useRef(t)
   const terminalPreferencesRef = useRef(terminalPreferences)
@@ -175,6 +179,14 @@ export const TerminalPane: FC<TerminalPaneProps> = ({
 
   const focusTerminal = useCallback(() => {
     terminalRef.current?.focus()
+  }, [])
+
+  const writeTextToTerminal = useCallback((text: string) => {
+    const sessionId = sessionIdRef.current
+    if (!sessionId || !text) return
+
+    terminalRef.current?.focus()
+    void window.terminalAPI.write({ sessionId, data: text })
   }, [])
 
   const closeContextMenu = useCallback(() => {
@@ -275,6 +287,11 @@ export const TerminalPane: FC<TerminalPaneProps> = ({
     if (isActive) return
     setContextMenu(null)
   }, [isActive])
+
+  useEffect(() => registerTerminalController(tabId, {
+    focus: focusTerminal,
+    writeText: writeTextToTerminal,
+  }), [focusTerminal, registerTerminalController, tabId, writeTextToTerminal])
 
   useEffect(() => {
     if (contextMenu) return

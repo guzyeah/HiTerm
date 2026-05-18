@@ -238,7 +238,14 @@
     "totalSize": "总大小",
     "freeSize": "剩余",
     "unavailable": "不可用",
-    "donate": "捐赠"
+    "donate": "捐赠",
+    "voiceInput": "语音输入",
+    "voiceInputActive": "正在聆听...",
+    "voiceInputUnsupported": "当前环境不支持语音输入",
+    "zoomTerminal": "放大终端",
+    "exitZoomTerminal": "退出放大",
+    "fullscreenTerminal": "全屏终端",
+    "exitFullscreenTerminal": "退出全屏"
   },
   "shellGroups": {
     "default": "默认",

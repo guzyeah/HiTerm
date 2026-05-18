@@ -8,7 +8,7 @@
  *
  * You may choose the license that best suits your needs.
  */
-import { useState, useEffect } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import { Link, makeStyles, tokens } from '@fluentui/react-components'
 import { useTranslation } from 'react-i18next'
 import { MenuBar, type MenuItemId } from '@/components/MenuBar/MenuBar'
@@ -19,6 +19,7 @@ import { WorkspacePanel, WorkspaceRuntimeProvider } from '@/components/Workspace
 import { MainLayout } from '@/components/MainLayout'
 import { ActivityBar } from '@/components/ActivityBar'
 import { TerminalStatusBar } from '@/components/StatusBar'
+import type { TerminalViewMode } from '@/shared/terminalViewTypes'
 import './App.css'
 
 const DONATE_URL = 'https://www.guzyeah.cn/donate'
@@ -53,6 +54,7 @@ function App() {
   const [aboutOpen, setAboutOpen] = useState(false)
   const [connectOpen, setConnectOpen] = useState(false)
   const [preferencesOpen, setPreferencesOpen] = useState(false)
+  const [terminalViewMode, setTerminalViewMode] = useState<TerminalViewMode>('normal')
 
   const handleMenuItemClick = (itemId: MenuItemId) => {
     if (itemId === 'help.about') {
@@ -63,6 +65,11 @@ function App() {
       setPreferencesOpen(true)
     }
   }
+
+  const handleTerminalViewModeChange = useCallback((mode: TerminalViewMode) => {
+    setTerminalViewMode(mode)
+    void window.windowAPI?.setFullscreen(mode === 'fullscreen')
+  }, [])
 
   // 监听macOS原生菜单的IPC点击事件
   useEffect(() => {
@@ -82,13 +89,39 @@ function App() {
     }
   }, [])
 
+  useEffect(() => {
+    if (!window.windowAPI) return
+
+    let isMounted = true
+    void window.windowAPI.isFullscreen().then(isFullscreen => {
+      if (isMounted && isFullscreen) {
+        setTerminalViewMode('fullscreen')
+      }
+    })
+
+    const unsubscribe = window.windowAPI.onFullscreenChange(isFullscreen => {
+      setTerminalViewMode(previous => {
+        if (isFullscreen) {
+          return 'fullscreen'
+        }
+
+        return previous === 'fullscreen' ? 'normal' : previous
+      })
+    })
+
+    return () => {
+      isMounted = false
+      unsubscribe()
+    }
+  }, [])
+
   return (
     <div className="app-shell">
-      <MenuBar onMenuItemClick={handleMenuItemClick} />
+      {terminalViewMode === 'normal' && <MenuBar onMenuItemClick={handleMenuItemClick} />}
       <WorkspaceRuntimeProvider>
         <MainLayout
           leftPanel={<ActivityBar />}
-          rightPanel={<WorkspacePanel />}
+          rightPanel={<WorkspacePanel focusMode={terminalViewMode !== 'normal'} />}
           leftStatusBar={(
             <span className={styles.leftStatusBar} dir="ltr">
               <span className={styles.leftStatusText}>{`${t('app.name')} by Guzyeah, Free for Everyone`}</span>
@@ -102,7 +135,13 @@ function App() {
               </Link>
             </span>
           )}
-          rightStatusBar={<TerminalStatusBar />}
+          rightStatusBar={(
+            <TerminalStatusBar
+              terminalViewMode={terminalViewMode}
+              onTerminalViewModeChange={handleTerminalViewModeChange}
+            />
+          )}
+          terminalViewMode={terminalViewMode}
         />
       </WorkspaceRuntimeProvider>
       <AboutDialog open={aboutOpen} onOpenChange={setAboutOpen} />

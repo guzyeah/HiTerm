@@ -238,7 +238,14 @@
     "totalSize": "Totale",
     "freeSize": "Libero",
     "unavailable": "Non disponibile",
-    "donate": "Dona"
+    "donate": "Dona",
+    "voiceInput": "Input vocale",
+    "voiceInputActive": "In ascolto...",
+    "voiceInputUnsupported": "Input vocale non supportato",
+    "zoomTerminal": "Ingrandisci terminale",
+    "exitZoomTerminal": "Esci da ingrandimento",
+    "fullscreenTerminal": "Terminale a schermo intero",
+    "exitFullscreenTerminal": "Esci da schermo intero"
   },
   "shellGroups": {
     "default": "Predefinito",

@@ -61,10 +61,15 @@ interface ScrollState {
 }
 
 interface WorkspaceTabPanelProps {
+  focusMode?: boolean
   onTerminalSessionDisposed: (tabId: string, sessionId: string) => void
   onTerminalSessionReady: (tabId: string, sessionId: string) => void
   tab: WorkspaceTab
   isActive: boolean
+}
+
+interface WorkspacePanelProps {
+  focusMode?: boolean
 }
 
 const INITIAL_TAB_SEQUENCE = 1
@@ -380,6 +385,7 @@ const useStyles = makeStyles({
 })
 
 function WorkspaceTabPanel({
+  focusMode = false,
   isActive,
   onTerminalSessionDisposed,
   onTerminalSessionReady,
@@ -398,9 +404,11 @@ function WorkspaceTabPanel({
         isActive ? styles.tabPanelActive : styles.tabPanelInactive,
       )}
       role="tabpanel"
+      style={focusMode && !isActive ? { display: 'none' } : undefined}
     >
       <TerminalPane
         shellId={tab.content.shellId}
+        tabId={tab.id}
         isActive={isActive}
         onSessionDisposed={sessionId => onTerminalSessionDisposed(tab.id, sessionId)}
         onSessionReady={sessionId => onTerminalSessionReady(tab.id, sessionId)}
@@ -409,7 +417,7 @@ function WorkspaceTabPanel({
   )
 }
 
-export const WorkspacePanel: FC = () => {
+export const WorkspacePanel: FC<WorkspacePanelProps> = ({ focusMode = false }) => {
   const styles = useStyles()
   const { t } = useTranslation()
   const { isRTL } = useRTL()
@@ -843,130 +851,63 @@ export const WorkspacePanel: FC = () => {
       </div>
     )
   })
+  const contentPanels = showEmptyState ? (
+    <div className={styles.emptyState}>
+      {startupState === 'loading' ? (
+        <>
+          <Spinner size="medium" />
+          <div className={styles.emptyStateText}>
+            <span className={styles.emptyStateTitle}>{t('common.loading')}</span>
+          </div>
+        </>
+      ) : (
+        <div className={styles.emptyStateText}>
+          <span className={styles.emptyStateTitle}>{t('status.unavailable')}</span>
+          <span className={styles.emptyStateDescription}>{t('status.unavailable')}</span>
+        </div>
+      )}
+    </div>
+  ) : (
+    tabs.map(tab => (
+      <WorkspaceTabPanel
+        focusMode={focusMode}
+        key={tab.id}
+        tab={tab}
+        isActive={tab.id === activeTabId}
+        onTerminalSessionDisposed={handleTerminalSessionDisposed}
+        onTerminalSessionReady={handleTerminalSessionReady}
+      />
+    ))
+  )
 
   return (
     <div className={layoutRootClassName} role="region" aria-label={t('workspace.panelTitle')}>
-      {isVertical ? (
-        <>
-          <aside className={styles.verticalSidebar}>
-            <div className={styles.verticalTabList} role="tablist" aria-orientation="vertical">
-              {panelTabs}
-            </div>
-            <div className={styles.verticalFooter}>
-              <Button
-                aria-label={t('workspace.addTab')}
-                appearance="subtle"
-                className={styles.tabActionButton}
-                icon={<AddRegular />}
-                onClick={() => void openStartupTerminalTab(false)}
-                size="small"
-                title={t('workspace.addTab')}
-                type="button"
-              />
-              <Button
-                aria-label={t('workspace.moreActions')}
-                appearance="subtle"
-                className={styles.tabActionButton}
-                icon={<ChevronDownRegular />}
-                disabled
-                size="small"
-                title={t('workspace.moreActions')}
-                type="button"
-              />
-              <Button
-                aria-label={toggleLabel}
-                appearance="subtle"
-                className={styles.tabActionButton}
-                icon={toggleIcon}
-                onClick={toggleLayoutMode}
-                size="small"
-                title={toggleLabel}
-                type="button"
-              />
-            </div>
-          </aside>
-          <main className={styles.contentArea}>
-            {tabs.map(tab => (
-              <WorkspaceTabPanel
-                key={tab.id}
-                tab={tab}
-                isActive={tab.id === activeTabId}
-                onTerminalSessionDisposed={handleTerminalSessionDisposed}
-                onTerminalSessionReady={handleTerminalSessionReady}
-              />
-            ))}
-          </main>
-        </>
-      ) : (
-        <>
-          <div className={styles.horizontalBar}>
-            <div className={styles.tabScrollFrame}>
-              <div className={styles.tabScrollViewport} ref={tabScrollViewportRef}>
-                <div className={styles.tabStripInner} ref={tabStripInnerRef} role="tablist" aria-orientation="horizontal">
-                  {panelTabs}
-                </div>
-              </div>
-              {scrollState.canScrollLeft && (
-                <div
-                  aria-hidden="true"
-                  className={mergeClasses(styles.tabOverflowFade, styles.tabOverflowFadeLeft)}
-                />
-              )}
-              {scrollState.canScrollRight && (
-                <div
-                  aria-hidden="true"
-                  className={mergeClasses(styles.tabOverflowFade, styles.tabOverflowFadeRight)}
-                />
-              )}
-            </div>
-            <div className={styles.actionGroup}>
-              <Button
-                aria-label={t('workspace.addTab')}
-                appearance="subtle"
-                className={styles.tabActionButton}
-                icon={<AddRegular />}
-                onClick={() => void openStartupTerminalTab(false)}
-                size="small"
-                title={t('workspace.addTab')}
-                type="button"
-              />
-              <Button
-                aria-label={t('workspace.moreActions')}
-                appearance="subtle"
-                className={styles.tabActionButton}
-                icon={<ChevronDownRegular />}
-                disabled
-                size="small"
-                title={t('workspace.moreActions')}
-                type="button"
-              />
-            </div>
-            {showScrollButtons && (
-              <div className={styles.scrollButtonGroup}>
-                <Button
-                  aria-label={t('workspace.scrollLeft')}
-                  appearance="subtle"
-                  className={styles.tabActionButton}
-                  disabled={!scrollState.canScrollLeft}
-                  icon={<ChevronLeftRegular />}
-                  onClick={() => scrollTabStrip('left')}
-                  size="small"
-                  title={t('workspace.scrollLeft')}
-                  type="button"
-                />
-                <Button
-                  aria-label={t('workspace.scrollRight')}
-                  appearance="subtle"
-                  className={styles.tabActionButton}
-                  disabled={!scrollState.canScrollRight}
-                  icon={<ChevronRightRegular />}
-                  onClick={() => scrollTabStrip('right')}
-                  size="small"
-                  title={t('workspace.scrollRight')}
-                  type="button"
-                />
-              </div>
-            )}
+      {!focusMode && isVertical && (
+        <aside className={styles.verticalSidebar}>
+          <div className={styles.verticalTabList} role="tablist" aria-orientation="vertical">
+            {panelTabs}
+          </div>
+          <div className={styles.verticalFooter}>
+            <Button
+              aria-label={t('workspace.addTab')}
+              appearance="subtle"
+              className={styles.tabActionButton}
+              icon={<AddRegular />}
+              onClick={() => void openStartupTerminalTab(false)}
+              size="small"
+              title={t('workspace.addTab')}
+              type="button"
+            />
+            <Button
+              aria-label={t('workspace.moreActions')}
+              appearance="subtle"
+              className={styles.tabActionButton}
+              icon={<ChevronDownRegular />}
+              disabled
+              size="small"
+              title={t('workspace.moreActions')}
+              type="button"
+            />
             <Button
               aria-label={toggleLabel}
               appearance="subtle"
@@ -978,37 +919,92 @@ export const WorkspacePanel: FC = () => {
               type="button"
             />
           </div>
-          <main className={styles.contentArea}>
-            {showEmptyState ? (
-              <div className={styles.emptyState}>
-                {startupState === 'loading' ? (
-                  <>
-                    <Spinner size="medium" />
-                    <div className={styles.emptyStateText}>
-                      <span className={styles.emptyStateTitle}>{t('common.loading')}</span>
-                    </div>
-                  </>
-                ) : (
-                  <div className={styles.emptyStateText}>
-                    <span className={styles.emptyStateTitle}>{t('status.unavailable')}</span>
-                    <span className={styles.emptyStateDescription}>{t('status.unavailable')}</span>
-                  </div>
-                )}
-              </div>
-            ) : (
-              tabs.map(tab => (
-                <WorkspaceTabPanel
-                  key={tab.id}
-                  tab={tab}
-                  isActive={tab.id === activeTabId}
-                  onTerminalSessionDisposed={handleTerminalSessionDisposed}
-                  onTerminalSessionReady={handleTerminalSessionReady}
-                />
-              ))
-            )}
-          </main>
-        </>
+        </aside>
       )}
+      {!focusMode && !isVertical && (
+        <div className={styles.horizontalBar}>
+          <div className={styles.tabScrollFrame}>
+            <div className={styles.tabScrollViewport} ref={tabScrollViewportRef}>
+              <div className={styles.tabStripInner} ref={tabStripInnerRef} role="tablist" aria-orientation="horizontal">
+                {panelTabs}
+              </div>
+            </div>
+            {scrollState.canScrollLeft && (
+              <div
+                aria-hidden="true"
+                className={mergeClasses(styles.tabOverflowFade, styles.tabOverflowFadeLeft)}
+              />
+            )}
+            {scrollState.canScrollRight && (
+              <div
+                aria-hidden="true"
+                className={mergeClasses(styles.tabOverflowFade, styles.tabOverflowFadeRight)}
+              />
+            )}
+          </div>
+          <div className={styles.actionGroup}>
+            <Button
+              aria-label={t('workspace.addTab')}
+              appearance="subtle"
+              className={styles.tabActionButton}
+              icon={<AddRegular />}
+              onClick={() => void openStartupTerminalTab(false)}
+              size="small"
+              title={t('workspace.addTab')}
+              type="button"
+            />
+            <Button
+              aria-label={t('workspace.moreActions')}
+              appearance="subtle"
+              className={styles.tabActionButton}
+              icon={<ChevronDownRegular />}
+              disabled
+              size="small"
+              title={t('workspace.moreActions')}
+              type="button"
+            />
+          </div>
+          {showScrollButtons && (
+            <div className={styles.scrollButtonGroup}>
+              <Button
+                aria-label={t('workspace.scrollLeft')}
+                appearance="subtle"
+                className={styles.tabActionButton}
+                disabled={!scrollState.canScrollLeft}
+                icon={<ChevronLeftRegular />}
+                onClick={() => scrollTabStrip('left')}
+                size="small"
+                title={t('workspace.scrollLeft')}
+                type="button"
+              />
+              <Button
+                aria-label={t('workspace.scrollRight')}
+                appearance="subtle"
+                className={styles.tabActionButton}
+                disabled={!scrollState.canScrollRight}
+                icon={<ChevronRightRegular />}
+                onClick={() => scrollTabStrip('right')}
+                size="small"
+                title={t('workspace.scrollRight')}
+                type="button"
+              />
+            </div>
+          )}
+          <Button
+            aria-label={toggleLabel}
+            appearance="subtle"
+            className={styles.tabActionButton}
+            icon={toggleIcon}
+            onClick={toggleLayoutMode}
+            size="small"
+            title={toggleLabel}
+            type="button"
+          />
+        </div>
+      )}
+      <main className={styles.contentArea} key="workspace-content">
+        {contentPanels}
+      </main>
     </div>
   )
 }

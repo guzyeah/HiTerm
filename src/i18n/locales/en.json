@@ -238,7 +238,14 @@
     "totalSize": "Total",
     "freeSize": "Free",
     "unavailable": "Unavailable",
-    "donate": "Donate"
+    "donate": "Donate",
+    "voiceInput": "Voice input",
+    "voiceInputActive": "Listening...",
+    "voiceInputUnsupported": "Voice input is not supported",
+    "zoomTerminal": "Maximize terminal",
+    "exitZoomTerminal": "Exit maximize",
+    "fullscreenTerminal": "Fullscreen terminal",
+    "exitFullscreenTerminal": "Exit fullscreen"
   },
   "shellGroups": {
     "default": "Default",

@@ -11,6 +11,7 @@
 import {
   useCallback,
   useMemo,
+  useRef,
   useState,
   type FC,
   type ReactNode,
@@ -18,6 +19,7 @@ import {
 import {
   WorkspaceRuntimeContext,
   type ActiveTerminalSession,
+  type TerminalController,
   type WorkspaceRuntimeContextValue,
 } from './workspaceRuntimeContext'
 
@@ -27,8 +29,11 @@ interface WorkspaceRuntimeProviderProps {
 
 export const WorkspaceRuntimeProvider: FC<WorkspaceRuntimeProviderProps> = ({ children }) => {
   const [activeTerminalSession, setActiveTerminalSessionState] = useState<ActiveTerminalSession | null>(null)
+  const activeTerminalSessionRef = useRef<ActiveTerminalSession | null>(null)
+  const terminalControllersRef = useRef(new Map<string, TerminalController>())
 
   const setActiveTerminalSession = useCallback((session: ActiveTerminalSession | null) => {
+    activeTerminalSessionRef.current = session
     setActiveTerminalSessionState(previous => {
       if (
         previous?.tabId === session?.tabId
@@ -42,10 +47,43 @@ export const WorkspaceRuntimeProvider: FC<WorkspaceRuntimeProviderProps> = ({ ch
     })
   }, [])
 
+  const registerTerminalController = useCallback((tabId: string, controller: TerminalController) => {
+    terminalControllersRef.current.set(tabId, controller)
+
+    return () => {
+      if (terminalControllersRef.current.get(tabId) === controller) {
+        terminalControllersRef.current.delete(tabId)
+      }
+    }
+  }, [])
+
+  const focusActiveTerminal = useCallback(() => {
+    const activeTabId = activeTerminalSessionRef.current?.tabId
+    if (!activeTabId) return
+
+    terminalControllersRef.current.get(activeTabId)?.focus()
+  }, [])
+
+  const writeToActiveTerminal = useCallback((text: string) => {
+    const activeTabId = activeTerminalSessionRef.current?.tabId
+    if (!activeTabId) return
+
+    terminalControllersRef.current.get(activeTabId)?.writeText(text)
+  }, [])
+
   const value = useMemo<WorkspaceRuntimeContextValue>(() => ({
     activeTerminalSession,
+    focusActiveTerminal,
+    registerTerminalController,
     setActiveTerminalSession,
-  }), [activeTerminalSession, setActiveTerminalSession])
+    writeToActiveTerminal,
+  }), [
+    activeTerminalSession,
+    focusActiveTerminal,
+    registerTerminalController,
+    setActiveTerminalSession,
+    writeToActiveTerminal,
+  ])
 
   return (
     <WorkspaceRuntimeContext.Provider value={value}>

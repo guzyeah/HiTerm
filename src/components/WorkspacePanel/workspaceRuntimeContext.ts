@@ -16,9 +16,17 @@ export interface ActiveTerminalSession {
   shellName: string
 }
 
+export interface TerminalController {
+  focus: () => void
+  writeText: (text: string) => void
+}
+
 export interface WorkspaceRuntimeContextValue {
   activeTerminalSession: ActiveTerminalSession | null
+  focusActiveTerminal: () => void
+  registerTerminalController: (tabId: string, controller: TerminalController) => () => void
   setActiveTerminalSession: (session: ActiveTerminalSession | null) => void
+  writeToActiveTerminal: (text: string) => void
 }
 
 export const WorkspaceRuntimeContext = createContext<WorkspaceRuntimeContextValue | null>(null)

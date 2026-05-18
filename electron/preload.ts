@@ -92,6 +92,19 @@ contextBridge.exposeInMainWorld('settingsAPI', {
   getSystemInfo: () => ipcRenderer.invoke('settings:getSystemInfo'),
 })
 
+// --------- Expose Window API to the Renderer process ---------
+contextBridge.exposeInMainWorld('windowAPI', {
+  setFullscreen: (fullscreen: boolean): Promise<void> =>
+    ipcRenderer.invoke('window:setFullscreen', fullscreen),
+  isFullscreen: (): Promise<boolean> =>
+    ipcRenderer.invoke('window:isFullscreen'),
+  onFullscreenChange: (callback: (fullscreen: boolean) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, fullscreen: boolean) => callback(fullscreen)
+    ipcRenderer.on('window:fullscreenChanged', listener)
+    return () => ipcRenderer.off('window:fullscreenChanged', listener)
+  },
+})
+
 // --------- Expose Menu API to the Renderer process ---------
 contextBridge.exposeInMainWorld('menuAPI', {
   updateLabels: (labels: Record<string, string>) => ipcRenderer.send('menu:updateLabels', labels),

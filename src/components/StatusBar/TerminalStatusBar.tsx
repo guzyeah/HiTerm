@@ -8,12 +8,21 @@
  *
  * You may choose the license that best suits your needs.
  */
-import { useMemo, type ReactNode } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
 import { useTranslation } from 'react-i18next'
 import {
+  Button,
   Popover,
   PopoverSurface,
   PopoverTrigger,
+  Tooltip,
   makeStyles,
   mergeClasses,
   tokens,
@@ -22,13 +31,25 @@ import {
   ArrowDownloadRegular,
   ArrowExportRegular,
   ArrowImportRegular,
+  ArrowMaximizeRegular,
+  ArrowMinimizeRegular,
   ArrowUploadRegular,
+  FullScreenMaximizeRegular,
+  FullScreenMinimizeRegular,
   HardDriveRegular,
+  MicOffRegular,
+  MicRegular,
 } from '@fluentui/react-icons'
 import { useTerminalStatus } from '@/hooks/useTerminalStatus'
 import { useWorkspaceRuntime } from '@/components/WorkspacePanel/workspaceRuntimeContext'
 import { MiniTrendChart } from './MiniTrendChart'
 import type { TerminalStatusDisk } from '@/shared/terminalStatusTypes'
+import type { TerminalViewMode } from '@/shared/terminalViewTypes'
+
+interface TerminalStatusBarProps {
+  terminalViewMode: TerminalViewMode
+  onTerminalViewModeChange: (mode: TerminalViewMode) => void
+}
 
 interface TrendMetricProps {
   history: Array<number | null>
@@ -44,6 +65,34 @@ interface SpeedMetricProps {
   withDivider?: boolean
 }
 
+type SpeechRecognitionConstructor = new () => SpeechRecognitionLike
+
+interface SpeechRecognitionResultLike {
+  readonly isFinal: boolean
+  readonly [index: number]: {
+    readonly transcript: string
+  }
+}
+
+interface SpeechRecognitionEventLike extends Event {
+  readonly resultIndex: number
+  readonly results: {
+    readonly length: number
+    readonly [index: number]: SpeechRecognitionResultLike
+  }
+}
+
+interface SpeechRecognitionLike {
+  continuous: boolean
+  interimResults: boolean
+  lang: string
+  onend: (() => void) | null
+  onerror: (() => void) | null
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null
+  start: () => void
+  stop: () => void
+}
+
 const STATUS_ITEM_GAP = '0'
 const TREND_METRIC_WIDTH = '96px'
 const SPEED_METRIC_WIDTH = '76px'
@@ -54,11 +103,27 @@ const useStyles = makeStyles({
   root: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     gap: STATUS_ITEM_GAP,
     width: '100%',
     minWidth: 0,
     overflow: 'hidden',
+  },
+  metricsGroup: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    gap: STATUS_ITEM_GAP,
+    minWidth: 0,
+    overflow: 'hidden',
+  },
+  actionsGroup: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: tokens.spacingHorizontalXXS,
+    flexShrink: 0,
+    marginInlineStart: tokens.spacingHorizontalM,
   },
   metric: {
     display: 'inline-flex',
@@ -173,6 +238,20 @@ const useStyles = makeStyles({
   muted: {
     color: tokens.colorNeutralForeground3,
   },
+  actionButton: {
+    width: '28px',
+    minWidth: '28px',
+    height: '24px',
+    padding: 0,
+    borderRadius: tokens.borderRadiusMedium,
+  },
+  actionButtonActive: {
+    color: tokens.colorBrandForeground1,
+    backgroundColor: tokens.colorBrandBackground2,
+    ':hover': {
+      backgroundColor: tokens.colorBrandBackground2Hover,
+    },
+  },
 })
 
 function formatPercent(value: number | null | undefined): string {
@@ -267,10 +346,29 @@ function DiskPopoverContent({ disks }: { disks: TerminalStatusDisk[] }) {
   )
 }
 
-export function TerminalStatusBar() {
+function getSpeechRecognitionConstructor(): SpeechRecognitionConstructor | null {
+  const speechWindow = window as Window & {
+    SpeechRecognition?: SpeechRecognitionConstructor
+    webkitSpeechRecognition?: SpeechRecognitionConstructor
+  }
+
+  return speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition ?? null
+}
+
+export function TerminalStatusBar({
+  terminalViewMode,
+  onTerminalViewModeChange,
+}: TerminalStatusBarProps) {
   const styles = useStyles()
   const { t } = useTranslation()
-  const { activeTerminalSession } = useWorkspaceRuntime()
+  const {
+    activeTerminalSession,
+    focusActiveTerminal,
+    writeToActiveTerminal,
+  } = useWorkspaceRuntime()
+  const [isVoiceInputActive, setIsVoiceInputActive] = useState(false)
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null)
+  const speechRecognitionConstructor = useMemo(() => getSpeechRecognitionConstructor(), [])
   const { cpuHistory, error, memoryHistory, sample } = useTerminalStatus(
     activeTerminalSession?.sessionId ?? null,
   )
@@ -282,74 +380,214 @@ export function TerminalStatusBar() {
     return `${primaryDisk.mountPoint} ${formatPercent(primaryDisk.usagePercent)}`
   }, [primaryDisk, t])
 
+  const handleVoiceInputClick = useCallback(() => {
+    if (!activeTerminalSession || !speechRecognitionConstructor) return
+
+    if (isVoiceInputActive) {
+      recognitionRef.current?.stop()
+      return
+    }
+
+    const recognition = new speechRecognitionConstructor()
+    recognition.continuous = false
+    recognition.interimResults = false
+    recognition.lang = navigator.language || 'en-US'
+    recognition.onresult = event => {
+      let transcript = ''
+      for (let index = event.resultIndex; index < event.results.length; index += 1) {
+        const result = event.results[index]
+        if (result?.isFinal) {
+          transcript += result[0]?.transcript ?? ''
+        }
+      }
+
+      if (transcript) {
+        writeToActiveTerminal(transcript)
+      }
+    }
+    recognition.onend = () => {
+      if (recognitionRef.current === recognition) {
+        recognitionRef.current = null
+      }
+      setIsVoiceInputActive(false)
+      focusActiveTerminal()
+    }
+    recognition.onerror = () => {
+      if (recognitionRef.current === recognition) {
+        recognitionRef.current = null
+      }
+      setIsVoiceInputActive(false)
+      focusActiveTerminal()
+    }
+
+    recognitionRef.current = recognition
+    setIsVoiceInputActive(true)
+    focusActiveTerminal()
+    try {
+      recognition.start()
+    } catch {
+      recognitionRef.current = null
+      setIsVoiceInputActive(false)
+      focusActiveTerminal()
+    }
+  }, [
+    activeTerminalSession,
+    focusActiveTerminal,
+    isVoiceInputActive,
+    speechRecognitionConstructor,
+    writeToActiveTerminal,
+  ])
+
+  const handleMaximizeClick = useCallback(() => {
+    onTerminalViewModeChange(terminalViewMode === 'maximized' ? 'normal' : 'maximized')
+    window.requestAnimationFrame(() => focusActiveTerminal())
+  }, [focusActiveTerminal, onTerminalViewModeChange, terminalViewMode])
+
+  const handleFullscreenClick = useCallback(() => {
+    onTerminalViewModeChange(terminalViewMode === 'fullscreen' ? 'normal' : 'fullscreen')
+    window.requestAnimationFrame(() => focusActiveTerminal())
+  }, [focusActiveTerminal, onTerminalViewModeChange, terminalViewMode])
+
+  useEffect(() => () => {
+    try {
+      recognitionRef.current?.stop()
+    } catch {
+      // 语音识别状态由浏览器维护，停止失败时只清理本地引用。
+    }
+    recognitionRef.current = null
+  }, [])
+
+  const hasActiveTerminal = Boolean(activeTerminalSession)
+  const canToggleTerminalView = hasActiveTerminal || terminalViewMode !== 'normal'
+  const isMaximized = terminalViewMode === 'maximized'
+  const isFullscreen = terminalViewMode === 'fullscreen'
+  const voiceInputLabel = !speechRecognitionConstructor
+    ? t('status.voiceInputUnsupported')
+    : isVoiceInputActive
+      ? t('status.voiceInputActive')
+      : t('status.voiceInput')
+  const maximizeLabel = isMaximized ? t('status.exitZoomTerminal') : t('status.zoomTerminal')
+  const fullscreenLabel = isFullscreen ? t('status.exitFullscreenTerminal') : t('status.fullscreenTerminal')
+
+  const actionButtons = (
+    <div className={styles.actionsGroup}>
+      <Tooltip content={voiceInputLabel} relationship="label">
+        <Button
+          appearance="subtle"
+          aria-pressed={isVoiceInputActive}
+          className={mergeClasses(styles.actionButton, isVoiceInputActive ? styles.actionButtonActive : undefined)}
+          disabled={!hasActiveTerminal || !speechRecognitionConstructor}
+          icon={speechRecognitionConstructor ? <MicRegular /> : <MicOffRegular />}
+          onClick={handleVoiceInputClick}
+          size="small"
+          title={voiceInputLabel}
+          type="button"
+        />
+      </Tooltip>
+      <Tooltip content={maximizeLabel} relationship="label">
+        <Button
+          appearance="subtle"
+          aria-pressed={isMaximized}
+          className={mergeClasses(styles.actionButton, isMaximized ? styles.actionButtonActive : undefined)}
+          disabled={!canToggleTerminalView}
+          icon={isMaximized ? <ArrowMinimizeRegular /> : <ArrowMaximizeRegular />}
+          onClick={handleMaximizeClick}
+          size="small"
+          title={maximizeLabel}
+          type="button"
+        />
+      </Tooltip>
+      <Tooltip content={fullscreenLabel} relationship="label">
+        <Button
+          appearance="subtle"
+          aria-pressed={isFullscreen}
+          className={mergeClasses(styles.actionButton, isFullscreen ? styles.actionButtonActive : undefined)}
+          disabled={!canToggleTerminalView}
+          icon={isFullscreen ? <FullScreenMinimizeRegular /> : <FullScreenMaximizeRegular />}
+          onClick={handleFullscreenClick}
+          size="small"
+          title={fullscreenLabel}
+          type="button"
+        />
+      </Tooltip>
+    </div>
+  )
+
+  let metricsContent: ReactNode
   if (!activeTerminalSession) {
-    return (
-      <div className={styles.root}>
-        <span className={styles.muted}>{t('workspace.statusReady')}</span>
-      </div>
+    metricsContent = <span className={styles.muted}>{t('workspace.statusReady')}</span>
+  } else if (error && !sample) {
+    metricsContent = <span className={styles.muted}>{t('status.unavailable')}</span>
+  } else {
+    metricsContent = (
+      <>
+        <TrendMetric
+          history={cpuHistory}
+          label={t('status.cpu')}
+          value={sample?.cpu.usagePercent}
+        />
+        <TrendMetric
+          history={memoryHistory}
+          label={t('status.memory')}
+          value={sample?.memory.usagePercent}
+          withDivider
+        />
+        <SpeedMetric
+          icon={<ArrowUploadRegular />}
+          label={t('status.upload')}
+          value={sample?.network.uploadBytesPerSecond}
+          withDivider
+        />
+        <SpeedMetric
+          icon={<ArrowDownloadRegular />}
+          label={t('status.download')}
+          value={sample?.network.downloadBytesPerSecond}
+          withDivider
+        />
+        <SpeedMetric
+          icon={<ArrowImportRegular />}
+          label={t('status.diskRead')}
+          value={sample?.diskIo.readBytesPerSecond}
+          withDivider
+        />
+        <SpeedMetric
+          icon={<ArrowExportRegular />}
+          label={t('status.diskWrite')}
+          value={sample?.diskIo.writeBytesPerSecond}
+          withDivider
+        />
+        <Popover openOnHover positioning="above-end" withArrow>
+          <PopoverTrigger disableButtonEnhancement>
+            <button className={mergeClasses(styles.diskButton, styles.itemDivider)} type="button">
+              <span className={styles.icon}><HardDriveRegular /></span>
+              <span className={mergeClasses(styles.metricValue, styles.diskValue)}>
+                {diskLabel}
+              </span>
+            </button>
+          </PopoverTrigger>
+          <PopoverSurface className={styles.popoverSurface}>
+            {disks.length > 0
+              ? <DiskPopoverContent disks={disks} />
+              : <span className={styles.muted}>{t('status.unavailable')}</span>}
+          </PopoverSurface>
+        </Popover>
+      </>
     )
   }
 
-  if (error && !sample) {
+  if (!activeTerminalSession) {
     return (
       <div className={styles.root}>
-        <span className={styles.muted}>{t('status.unavailable')}</span>
+        <div className={styles.metricsGroup}>{metricsContent}</div>
+        {actionButtons}
       </div>
     )
   }
 
   return (
     <div className={styles.root} title={activeTerminalSession.shellName}>
-      <TrendMetric
-        history={cpuHistory}
-        label={t('status.cpu')}
-        value={sample?.cpu.usagePercent}
-      />
-      <TrendMetric
-        history={memoryHistory}
-        label={t('status.memory')}
-        value={sample?.memory.usagePercent}
-        withDivider
-      />
-      <SpeedMetric
-        icon={<ArrowUploadRegular />}
-        label={t('status.upload')}
-        value={sample?.network.uploadBytesPerSecond}
-        withDivider
-      />
-      <SpeedMetric
-        icon={<ArrowDownloadRegular />}
-        label={t('status.download')}
-        value={sample?.network.downloadBytesPerSecond}
-        withDivider
-      />
-      <SpeedMetric
-        icon={<ArrowImportRegular />}
-        label={t('status.diskRead')}
-        value={sample?.diskIo.readBytesPerSecond}
-        withDivider
-      />
-      <SpeedMetric
-        icon={<ArrowExportRegular />}
-        label={t('status.diskWrite')}
-        value={sample?.diskIo.writeBytesPerSecond}
-        withDivider
-      />
-      <Popover openOnHover positioning="above-end" withArrow>
-        <PopoverTrigger disableButtonEnhancement>
-          <button className={mergeClasses(styles.diskButton, styles.itemDivider)} type="button">
-            <span className={styles.icon}><HardDriveRegular /></span>
-            <span className={mergeClasses(styles.metricValue, styles.diskValue)}>
-              {diskLabel}
-            </span>
-          </button>
-        </PopoverTrigger>
-        <PopoverSurface className={styles.popoverSurface}>
-          {disks.length > 0
-            ? <DiskPopoverContent disks={disks} />
-            : <span className={styles.muted}>{t('status.unavailable')}</span>}
-        </PopoverSurface>
-      </Popover>
+      <div className={styles.metricsGroup}>{metricsContent}</div>
+      {actionButtons}
     </div>
   )
 }

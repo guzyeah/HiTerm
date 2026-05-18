@@ -238,7 +238,14 @@
     "totalSize": "Gesamt",
     "freeSize": "Frei",
     "unavailable": "Nicht verfügbar",
-    "donate": "Spenden"
+    "donate": "Spenden",
+    "voiceInput": "Spracheingabe",
+    "voiceInputActive": "Höre zu...",
+    "voiceInputUnsupported": "Spracheingabe wird nicht unterstützt",
+    "zoomTerminal": "Terminal maximieren",
+    "exitZoomTerminal": "Maximierung beenden",
+    "fullscreenTerminal": "Terminal im Vollbild",
+    "exitFullscreenTerminal": "Vollbild beenden"
   },
   "shellGroups": {
     "default": "Standard",

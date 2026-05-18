@@ -238,7 +238,14 @@
     "totalSize": "전체",
     "freeSize": "여유",
     "unavailable": "사용 불가",
-    "donate": "기부"
+    "donate": "기부",
+    "voiceInput": "음성 입력",
+    "voiceInputActive": "듣는 중...",
+    "voiceInputUnsupported": "음성 입력을 지원하지 않습니다",
+    "zoomTerminal": "터미널 확대",
+    "exitZoomTerminal": "확대 종료",
+    "fullscreenTerminal": "터미널 전체 화면",
+    "exitFullscreenTerminal": "전체 화면 종료"
   },
   "shellGroups": {
     "default": "기본",

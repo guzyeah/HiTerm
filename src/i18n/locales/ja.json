@@ -238,7 +238,14 @@
     "totalSize": "合計",
     "freeSize": "空き",
     "unavailable": "利用不可",
-    "donate": "寄付"
+    "donate": "寄付",
+    "voiceInput": "音声入力",
+    "voiceInputActive": "聴取中...",
+    "voiceInputUnsupported": "音声入力はサポートされていません",
+    "zoomTerminal": "ターミナルを拡大",
+    "exitZoomTerminal": "拡大を終了",
+    "fullscreenTerminal": "ターミナルを全画面表示",
+    "exitFullscreenTerminal": "全画面表示を終了"
   },
   "shellGroups": {
     "default": "デフォルト",

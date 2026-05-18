@@ -14,7 +14,8 @@
  */
 
 import { type FC, type ReactNode } from 'react'
-import { makeStyles, tokens } from '@fluentui/react-components'
+import { makeStyles, mergeClasses, tokens } from '@fluentui/react-components'
+import type { TerminalViewMode } from '@/shared/terminalViewTypes'
 
 interface MainLayoutProps {
   /** 左栏工具栏内容 */
@@ -25,6 +26,7 @@ interface MainLayoutProps {
   leftStatusBar: ReactNode
   /** 右下状态栏内容 */
   rightStatusBar: ReactNode
+  terminalViewMode?: TerminalViewMode
 }
 
 /** 标准状态栏高度 (FluentUI 标准) */
@@ -59,6 +61,10 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     flex: 1,
     minWidth: 0,
+  },
+  focusedRightColumn: {
+    width: '100%',
+    flexBasis: '100%',
   },
   panelContent: {
     flex: 1,
@@ -103,19 +109,23 @@ export const MainLayout: FC<MainLayoutProps> = ({
   rightPanel,
   leftStatusBar,
   rightStatusBar,
+  terminalViewMode = 'normal',
 }) => {
   const styles = useStyles()
+  const isTerminalFocused = terminalViewMode !== 'normal'
 
   return (
     <div className={styles.root}>
       {/* 左栏：工具栏 + 左下状态栏 */}
-      <div className={styles.leftColumn}>
-        <div className={styles.panelContent}>{leftPanel}</div>
-        <div className={styles.statusBar}>{leftStatusBar}</div>
-      </div>
+      {!isTerminalFocused && (
+        <div className={styles.leftColumn}>
+          <div className={styles.panelContent}>{leftPanel}</div>
+          <div className={styles.statusBar}>{leftStatusBar}</div>
+        </div>
+      )}
 
       {/* 右栏：主内容区 + 右下状态栏 */}
-      <div className={styles.rightColumn}>
+      <div className={mergeClasses(styles.rightColumn, isTerminalFocused ? styles.focusedRightColumn : undefined)}>
         <div className={styles.panelContent}>{rightPanel}</div>
         <div className={styles.statusBar}>{rightStatusBar}</div>
       </div>

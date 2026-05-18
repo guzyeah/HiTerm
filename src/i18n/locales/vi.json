@@ -238,7 +238,14 @@
     "totalSize": "Tổng",
     "freeSize": "Còn trống",
     "unavailable": "Không khả dụng",
-    "donate": "Ủng hộ"
+    "donate": "Ủng hộ",
+    "voiceInput": "Nhập bằng giọng nói",
+    "voiceInputActive": "Đang nghe...",
+    "voiceInputUnsupported": "Không hỗ trợ nhập bằng giọng nói",
+    "zoomTerminal": "Phóng to terminal",
+    "exitZoomTerminal": "Thoát phóng to",
+    "fullscreenTerminal": "Terminal toàn màn hình",
+    "exitFullscreenTerminal": "Thoát toàn màn hình"
   },
   "shellGroups": {
     "default": "Mặc định",

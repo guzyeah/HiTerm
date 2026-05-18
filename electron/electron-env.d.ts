@@ -56,6 +56,12 @@ interface MenuAPI {
   updateLabels: (labels: Record<string, string>) => void
 }
 
+interface WindowAPI {
+  setFullscreen: (fullscreen: boolean) => Promise<void>
+  isFullscreen: () => Promise<boolean>
+  onFullscreenChange: (callback: (fullscreen: boolean) => void) => () => void
+}
+
 interface ShellAPI {
   saveShell: (record: unknown) => Promise<unknown>
   listGroups: () => Promise<string[]>
@@ -124,6 +130,7 @@ interface TerminalHistoryAPI {
 interface Window {
   ipcRenderer: import('electron').IpcRenderer
   settingsAPI: SettingsAPI
+  windowAPI: WindowAPI
   menuAPI: MenuAPI
   shellAPI: ShellAPI
   dialogAPI: DialogAPI

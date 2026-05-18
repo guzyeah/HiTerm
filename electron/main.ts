@@ -76,6 +76,14 @@ function createWindow() {
     },
   })
 
+  win.on('enter-full-screen', () => {
+    win?.webContents.send('window:fullscreenChanged', true)
+  })
+
+  win.on('leave-full-screen', () => {
+    win?.webContents.send('window:fullscreenChanged', false)
+  })
+
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL)
   } else {
@@ -114,6 +122,16 @@ function registerIpcHandlers() {
   ipcMain.handle('settings:getTerminalThemeId', () => getTerminalThemeId())
   ipcMain.handle('settings:setTerminalThemeId', (_event, themeId: string) => setTerminalThemeId(themeId))
   ipcMain.handle('settings:getSystemInfo', () => getSystemInfo())
+
+  ipcMain.handle('window:setFullscreen', (_event, fullscreen: boolean) => {
+    const targetWindow = BrowserWindow.getFocusedWindow() ?? win
+    targetWindow?.setFullScreen(fullscreen)
+  })
+
+  ipcMain.handle('window:isFullscreen', () => {
+    const targetWindow = BrowserWindow.getFocusedWindow() ?? win
+    return targetWindow?.isFullScreen() ?? false
+  })
 
   // renderer发送i18n菜单标签到主进程，macOS上重建原生菜单
   ipcMain.on('menu:updateLabels', (_event, labels: MenuLabels) => {
