@@ -13,7 +13,7 @@
  * 包含协议Tab栏和各协议表单
  */
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -227,6 +227,16 @@ export function ConnectDialog({ open, onOpenChange }: ConnectDialogProps) {
   // 串口列表
   const [serialPortList, setSerialPortList] = useState<{ path: string; friendlyName?: string }[]>([])
 
+  // 记录上一次自动生成的名称，用于区分自动填充与用户自定义。
+  const generatedNameRef = useRef<Record<ProtocolType, string>>({
+    ssh: '',
+    local: '',
+    telnet: '',
+    serial: '',
+    vnc: '',
+    rdp: '',
+  })
+
   // 加载分组列表
   useEffect(() => {
     if (!open) return
@@ -315,44 +325,50 @@ export function ConnectDialog({ open, onOpenChange }: ConnectDialogProps) {
 
   // 更新 SSH 名称
   useEffect(() => {
-    if (sshData.name) return
     const name = generateName('ssh', sshData)
-    if (name) setSshData(prev => ({ ...prev, name }))
+    if (sshData.name && sshData.name !== generatedNameRef.current.ssh) return
+    generatedNameRef.current.ssh = name
+    if (name !== sshData.name) setSshData(prev => ({ ...prev, name }))
   }, [sshData, generateName])
 
   // 更新 Local 名称
   useEffect(() => {
-    if (localData.name) return
     const name = generateName('local', localData)
-    if (name) setLocalData(prev => ({ ...prev, name }))
+    if (localData.name && localData.name !== generatedNameRef.current.local) return
+    generatedNameRef.current.local = name
+    if (name !== localData.name) setLocalData(prev => ({ ...prev, name }))
   }, [localData, generateName])
 
   // 更新 Telnet 名称
   useEffect(() => {
-    if (telnetData.name) return
     const name = generateName('telnet', telnetData)
-    if (name) setTelnetData(prev => ({ ...prev, name }))
+    if (telnetData.name && telnetData.name !== generatedNameRef.current.telnet) return
+    generatedNameRef.current.telnet = name
+    if (name !== telnetData.name) setTelnetData(prev => ({ ...prev, name }))
   }, [telnetData, generateName])
 
   // 更新 Serial 名称
   useEffect(() => {
-    if (serialData.name) return
     const name = generateName('serial', serialData)
-    if (name) setSerialData(prev => ({ ...prev, name }))
+    if (serialData.name && serialData.name !== generatedNameRef.current.serial) return
+    generatedNameRef.current.serial = name
+    if (name !== serialData.name) setSerialData(prev => ({ ...prev, name }))
   }, [serialData, generateName])
 
   // 更新 VNC 名称
   useEffect(() => {
-    if (vncData.name) return
     const name = generateName('vnc', vncData)
-    if (name) setVncData(prev => ({ ...prev, name }))
+    if (vncData.name && vncData.name !== generatedNameRef.current.vnc) return
+    generatedNameRef.current.vnc = name
+    if (name !== vncData.name) setVncData(prev => ({ ...prev, name }))
   }, [vncData, generateName])
 
   // 更新 RDP 名称
   useEffect(() => {
-    if (rdpData.name) return
     const name = generateName('rdp', rdpData)
-    if (name) setRdpData(prev => ({ ...prev, name }))
+    if (rdpData.name && rdpData.name !== generatedNameRef.current.rdp) return
+    generatedNameRef.current.rdp = name
+    if (name !== rdpData.name) setRdpData(prev => ({ ...prev, name }))
   }, [rdpData, generateName])
 
   // 保存处理
