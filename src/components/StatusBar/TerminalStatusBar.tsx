@@ -545,13 +545,13 @@ export function TerminalStatusBar({
           withDivider
         />
         <SpeedMetric
-          icon={<ArrowImportRegular />}
+          icon={<ArrowExportRegular />}
           label={t('status.diskRead')}
           value={sample?.diskIo.readBytesPerSecond}
           withDivider
         />
         <SpeedMetric
-          icon={<ArrowExportRegular />}
+          icon={<ArrowImportRegular />}
           label={t('status.diskWrite')}
           value={sample?.diskIo.writeBytesPerSecond}
           withDivider
