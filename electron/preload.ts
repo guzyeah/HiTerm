@@ -113,6 +113,8 @@ contextBridge.exposeInMainWorld('menuAPI', {
 // --------- Expose Shell API to the Renderer process ---------
 contextBridge.exposeInMainWorld('shellAPI', {
   saveShell: (record: unknown) => ipcRenderer.invoke('shell:save', record),
+  deleteShell: (shellId: string): Promise<boolean> => ipcRenderer.invoke('shell:delete', shellId),
+  deleteGroup: (groupName: string): Promise<boolean> => ipcRenderer.invoke('shell:deleteGroup', groupName),
   listGroups: () => ipcRenderer.invoke('shell:listGroups'),
   listShellSummaries: () => ipcRenderer.invoke('shell:listSummaries'),
   getStartupLocalShell: (preferredShellId?: string | null) =>

@@ -64,6 +64,8 @@ interface WindowAPI {
 
 interface ShellAPI {
   saveShell: (record: unknown) => Promise<unknown>
+  deleteShell: (shellId: string) => Promise<boolean>
+  deleteGroup: (groupName: string) => Promise<boolean>
   listGroups: () => Promise<string[]>
   listShellSummaries: () => Promise<import('../src/shared/shellTypes').ShellSummary[]>
   getStartupLocalShell: (preferredShellId?: string | null) => Promise<import('../src/shared/shellTypes').ShellSummary | null>

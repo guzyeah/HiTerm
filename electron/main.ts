@@ -34,6 +34,8 @@ import { initNativeMenu, updateNativeMenu, type MenuLabels } from './menu'
 import {
   initializeShellStore,
   saveShell,
+  deleteShell,
+  deleteGroup,
   listGroups,
   listShellSummaries,
   getStartupLocalShellSummary,
@@ -145,7 +147,17 @@ function registerIpcHandlers() {
     return saveShell(record)
   })
 
+  // Shell 连接记录删除
+  ipcMain.handle('shell:delete', (_event, shellId: string) => {
+    return deleteShell(shellId)
+  })
+
   // Shell 分组列表
+  // Shell 分组删除，仅允许删除无连接的非预置分组
+  ipcMain.handle('shell:deleteGroup', (_event, groupName: string) => {
+    return deleteGroup(groupName)
+  })
+
   ipcMain.handle('shell:listGroups', () => {
     return listGroups()
   })

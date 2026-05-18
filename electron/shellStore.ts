@@ -20,6 +20,7 @@ import { randomUUID } from 'crypto'
 import {
   LOCAL_SHELL_GROUP_NAME,
   PRESET_SHELL_GROUP_NAMES,
+  isPresetShellGroupName,
 } from '../src/shared/shellGroups'
 import type { ShellSummary } from '../src/shared/shellTypes'
 import { aesEncrypt, aesDecrypt } from './utils/crypto'
@@ -229,6 +230,24 @@ export function saveGroup(name: string): ShellGroup | null {
 
   store.set('groups', [...groups, group])
   return group
+}
+
+/** 删除空 Shell 分组；仍有关联连接或预置分组时拒绝删除 */
+export function deleteGroup(name: string): boolean {
+  const normalizedName = normalizeGroupName(name)
+  if (!normalizedName || isPresetShellGroupName(normalizedName)) return false
+
+  const hasLinkedShell = store
+    .get('shells', [])
+    .some(shell => normalizeGroupName(shell.group) === normalizedName)
+  if (hasLinkedShell) return false
+
+  const groups = ensureGroupsMigratedFromShells()
+  const filtered = groups.filter(group => group.name !== normalizedName)
+  if (filtered.length === groups.length) return false
+
+  store.set('groups', filtered)
+  return true
 }
 
 /** 生成 Windows 上 Git Bash 的候选路径，盘符覆盖 A-Z */
