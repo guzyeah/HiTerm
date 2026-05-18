@@ -10,10 +10,7 @@
  */
 import {
   useCallback,
-  useEffect,
   useMemo,
-  useRef,
-  useState,
   type ReactNode,
 } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -38,7 +35,6 @@ import {
   FullScreenMinimizeRegular,
   HardDriveRegular,
   MicOffRegular,
-  MicRegular,
 } from '@fluentui/react-icons'
 import { useTerminalStatus } from '@/hooks/useTerminalStatus'
 import { useWorkspaceRuntime } from '@/components/WorkspacePanel/workspaceRuntimeContext'
@@ -63,34 +59,6 @@ interface SpeedMetricProps {
   label: string
   value: number | null | undefined
   withDivider?: boolean
-}
-
-type SpeechRecognitionConstructor = new () => SpeechRecognitionLike
-
-interface SpeechRecognitionResultLike {
-  readonly isFinal: boolean
-  readonly [index: number]: {
-    readonly transcript: string
-  }
-}
-
-interface SpeechRecognitionEventLike extends Event {
-  readonly resultIndex: number
-  readonly results: {
-    readonly length: number
-    readonly [index: number]: SpeechRecognitionResultLike
-  }
-}
-
-interface SpeechRecognitionLike {
-  continuous: boolean
-  interimResults: boolean
-  lang: string
-  onend: (() => void) | null
-  onerror: (() => void) | null
-  onresult: ((event: SpeechRecognitionEventLike) => void) | null
-  start: () => void
-  stop: () => void
 }
 
 const STATUS_ITEM_GAP = '0'
@@ -346,15 +314,6 @@ function DiskPopoverContent({ disks }: { disks: TerminalStatusDisk[] }) {
   )
 }
 
-function getSpeechRecognitionConstructor(): SpeechRecognitionConstructor | null {
-  const speechWindow = window as Window & {
-    SpeechRecognition?: SpeechRecognitionConstructor
-    webkitSpeechRecognition?: SpeechRecognitionConstructor
-  }
-
-  return speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition ?? null
-}
-
 export function TerminalStatusBar({
   terminalViewMode,
   onTerminalViewModeChange,
@@ -364,11 +323,7 @@ export function TerminalStatusBar({
   const {
     activeTerminalSession,
     focusActiveTerminal,
-    writeToActiveTerminal,
   } = useWorkspaceRuntime()
-  const [isVoiceInputActive, setIsVoiceInputActive] = useState(false)
-  const recognitionRef = useRef<SpeechRecognitionLike | null>(null)
-  const speechRecognitionConstructor = useMemo(() => getSpeechRecognitionConstructor(), [])
   const { cpuHistory, error, memoryHistory, sample } = useTerminalStatus(
     activeTerminalSession?.sessionId ?? null,
   )
@@ -380,64 +335,6 @@ export function TerminalStatusBar({
     return `${primaryDisk.mountPoint} ${formatPercent(primaryDisk.usagePercent)}`
   }, [primaryDisk, t])
 
-  const handleVoiceInputClick = useCallback(() => {
-    if (!activeTerminalSession || !speechRecognitionConstructor) return
-
-    if (isVoiceInputActive) {
-      recognitionRef.current?.stop()
-      return
-    }
-
-    const recognition = new speechRecognitionConstructor()
-    recognition.continuous = false
-    recognition.interimResults = false
-    recognition.lang = navigator.language || 'en-US'
-    recognition.onresult = event => {
-      let transcript = ''
-      for (let index = event.resultIndex; index < event.results.length; index += 1) {
-        const result = event.results[index]
-        if (result?.isFinal) {
-          transcript += result[0]?.transcript ?? ''
-        }
-      }
-
-      if (transcript) {
-        writeToActiveTerminal(transcript)
-      }
-    }
-    recognition.onend = () => {
-      if (recognitionRef.current === recognition) {
-        recognitionRef.current = null
-      }
-      setIsVoiceInputActive(false)
-      focusActiveTerminal()
-    }
-    recognition.onerror = () => {
-      if (recognitionRef.current === recognition) {
-        recognitionRef.current = null
-      }
-      setIsVoiceInputActive(false)
-      focusActiveTerminal()
-    }
-
-    recognitionRef.current = recognition
-    setIsVoiceInputActive(true)
-    focusActiveTerminal()
-    try {
-      recognition.start()
-    } catch {
-      recognitionRef.current = null
-      setIsVoiceInputActive(false)
-      focusActiveTerminal()
-    }
-  }, [
-    activeTerminalSession,
-    focusActiveTerminal,
-    isVoiceInputActive,
-    speechRecognitionConstructor,
-    writeToActiveTerminal,
-  ])
-
   const handleMaximizeClick = useCallback(() => {
     onTerminalViewModeChange(terminalViewMode === 'maximized' ? 'normal' : 'maximized')
     window.requestAnimationFrame(() => focusActiveTerminal())
@@ -448,24 +345,11 @@ export function TerminalStatusBar({
     window.requestAnimationFrame(() => focusActiveTerminal())
   }, [focusActiveTerminal, onTerminalViewModeChange, terminalViewMode])
 
-  useEffect(() => () => {
-    try {
-      recognitionRef.current?.stop()
-    } catch {
-      // 语音识别状态由浏览器维护，停止失败时只清理本地引用。
-    }
-    recognitionRef.current = null
-  }, [])
-
   const hasActiveTerminal = Boolean(activeTerminalSession)
   const canToggleTerminalView = hasActiveTerminal || terminalViewMode !== 'normal'
   const isMaximized = terminalViewMode === 'maximized'
   const isFullscreen = terminalViewMode === 'fullscreen'
-  const voiceInputLabel = !speechRecognitionConstructor
-    ? t('status.voiceInputUnsupported')
-    : isVoiceInputActive
-      ? t('status.voiceInputActive')
-      : t('status.voiceInput')
+  const voiceInputLabel = t('status.voiceInputUnsupported')
   const maximizeLabel = isMaximized ? t('status.exitZoomTerminal') : t('status.zoomTerminal')
   const fullscreenLabel = isFullscreen ? t('status.exitFullscreenTerminal') : t('status.fullscreenTerminal')
 
@@ -474,11 +358,10 @@ export function TerminalStatusBar({
       <Tooltip content={voiceInputLabel} relationship="label">
         <Button
           appearance="subtle"
-          aria-pressed={isVoiceInputActive}
-          className={mergeClasses(styles.actionButton, isVoiceInputActive ? styles.actionButtonActive : undefined)}
-          disabled={!hasActiveTerminal || !speechRecognitionConstructor}
-          icon={speechRecognitionConstructor ? <MicRegular /> : <MicOffRegular />}
-          onClick={handleVoiceInputClick}
+          aria-pressed={false}
+          className={styles.actionButton}
+          disabled
+          icon={<MicOffRegular />}
           size="small"
           title={voiceInputLabel}
           type="button"
