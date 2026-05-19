@@ -11,10 +11,22 @@
     "url": "https://www.guzyeah.cn"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build && electron-builder",
+    "dev": "vite --config vite.config.dev.ts",
+    "build": "tsc && vite build --config vite.config.prod.ts",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview --config vite.config.prod.ts",
+    "dist": "pnpm build && node scripts/dist.mjs --platform=win --arch=x64",
+    "dist:win-x64": "pnpm build && node scripts/dist.mjs --platform=win --arch=x64",
+    "dist:win-x86": "pnpm build && node scripts/dist.mjs --platform=win --arch=x86",
+    "dist:win-arm64": "pnpm build && node scripts/dist.mjs --platform=win --arch=arm64",
+    "dist:linux-x64": "pnpm build && node scripts/dist.mjs --platform=linux --arch=x64",
+    "dist:linux-arm64": "pnpm build && node scripts/dist.mjs --platform=linux --arch=arm64",
+    "dist:mac-x64": "pnpm build && node scripts/dist.mjs --platform=mac --arch=x64",
+    "dist:mac-applesilicon": "pnpm build && node scripts/dist.mjs --platform=mac --arch=applesilicon",
+    "dist:win": "pnpm build && node scripts/dist.mjs --platform=win --arch=x64 && node scripts/dist.mjs --platform=win --arch=x86 && node scripts/dist.mjs --platform=win --arch=arm64",
+    "dist:linux": "pnpm build && node scripts/dist.mjs --platform=linux --arch=x64 && node scripts/dist.mjs --platform=linux --arch=arm64",
+    "dist:mac": "pnpm build && node scripts/dist.mjs --platform=mac --arch=x64 && node scripts/dist.mjs --platform=mac --arch=applesilicon",
+    "dist:all": "pnpm dist:win && pnpm dist:linux && pnpm dist:mac"
   },
   "dependencies": {
     "@fluentui/react-components": "^9.73.8",
@@ -41,6 +53,7 @@
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
+    "terser": "^5.47.1",
     "typescript": "^5.2.2",
     "vite": "^5.1.6",
     "vite-plugin-electron": "^0.28.6",

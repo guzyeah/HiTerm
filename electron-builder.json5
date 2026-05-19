@@ -11,43 +11,73 @@
 // @see - https://www.electron.build/configuration/configuration
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  "appId": "YourAppID",
+  "appId": "com.guzyeah.hiterm",
+  "productName": "HiTerm",
   "asar": true,
-  "productName": "YourAppName",
+"asarUnpack": [
+    "node-pty/**",
+    "node-addon-api/**"
+  ],
+  "compression": "maximum",
+  "nodeGypRebuild": false,
+  "npmRebuild": false,
   "directories": {
     "output": "release/${version}"
   },
   "files": [
     "dist",
-    "dist-electron"
+    "dist-electron",
+    "!node_modules/**/{README,readme,CHANGELOG,changelog,TEST,test,test_.spec}.{md,MD}",
+    "!node_modules/**/*.d.ts",
+    "!node_modules/**/*.map",
+    "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,__pycache__,thumbs.db,.gitignore,.gitattributes,.editorconfig,.flowconfig,.npmignore,.eslintrc,.eslintignore,.prettierignore,.stylelintrc,.stylelintignore,.jshintrc,.jscsrc,.npmrc,.babelrc,.tslintrc,yarn.lock,package-lock.json,pnpm-lock.yaml}",
+    "!**/node_modules/.cache"
   ],
-  "mac": {
-    "target": [
-      "dmg"
-    ],
-    "artifactName": "${productName}-Mac-${version}-Installer.${ext}"
-  },
   "win": {
     "target": [
-      {
-        "target": "nsis",
-        "arch": [
-          "x64"
-        ]
-      }
+      "nsis",
+      "zip"
     ],
-    "artifactName": "${productName}-Windows-${version}-Setup.${ext}"
+    "artifactName": "${productName}-${version}-windows-${arch}.${ext}"
   },
   "nsis": {
     "oneClick": false,
     "perMachine": false,
     "allowToChangeInstallationDirectory": true,
-    "deleteAppDataOnUninstall": false
+    "deleteAppDataOnUninstall": false,
+    "artifactName": "${productName}-${version}-windows-${arch}-installer.${ext}"
+  },
+  "portable": {
+    "artifactName": "${productName}-${version}-windows-${arch}-portable.${ext}"
+  },
+  "mac": {
+    "target": [
+      "dmg"
+    ],
+    "artifactName": "${productName}-${version}-mac-${arch}.${ext}",
+    "category": "public.app-category.developer-tools",
+    "darkModeSupport": true
+  },
+  "dmg": {
+    "contents": [
+      { "x": 130, "y": 220 },
+      { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
+    ]
   },
   "linux": {
     "target": [
+      "deb",
+      "rpm",
       "AppImage"
     ],
-    "artifactName": "${productName}-Linux-${version}.${ext}"
+    "artifactName": "${productName}-${version}-linux-${arch}.${ext}",
+    "category": "Development",
+    "maintainer": "Guzyeah Studio <guzyeah@foxmail.com>"
+  },
+  "deb": {
+    "depends": ["libgtk-3-0", "libnotify4", "libnss3", "libxss1", "libxtst6", "xdg-utils", "libatspi2.0-0", "libsecret-1-0", "libgbm1"]
+  },
+  "rpm": {
+    "depends": ["gtk3", "libnotify", "nss", "libXScrnSaver", "libxtst", "xdg-utils", "at-spi2-atk", "libsecret", "mesa-libgbm"]
   }
 }
