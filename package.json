@@ -4,8 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "license": "AGPL-3.0-only",
+  "description": "An easy-to-use, aesthetically pleasing, and versatile shell management app",
   "author": {
-    "name": "Xi'an Beilin Guzyeah LLC.",
+    "name": "Guzyeah Studio",
     "email": "guzyeah@foxmail.com",
     "url": "https://www.guzyeah.cn"
   },
