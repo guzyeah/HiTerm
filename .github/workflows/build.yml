@@ -4,6 +4,16 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: "Create release or not"
+        required: true
+        default: 'false'
+        type: choice
+        options:
+         - 'true'
+         - 'false'
 
 permissions:
   contents: write
@@ -29,6 +39,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.create_release == 'true'
         with:
           files: |
             release/**/*.exe
@@ -55,6 +66,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.create_release == 'true'
         with:
           files: |
             release/**/*.deb
@@ -83,6 +95,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.create_release == 'true'
         with:
           files: |
             release/**/*.dmg
