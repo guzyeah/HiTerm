@@ -13,7 +13,7 @@
  * Local 会话复用全局 worker，SSH 会话按订阅创建独立采样器。
  */
 
-import electron, { type WebContents } from 'electron'
+import { app, ipcMain, type WebContents } from 'electron'
 import { Worker } from 'node:worker_threads'
 import { getTerminalSessionMetadata } from './terminalSession'
 import { LOCAL_STATUS_WORKER_SOURCE } from './localStatusWorkerSource'
@@ -27,8 +27,6 @@ import type {
   TerminalStatusSampleEvent,
   TerminalStatusSubscribeRequest,
 } from '../src/shared/terminalStatusTypes'
-
-const { app, ipcMain } = electron
 
 interface TerminalStatusSubscription {
   sessionId: string

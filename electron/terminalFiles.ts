@@ -13,7 +13,7 @@
  * Local 文件扫描/复制使用 worker，SSH 文件能力通过 SFTP 侧信道提供。
  */
 
-import electron, { type WebContents } from 'electron'
+import { app, ipcMain, type WebContents } from 'electron'
 import { randomUUID } from 'node:crypto'
 import fsPromises from 'node:fs/promises'
 import path from 'node:path'
@@ -53,8 +53,6 @@ import type {
   TerminalFilesTransferStateEvent,
   TerminalFilesUploadRequest,
 } from '../src/shared/terminalFilesTypes'
-
-const { app, ipcMain } = electron
 
 interface TerminalFilesSubscription {
   sessionId: string

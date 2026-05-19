@@ -14,6 +14,7 @@
  */
 
 import ElectronStore from 'electron-store'
+import { app } from 'electron'
 import { randomUUID } from 'node:crypto'
 import type { ProtocolType } from '../src/shared/shellTypes'
 import type { TerminalHistoryRecord } from '../src/shared/terminalHistoryTypes'
@@ -34,6 +35,7 @@ export interface SaveTerminalHistoryRecordInput {
 }
 
 const store = new ElectronStore<TerminalHistoryStoreSchema>({
+  cwd: app.getPath('userData'),
   defaults: {
     records: [],
   },

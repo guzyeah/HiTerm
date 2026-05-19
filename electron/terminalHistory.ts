@@ -12,7 +12,7 @@
  * Terminal 命令历史 IPC 与记录分发。
  */
 
-import electron, { type WebContents } from 'electron'
+import { ipcMain, type WebContents } from 'electron'
 import { getShellById } from './shellStore'
 import {
   deleteTerminalHistoryRecord,
@@ -27,8 +27,6 @@ import type {
   TerminalHistoryDeletedEvent,
 } from '../src/shared/terminalHistoryTypes'
 import type { ProtocolType } from '../src/shared/shellTypes'
-
-const { ipcMain } = electron
 
 interface RecordTerminalCommandInput {
   sessionId: string

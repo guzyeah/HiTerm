@@ -8,7 +8,7 @@
  *
  * You may choose the license that best suits your needs.
  */
-import electron from 'electron'
+import { app, BrowserWindow, ipcMain, Menu, dialog, clipboard } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import {
@@ -47,8 +47,6 @@ import { registerTerminalHistoryIpcHandlers } from './terminalHistory'
 import { listSerialPorts } from './utils/serialPort'
 import type { OpenPathsDialogOptions } from '../src/shared/dialogTypes'
 
-const { app, BrowserWindow, ipcMain, Menu, dialog, clipboard } = electron
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 process.env.APP_ROOT = path.join(__dirname, '..')
@@ -72,7 +70,7 @@ function createWindow() {
   win = new BrowserWindow({
     width: 1280,
     height: 860,
-    icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
+    icon: path.join(process.env.VITE_PUBLIC, 'icons', process.platform === 'win32' ? 'icon.ico' : process.platform === 'darwin' ? 'icon.icns' : 'icon.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
     },

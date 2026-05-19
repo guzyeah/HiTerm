@@ -19,6 +19,7 @@
     "node-addon-api/**"
   ],
   "compression": "maximum",
+  "icon": "public/icons/icon",
   "nodeGypRebuild": false,
   "npmRebuild": false,
   "directories": {

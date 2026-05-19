@@ -15,9 +15,7 @@
  * Edit/Window菜单使用Electron内置role，系统自动处理快捷键和本地化
  */
 
-import electron from 'electron'
-
-const { Menu, BrowserWindow } = electron
+import { Menu, BrowserWindow } from 'electron'
 
 /** 菜单标签字典：renderer通过IPC发送的i18n翻译文本 */
 export interface MenuLabels {

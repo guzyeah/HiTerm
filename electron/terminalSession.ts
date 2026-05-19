@@ -17,7 +17,7 @@ import { existsSync, readFileSync, statSync } from 'node:fs'
 import { homedir } from 'node:os'
 import path from 'node:path'
 import { randomUUID } from 'node:crypto'
-import electron, { type WebContents } from 'electron'
+import { app, ipcMain, type WebContents } from 'electron'
 import * as pty from 'node-pty'
 import { Client, type ClientChannel, type ConnectConfig, type SFTPWrapper } from 'ssh2'
 import { getShellById } from './shellStore'
@@ -30,8 +30,6 @@ import type {
   TerminalWriteRequest,
 } from '../src/shared/terminalTypes'
 import type { ProtocolType } from '../src/shared/shellTypes'
-
-const { app, ipcMain } = electron
 
 export type RemoteOs = 'linux' | 'darwin' | 'unknown'
 
