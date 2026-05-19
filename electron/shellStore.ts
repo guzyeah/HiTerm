@@ -14,6 +14,7 @@
  */
 
 import ElectronStore from 'electron-store'
+import { app } from 'electron'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { randomUUID } from 'crypto'
@@ -102,6 +103,7 @@ const BUILTIN_LOCAL_SHELL_KIND_SET = new Set<BuiltinLocalShellKind>([
 ])
 
 const store = new ElectronStore<ShellStoreSchema>({
+  cwd: app.getPath('userData'),
   defaults: {
     shells: [],
     groups: [],

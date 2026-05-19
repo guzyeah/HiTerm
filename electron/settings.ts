@@ -14,7 +14,7 @@
  */
 
 import ElectronStore from 'electron-store'
-import electron from 'electron'
+import { app } from 'electron'
 import {
   DEFAULT_APP_THEME_PREFERENCE,
   DEFAULT_TERMINAL_FONT_FAMILY,
@@ -23,8 +23,6 @@ import {
   DEFAULT_TERMINAL_THEME_ID,
   type AppThemePreference,
 } from '../src/shared/preferencesTypes'
-
-const { app } = electron
 
 interface SettingsSchema {
   locale: string
@@ -38,6 +36,7 @@ interface SettingsSchema {
 }
 
 const store = new ElectronStore<SettingsSchema>({
+  cwd: app.getPath('userData'),
   defaults: {
     locale: '',
     fontOverride: null,

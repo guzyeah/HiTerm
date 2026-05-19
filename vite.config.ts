@@ -8,6 +8,7 @@
  *
  * You may choose the license that best suits your needs.
  */
+import { defineConfig } from 'vite'
 import path from 'node:path'
 import electron from 'vite-plugin-electron/simple'
 import react from '@vitejs/plugin-react'
@@ -20,7 +21,7 @@ function formatBuildTime(): string {
   return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 }
 
-export const baseConfig = {
+export const baseConfig = defineConfig({
   resolve: {
     alias: {
       '@': path.join(__dirname, 'src'),
@@ -36,8 +37,19 @@ export const baseConfig = {
     electron({
       main: {
         entry: 'electron/main.ts',
+        onstart({ startup }) {
+          const env = { ...process.env }
+          // ELECTRON_RUN_AS_NODE 会让 Electron 以 Node 模式启动，开发时必须剔除。
+          delete env.ELECTRON_RUN_AS_NODE
+          return startup(['.', '--no-sandbox'], { env })
+        },
         vite: {
           build: {
+            lib: {
+              entry: 'electron/main.ts',
+              formats: ['cjs'],
+              fileName: () => 'main.cjs',
+            },
             rollupOptions: {
               external: ['node-pty', 'ssh2'],
             },
@@ -52,4 +64,6 @@ export const baseConfig = {
         : {},
     }),
   ],
-}
+})
+
+export default baseConfig

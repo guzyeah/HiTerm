@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
+  "main": "dist-electron/main.cjs",
   "license": "AGPL-3.0-only",
   "description": "💻 An easy-to-use, aesthetically pleasing, and versatile shell management app",
   "author": {
@@ -58,6 +59,5 @@
     "vite": "^5.1.6",
     "vite-plugin-electron": "^0.28.6",
     "vite-plugin-electron-renderer": "^0.14.5"
-  },
-  "main": "dist-electron/main.js"
+  }
 }
