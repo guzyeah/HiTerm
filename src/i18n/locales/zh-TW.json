@@ -95,6 +95,7 @@
     "privateKey": "私鑰",
     "privateKeyPlaceholder": "選擇私鑰文件",
     "selectPrivateKey": "選擇私鑰文件",
+    "selectTerminalPath": "選擇終端路徑",
     "browse": "瀏覽",
     "noAuth": "無認證",
     "terminalPath": "終端路徑",

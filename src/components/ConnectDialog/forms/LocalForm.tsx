@@ -12,14 +12,16 @@
  * Local 终端表单
  */
 
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
+  Button,
   Input,
   Label,
   makeStyles,
   tokens,
 } from '@fluentui/react-components'
+import { FolderOpenRegular } from '@fluentui/react-icons'
 import { GroupCombobox } from './GroupCombobox'
 
 const useStyles = makeStyles({
@@ -40,6 +42,17 @@ const useStyles = makeStyles({
   field: {
     justifySelf: 'start',
     width: '100%',
+    minWidth: 0,
+  },
+  browseField: {
+    justifySelf: 'start',
+    width: '100%',
+    minWidth: 0,
+    display: 'flex',
+    gap: tokens.spacingHorizontalS,
+  },
+  browseInput: {
+    flexGrow: 1,
     minWidth: 0,
   },
   divider: {
@@ -64,6 +77,7 @@ interface LocalFormProps {
 export function LocalForm({ data, onChange, groupList }: LocalFormProps) {
   const { t } = useTranslation()
   const styles = useStyles()
+  const [isBrowsingTerminalPath, setIsBrowsingTerminalPath] = useState(false)
 
   const update = useCallback(
     <K extends keyof typeof data>(key: K, value: (typeof data)[K]) => {
@@ -72,15 +86,40 @@ export function LocalForm({ data, onChange, groupList }: LocalFormProps) {
     [data, onChange],
   )
 
+  const handleBrowseTerminalPath = useCallback(async () => {
+    if (!window.dialogAPI || isBrowsingTerminalPath) return
+
+    setIsBrowsingTerminalPath(true)
+    try {
+      const path = await window.dialogAPI.openFile({
+        title: t('connectDialog.selectTerminalPath'),
+      })
+      if (path) update('terminalPath', path)
+    } catch {
+      // 忽略系统文件选择器取消或异常，保持用户当前输入。
+    } finally {
+      setIsBrowsingTerminalPath(false)
+    }
+  }, [isBrowsingTerminalPath, t, update])
+
   return (
     <div className={styles.grid}>
       <Label className={styles.label}>{t('connectDialog.terminalPath')}</Label>
-      <Input
-        className={styles.field}
-        value={data.terminalPath}
-        onChange={(_, v: any) => update('terminalPath', v.value)}
-        placeholder={t('connectDialog.terminalPathPlaceholder')}
-      />
+      <div className={styles.browseField}>
+        <Input
+          className={styles.browseInput}
+          value={data.terminalPath}
+          onChange={(_, v: any) => update('terminalPath', v.value)}
+          placeholder={t('connectDialog.terminalPathPlaceholder')}
+        />
+        <Button
+          aria-label={t('connectDialog.browse')}
+          disabled={isBrowsingTerminalPath || !window.dialogAPI}
+          icon={<FolderOpenRegular />}
+          onClick={handleBrowseTerminalPath}
+          size="small"
+        />
+      </div>
 
       <Label className={styles.label}>{t('connectDialog.workDir')}</Label>
       <Input

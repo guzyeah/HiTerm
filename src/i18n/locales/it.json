@@ -95,6 +95,7 @@
     "privateKey": "Chiave privata",
     "privateKeyPlaceholder": "Seleziona il file della chiave privata",
     "selectPrivateKey": "Seleziona chiave privata",
+    "selectTerminalPath": "Seleziona percorso terminale",
     "browse": "Sfoglia",
     "noAuth": "Nessuna",
     "terminalPath": "Percorso terminale",

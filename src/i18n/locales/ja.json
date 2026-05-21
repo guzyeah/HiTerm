@@ -95,6 +95,7 @@
     "privateKey": "秘密鍵",
     "privateKeyPlaceholder": "秘密鍵ファイルを選択",
     "selectPrivateKey": "秘密鍵を選択",
+    "selectTerminalPath": "ターミナルパスを選択",
     "browse": "参照",
     "noAuth": "なし",
     "terminalPath": "ターミナルパス",

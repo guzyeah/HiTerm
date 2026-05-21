@@ -95,6 +95,7 @@
     "privateKey": "개인 키",
     "privateKeyPlaceholder": "개인 키 파일 선택",
     "selectPrivateKey": "개인 키 선택",
+    "selectTerminalPath": "터미널 경로 선택",
     "browse": "찾아보기",
     "noAuth": "없음",
     "terminalPath": "터미널 경로",

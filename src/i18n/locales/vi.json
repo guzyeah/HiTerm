@@ -95,6 +95,7 @@
     "privateKey": "Khóa riêng tư",
     "privateKeyPlaceholder": "Chọn tệp khóa riêng tư",
     "selectPrivateKey": "Chọn khóa riêng tư",
+    "selectTerminalPath": "Chọn đường dẫn terminal",
     "browse": "Duyệt",
     "noAuth": "Không",
     "terminalPath": "Đường dẫn terminal",

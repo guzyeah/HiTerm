@@ -95,6 +95,7 @@
     "privateKey": "Privater Schlüssel",
     "privateKeyPlaceholder": "Datei mit privatem Schlüssel auswählen",
     "selectPrivateKey": "Privaten Schlüssel auswählen",
+    "selectTerminalPath": "Terminalpfad auswählen",
     "browse": "Durchsuchen",
     "noAuth": "Keine",
     "terminalPath": "Terminalpfad",

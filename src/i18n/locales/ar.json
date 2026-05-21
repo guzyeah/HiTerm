@@ -95,6 +95,7 @@
     "privateKey": "المفتاح الخاص",
     "privateKeyPlaceholder": "حدد ملف المفتاح الخاص",
     "selectPrivateKey": "تحديد المفتاح الخاص",
+    "selectTerminalPath": "تحديد مسار الطرفية",
     "browse": "استعراض",
     "noAuth": "بدون",
     "terminalPath": "مسار الطرفية",

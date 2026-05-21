@@ -95,6 +95,7 @@
     "privateKey": "Clave privada",
     "privateKeyPlaceholder": "Selecciona el archivo de clave privada",
     "selectPrivateKey": "Seleccionar clave privada",
+    "selectTerminalPath": "Seleccionar ruta del terminal",
     "browse": "Examinar",
     "noAuth": "Ninguna",
     "terminalPath": "Ruta del terminal",

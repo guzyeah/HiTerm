@@ -95,6 +95,7 @@
     "privateKey": "Private Key",
     "privateKeyPlaceholder": "Select private key file",
     "selectPrivateKey": "Select Private Key",
+    "selectTerminalPath": "Select Terminal Path",
     "browse": "Browse",
     "noAuth": "None",
     "terminalPath": "Terminal Path",
