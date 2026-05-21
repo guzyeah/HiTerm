@@ -8,3 +8,4 @@
 - AI操作
 - ssh连接超时应当报错
 - vnc支持
+- 新建local shell时，shell路径值应当可以让用户打开文件选择器浏览

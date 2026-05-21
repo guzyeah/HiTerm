@@ -45,11 +45,6 @@ export const baseConfig = defineConfig({
         },
         vite: {
           build: {
-            lib: {
-              entry: 'electron/main.ts',
-              formats: ['cjs'],
-              fileName: () => 'main.cjs',
-            },
             rollupOptions: {
               external: ['node-pty', 'ssh2'],
             },

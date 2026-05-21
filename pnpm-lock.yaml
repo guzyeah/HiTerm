@@ -20,6 +20,12 @@ importers:
       '@xterm/xterm':
         specifier: ^6.0.0
         version: 6.0.0
+      asn1:
+        specifier: 0.2.6
+        version: 0.2.6
+      bcrypt-pbkdf:
+        specifier: 1.0.2
+        version: 1.0.2
       electron-store:
         specifier: ^11.0.2
         version: 11.0.2
@@ -38,9 +44,15 @@ importers:
       react-i18next:
         specifier: ^17.0.7
         version: 17.0.7(i18next@26.1.0(typescript@5.9.3))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
+      safer-buffer:
+        specifier: 2.1.2
+        version: 2.1.2
       ssh2:
         specifier: ^1.17.0
         version: 1.17.0
+      tweetnacl:
+        specifier: 0.14.5
+        version: 0.14.5
     devDependencies:
       '@types/react':
         specifier: ^18.2.64

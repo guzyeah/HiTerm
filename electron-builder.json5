@@ -14,9 +14,8 @@
   "appId": "com.guzyeah.hiterm",
   "productName": "HiTerm",
   "asar": true,
-"asarUnpack": [
-    "node-pty/**",
-    "node-addon-api/**"
+  "asarUnpack": [
+    "node_modules/{node-pty,node-addon-api,ssh2,asn1,safer-buffer,bcrypt-pbkdf,tweetnacl,cpu-features,nan}/**/*"
   ],
   "compression": "maximum",
   "icon": "public/icons/icon",

@@ -1,4 +1,6 @@
 allowBuilds:
+  cpu-features: false
   electron: true
   esbuild: true
   node-pty: true
+  ssh2: false
