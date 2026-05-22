@@ -36,6 +36,7 @@
     "@xterm/xterm": "^6.0.0",
     "asn1": "0.2.6",
     "bcrypt-pbkdf": "1.0.2",
+    "crypto-js": "^4.2.0",
     "electron-store": "^11.0.2",
     "i18next": "^26.1.0",
     "node-pty": "^1.1.0",
@@ -47,6 +48,7 @@
     "tweetnacl": "0.14.5"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.21",
     "@types/ssh2": "^1.15.5",

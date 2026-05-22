@@ -241,6 +241,17 @@
     "shortcutCopy": "Ctrl+Shift+C",
     "shortcutPaste": "Ctrl+Shift+V"
   },
+  "vnc": {
+    "desktop": "VNC desktop",
+    "connecting": "Connecting to VNC...",
+    "connected": "Connected",
+    "disconnected": "VNC connection closed",
+    "connectionFailed": "VNC connection failed: {{message}}",
+    "resolution": "{{width}} x {{height}}",
+    "reconnect": "Reconnect",
+    "pasteClipboard": "Paste clipboard",
+    "bell": "Remote bell"
+  },
   "status": {
     "cpu": "CPU",
     "memory": "Memory",

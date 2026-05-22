@@ -47,6 +47,19 @@ import type {
   TerminalHistoryRecordEvent,
   TerminalHistoryDeletedEvent,
 } from '../src/shared/terminalHistoryTypes'
+import type {
+  VncBellEvent,
+  VncClientCutTextRequest,
+  VncClipboardEvent,
+  VncCreateSessionRequest,
+  VncCreateSessionResult,
+  VncDesktopSizeEvent,
+  VncDisconnectedEvent,
+  VncFramebufferUpdateEvent,
+  VncKeyEventRequest,
+  VncPointerEventRequest,
+  VncSessionRequest,
+} from '../src/shared/vncTypes'
 import type { OpenPathsDialogOptions } from '../src/shared/dialogTypes'
 
 const { ipcRenderer, contextBridge, webUtils } = electron
@@ -167,6 +180,45 @@ contextBridge.exposeInMainWorld('terminalAPI', {
     const listener = (_event: Electron.IpcRendererEvent, payload: TerminalExitEvent) => callback(payload)
     ipcRenderer.on('terminal:exit', listener)
     return () => ipcRenderer.off('terminal:exit', listener)
+  },
+})
+
+// --------- Expose VNC API to the Renderer process ---------
+contextBridge.exposeInMainWorld('vncAPI', {
+  createSession: (request: VncCreateSessionRequest): Promise<VncCreateSessionResult> =>
+    ipcRenderer.invoke('vnc:createSession', request),
+  pointerEvent: (request: VncPointerEventRequest): Promise<void> =>
+    ipcRenderer.invoke('vnc:pointerEvent', request),
+  keyEvent: (request: VncKeyEventRequest): Promise<void> =>
+    ipcRenderer.invoke('vnc:keyEvent', request),
+  clientCutText: (request: VncClientCutTextRequest): Promise<void> =>
+    ipcRenderer.invoke('vnc:clientCutText', request),
+  dispose: (request: VncSessionRequest): Promise<void> =>
+    ipcRenderer.invoke('vnc:dispose', request),
+  onFramebufferUpdate: (callback: (event: VncFramebufferUpdateEvent) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, payload: VncFramebufferUpdateEvent) => callback(payload)
+    ipcRenderer.on('vnc:framebufferUpdate', listener)
+    return () => ipcRenderer.off('vnc:framebufferUpdate', listener)
+  },
+  onDesktopSize: (callback: (event: VncDesktopSizeEvent) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, payload: VncDesktopSizeEvent) => callback(payload)
+    ipcRenderer.on('vnc:desktopSize', listener)
+    return () => ipcRenderer.off('vnc:desktopSize', listener)
+  },
+  onClipboard: (callback: (event: VncClipboardEvent) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, payload: VncClipboardEvent) => callback(payload)
+    ipcRenderer.on('vnc:clipboard', listener)
+    return () => ipcRenderer.off('vnc:clipboard', listener)
+  },
+  onBell: (callback: (event: VncBellEvent) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, payload: VncBellEvent) => callback(payload)
+    ipcRenderer.on('vnc:bell', listener)
+    return () => ipcRenderer.off('vnc:bell', listener)
+  },
+  onDisconnected: (callback: (event: VncDisconnectedEvent) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, payload: VncDisconnectedEvent) => callback(payload)
+    ipcRenderer.on('vnc:disconnected', listener)
+    return () => ipcRenderer.off('vnc:disconnected', listener)
   },
 })
 

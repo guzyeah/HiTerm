@@ -21,6 +21,7 @@ import {
   tokens,
   Combobox,
   Option,
+  type InputOnChangeData,
 } from '@fluentui/react-components'
 import { GroupCombobox } from './GroupCombobox'
 
@@ -83,7 +84,7 @@ export function VNCForm({ data, onChange, groupList }: VNCFormProps) {
       <Input
         className={styles.field}
         value={data.host}
-        onChange={(_, v: any) => update('host', v.value)}
+        onChange={(_, v: InputOnChangeData) => update('host', v.value)}
         placeholder={t('connectDialog.hostPlaceholder')}
       />
 
@@ -92,7 +93,7 @@ export function VNCForm({ data, onChange, groupList }: VNCFormProps) {
         className={styles.field}
         type="number"
         value={String(data.port)}
-        onChange={(_, v: any) => update('port', Number(v.value) || 5900)}
+        onChange={(_, v: InputOnChangeData) => update('port', Number(v.value) || 5900)}
         placeholder="5900"
       />
 
@@ -101,7 +102,7 @@ export function VNCForm({ data, onChange, groupList }: VNCFormProps) {
         className={styles.field}
         type="password"
         value={data.password}
-        onChange={(_, v: any) => update('password', v.value)}
+        onChange={(_, v: InputOnChangeData) => update('password', v.value)}
         placeholder={t('connectDialog.passwordPlaceholder')}
       />
 
@@ -135,7 +136,7 @@ export function VNCForm({ data, onChange, groupList }: VNCFormProps) {
       <Input
         className={styles.field}
         value={data.name}
-        onChange={(_, v: any) => update('name', v.value)}
+        onChange={(_, v: InputOnChangeData) => update('name', v.value)}
         placeholder={t('connectDialog.namePlaceholder')}
       />
 

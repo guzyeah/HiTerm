@@ -41,13 +41,20 @@ import {
 } from '@fluentui/react-icons'
 import { useRTL } from '@/hooks/useRTL'
 import { TerminalPane } from '@/components/Terminal/TerminalPane'
+import { VNCDesktopPane } from '@/components/VNC/VNCDesktopPane'
 import { subscribeOpenShellTab } from '@/shared/workspaceEvents'
 import { useWorkspaceRuntime } from './workspaceRuntimeContext'
 import type { ShellSummary } from '@/shared/shellTypes'
 
 type WorkspaceLayoutMode = 'horizontal' | 'vertical'
 
-type WorkspaceTabContent = { type: 'terminal'; shellId: string; shellName: string; sessionId?: string }
+type WorkspaceTabContent = {
+  type: 'terminal' | 'vnc'
+  protocol: ShellSummary['protocol']
+  shellId: string
+  shellName: string
+  sessionId?: string
+}
 
 interface WorkspaceTab {
   id: string
@@ -494,13 +501,20 @@ function WorkspaceTabPanel({
       role="tabpanel"
       style={focusMode && !isActive ? { display: 'none' } : undefined}
     >
-      <TerminalPane
-        shellId={tab.content.shellId}
-        tabId={tab.id}
-        isActive={isActive}
-        onSessionDisposed={sessionId => onTerminalSessionDisposed(tab.id, sessionId)}
-        onSessionReady={sessionId => onTerminalSessionReady(tab.id, sessionId)}
-      />
+      {tab.content.type === 'vnc' ? (
+        <VNCDesktopPane
+          shellId={tab.content.shellId}
+          isActive={isActive}
+        />
+      ) : (
+        <TerminalPane
+          shellId={tab.content.shellId}
+          tabId={tab.id}
+          isActive={isActive}
+          onSessionDisposed={sessionId => onTerminalSessionDisposed(tab.id, sessionId)}
+          onSessionReady={sessionId => onTerminalSessionReady(tab.id, sessionId)}
+        />
+      )}
     </section>
   )
 }
@@ -565,7 +579,8 @@ export const WorkspacePanel: FC<WorkspacePanelProps> = ({ focusMode = false }) =
       const nextTab = createWorkspaceTab(
         nextSequenceRef.current,
         {
-          type: 'terminal',
+          type: shell.protocol === 'vnc' ? 'vnc' : 'terminal',
+          protocol: shell.protocol,
           shellId: shell.id,
           shellName: shell.name,
         },
@@ -645,7 +660,8 @@ export const WorkspacePanel: FC<WorkspacePanelProps> = ({ focusMode = false }) =
       const nextTab = createWorkspaceTab(
         nextSequenceRef.current,
         {
-          type: 'terminal',
+          type: sourceTab.content.type,
+          protocol: sourceTab.content.protocol,
           shellId: sourceTab.content.shellId,
           shellName: sourceTab.content.shellName,
         },

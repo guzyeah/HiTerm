@@ -44,6 +44,7 @@ import { registerTerminalFilesIpcHandlers } from './terminalFiles'
 import { registerTerminalIpcHandlers } from './terminalSession'
 import { registerTerminalStatusIpcHandlers } from './terminalStatus'
 import { registerTerminalHistoryIpcHandlers } from './terminalHistory'
+import { registerVncIpcHandlers } from './vncSession'
 import { listSerialPorts } from './utils/serialPort'
 import type { OpenPathsDialogOptions } from '../src/shared/dialogTypes'
 
@@ -244,6 +245,7 @@ function registerIpcHandlers() {
   registerTerminalFilesIpcHandlers()
   registerTerminalStatusIpcHandlers()
   registerTerminalHistoryIpcHandlers()
+  registerVncIpcHandlers()
 }
 
 app.whenReady().then(() => {

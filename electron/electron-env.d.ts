@@ -101,6 +101,21 @@ interface TerminalAPI {
   onExit: (callback: (event: import('../src/shared/terminalTypes').TerminalExitEvent) => void) => () => void
 }
 
+interface VncAPI {
+  createSession: (
+    request: import('../src/shared/vncTypes').VncCreateSessionRequest
+  ) => Promise<import('../src/shared/vncTypes').VncCreateSessionResult>
+  pointerEvent: (request: import('../src/shared/vncTypes').VncPointerEventRequest) => Promise<void>
+  keyEvent: (request: import('../src/shared/vncTypes').VncKeyEventRequest) => Promise<void>
+  clientCutText: (request: import('../src/shared/vncTypes').VncClientCutTextRequest) => Promise<void>
+  dispose: (request: import('../src/shared/vncTypes').VncSessionRequest) => Promise<void>
+  onFramebufferUpdate: (callback: (event: import('../src/shared/vncTypes').VncFramebufferUpdateEvent) => void) => () => void
+  onDesktopSize: (callback: (event: import('../src/shared/vncTypes').VncDesktopSizeEvent) => void) => () => void
+  onClipboard: (callback: (event: import('../src/shared/vncTypes').VncClipboardEvent) => void) => () => void
+  onBell: (callback: (event: import('../src/shared/vncTypes').VncBellEvent) => void) => () => void
+  onDisconnected: (callback: (event: import('../src/shared/vncTypes').VncDisconnectedEvent) => void) => () => void
+}
+
 interface TerminalFilesAPI {
   subscribe: (request: import('../src/shared/terminalFilesTypes').TerminalFilesSessionRequest) => Promise<void>
   unsubscribe: (request: import('../src/shared/terminalFilesTypes').TerminalFilesSessionRequest) => Promise<void>
@@ -144,6 +159,7 @@ interface Window {
   clipboardAPI: ClipboardAPI
   serialAPI: SerialAPI
   terminalAPI: TerminalAPI
+  vncAPI: VncAPI
   terminalFilesAPI: TerminalFilesAPI
   terminalStatusAPI: TerminalStatusAPI
   terminalHistoryAPI: TerminalHistoryAPI

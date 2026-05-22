@@ -241,6 +241,17 @@
     "shortcutCopy": "Ctrl+Shift+C",
     "shortcutPaste": "Ctrl+Shift+V"
   },
+  "vnc": {
+    "desktop": "VNC 桌面",
+    "connecting": "正在连接 VNC...",
+    "connected": "已连接",
+    "disconnected": "VNC 连接已关闭",
+    "connectionFailed": "VNC 连接失败：{{message}}",
+    "resolution": "{{width}} x {{height}}",
+    "reconnect": "重新连接",
+    "pasteClipboard": "粘贴剪贴板",
+    "bell": "远端提示音"
+  },
   "status": {
     "cpu": "CPU",
     "memory": "内存",
