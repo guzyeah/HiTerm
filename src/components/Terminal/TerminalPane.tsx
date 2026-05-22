@@ -143,6 +143,10 @@ function isTerminalPasteShortcut(event: KeyboardEvent): boolean {
   )
 }
 
+function isTerminalTabKey(event: KeyboardEvent): boolean {
+  return event.key === 'Tab' && !event.ctrlKey && !event.altKey && !event.metaKey
+}
+
 function stopTerminalBrowserEvent(event: Event): void {
   event.preventDefault()
   event.stopPropagation()
@@ -403,6 +407,12 @@ export const TerminalPane: FC<TerminalPaneProps> = ({
     }
     terminal.attachCustomKeyEventHandler(event => {
       if (event.type !== 'keydown') {
+        return true
+      }
+
+      if (isTerminalTabKey(event)) {
+        event.preventDefault()
+        event.stopPropagation()
         return true
       }
 
