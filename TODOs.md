@@ -9,6 +9,5 @@
 - ssh连接超时应当报错
 - vnc支持
 - 右键terminal标签页的功能，比如 克隆标签页
-- terminal标签可以拖动，调换顺序
 - 目前使用tab时不能补全，而是让terminal失去了焦点
 - 不能识别url，按ctrl单击可以打开链接

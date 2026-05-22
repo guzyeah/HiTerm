@@ -13,10 +13,12 @@ import {
   useEffect,
   useRef,
   useState,
+  type CSSProperties,
   type FC,
   type KeyboardEvent,
   type MouseEvent,
 } from 'react'
+import type { PointerEvent as ReactPointerEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
@@ -70,6 +72,20 @@ interface TabContextMenuState {
   tabId: string
 }
 
+interface TabDragSession {
+  tabId: string
+  pointerId: number
+  startX: number
+  startY: number
+  currentX: number
+  currentY: number
+  offsetX: number
+  offsetY: number
+  width: number
+  height: number
+  isDragging: boolean
+}
+
 interface WorkspaceTabPanelProps {
   focusMode?: boolean
   onTerminalSessionDisposed: (tabId: string, sessionId: string) => void
@@ -84,6 +100,7 @@ interface WorkspacePanelProps {
 
 const INITIAL_TAB_SEQUENCE = 1
 const CONTEXT_MENU_VIEWPORT_GAP = 8
+const TAB_DRAG_START_DISTANCE = 4
 
 function createWorkspaceTab(
   sequence: number,
@@ -224,6 +241,9 @@ const useStyles = makeStyles({
     minWidth: 0,
     boxSizing: 'border-box',
   },
+  tabItemDragging: {
+    zIndex: 2,
+  },
   tabItemHorizontal: {
     flex: '1 1 168px',
     minWidth: '64px',
@@ -240,7 +260,14 @@ const useStyles = makeStyles({
     minWidth: 0,
     maxWidth: '100%',
     boxSizing: 'border-box',
+    cursor: 'grab',
+    touchAction: 'none',
+    userSelect: 'none',
     transition: 'background-color 120ms ease, border-color 120ms ease, color 120ms ease, box-shadow 120ms ease',
+  },
+  tabButtonDragging: {
+    cursor: 'grabbing',
+    opacity: 0.48,
   },
   tabButtonHorizontal: {
     width: '100%',
@@ -343,6 +370,43 @@ const useStyles = makeStyles({
   },
   contextMenuItemContent: {
     minWidth: '116px',
+  },
+  dragPreview: {
+    position: 'fixed',
+    left: 0,
+    top: 0,
+    zIndex: 1400,
+    pointerEvents: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    minWidth: 0,
+    paddingInlineStart: tokens.spacingHorizontalM,
+    paddingInlineEnd: tokens.spacingHorizontalM,
+    borderRadius: tokens.borderRadiusMedium,
+    border: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke2}`,
+    backgroundColor: tokens.colorNeutralBackground1,
+    color: tokens.colorNeutralForeground1,
+    boxSizing: 'border-box',
+    boxShadow: tokens.shadow16,
+    fontWeight: tokens.fontWeightSemibold,
+    transform: 'translate3d(var(--drag-x), var(--drag-y), 0)',
+  },
+  dragPreviewHorizontal: {
+    height: '32px',
+    boxShadow: `${tokens.shadow16}, inset 0 -2px 0 ${tokens.colorBrandBackground}`,
+  },
+  dragPreviewVertical: {
+    minHeight: '32px',
+    boxShadow: `${tokens.shadow16}, inset 2px 0 0 ${tokens.colorBrandBackground}`,
+  },
+  dragPreviewLabel: {
+    display: 'block',
+    minWidth: 0,
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+    lineHeight: tokens.lineHeightBase300,
   },
   contentArea: {
     position: 'relative',
@@ -459,16 +523,22 @@ export const WorkspacePanel: FC<WorkspacePanelProps> = ({ focusMode = false }) =
     canScrollRight: false,
   })
   const [tabContextMenu, setTabContextMenu] = useState<TabContextMenuState | null>(null)
+  const [tabDragSession, setTabDragSession] = useState<TabDragSession | null>(null)
   const nextSequenceRef = useRef(INITIAL_TAB_SEQUENCE)
   const isResolvingDefaultTabRef = useRef(false)
   const tabContextMenuRef = useRef<HTMLDivElement | null>(null)
+  const tabDragSessionRef = useRef<TabDragSession | null>(null)
   const tabButtonRefs = useRef(new Map<string, HTMLButtonElement | null>())
   const tabScrollViewportRef = useRef<HTMLDivElement | null>(null)
   const tabStripInnerRef = useRef<HTMLDivElement | null>(null)
+  const tabsRef = useRef<WorkspaceTab[]>([])
+  const isVerticalRef = useRef(false)
 
   const { tabs, activeTabId } = workspaceState
   const isVertical = layoutMode === 'vertical'
   const visibleCloseTabId = hoveredTabId ?? focusedTabId
+  tabsRef.current = tabs
+  isVerticalRef.current = isVertical
 
   const setTabButtonRef = useCallback((tabId: string) => (node: HTMLButtonElement | null) => {
     if (node) {
@@ -721,6 +791,97 @@ export const WorkspacePanel: FC<WorkspacePanelProps> = ({ focusMode = false }) =
     ))
   }, [])
 
+  const getTabDropIndex = useCallback((clientX: number, clientY: number, tabId: string) => {
+    const currentTabs = tabsRef.current
+    const currentIndex = currentTabs.findIndex(tab => tab.id === tabId)
+    if (currentIndex < 0 || currentTabs.length < 2) return null
+
+    const isVerticalLayout = isVerticalRef.current
+    const pointerCoordinate = isVerticalLayout ? clientY : clientX
+    let targetIndex = currentTabs.length
+
+    for (const [index, tab] of currentTabs.entries()) {
+      const tabButton = tabButtonRefs.current.get(tab.id)
+      if (!tabButton) continue
+
+      const rect = tabButton.getBoundingClientRect()
+      const midpoint = isVerticalLayout
+        ? rect.top + rect.height / 2
+        : rect.left + rect.width / 2
+
+      if (pointerCoordinate < midpoint) {
+        targetIndex = index
+        break
+      }
+    }
+
+    const adjustedIndex = currentIndex < targetIndex ? targetIndex - 1 : targetIndex
+    return Math.max(0, Math.min(adjustedIndex, currentTabs.length - 1))
+  }, [])
+
+  const moveTabToIndex = useCallback((tabId: string, targetIndex: number) => {
+    setWorkspaceState(prev => {
+      const currentIndex = prev.tabs.findIndex(tab => tab.id === tabId)
+      if (currentIndex < 0) return prev
+
+      const boundedIndex = Math.max(0, Math.min(targetIndex, prev.tabs.length - 1))
+      if (currentIndex === boundedIndex) {
+        return prev.activeTabId === tabId ? prev : { ...prev, activeTabId: tabId }
+      }
+
+      const nextTabs = [...prev.tabs]
+      const [movedTab] = nextTabs.splice(currentIndex, 1)
+      nextTabs.splice(boundedIndex, 0, movedTab)
+      tabsRef.current = nextTabs
+
+      return {
+        tabs: nextTabs,
+        activeTabId: tabId,
+      }
+    })
+
+    focusTab(tabId)
+  }, [focusTab])
+
+  const finishTabDrag = useCallback(() => {
+    const session = tabDragSessionRef.current
+    tabDragSessionRef.current = null
+    setTabDragSession(null)
+
+    if (session?.isDragging) {
+      focusTab(session.tabId)
+    }
+  }, [focusTab])
+
+  const startTabDrag = useCallback((event: ReactPointerEvent<HTMLElement>, tabId: string) => {
+    if (event.button !== 0) return
+
+    const tabRect = event.currentTarget.getBoundingClientRect()
+
+    closeTabContextMenu()
+    selectTab(tabId)
+    setFocusedTabId(tabId)
+    event.currentTarget.focus({ preventScroll: true })
+    focusTab(tabId)
+
+    const nextSession: TabDragSession = {
+      tabId,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      currentX: event.clientX,
+      currentY: event.clientY,
+      offsetX: event.clientX - tabRect.left,
+      offsetY: event.clientY - tabRect.top,
+      width: tabRect.width,
+      height: tabRect.height,
+      isDragging: false,
+    }
+
+    tabDragSessionRef.current = nextSession
+    setTabDragSession(nextSession)
+  }, [closeTabContextMenu, focusTab, selectTab])
+
   const toggleLayoutMode = useCallback(() => {
     setLayoutMode(prev => (prev === 'horizontal' ? 'vertical' : 'horizontal'))
   }, [])
@@ -806,6 +967,93 @@ export const WorkspacePanel: FC<WorkspacePanelProps> = ({ focusMode = false }) =
         : previous
     ))
   }, [tabContextMenu])
+
+  useEffect(() => {
+    if (!tabDragSession) return
+
+    const handlePointerMove = (event: globalThis.PointerEvent) => {
+      const session = tabDragSessionRef.current
+      if (!session || event.pointerId !== session.pointerId) return
+
+      if ((event.buttons & 1) !== 1) {
+        finishTabDrag()
+        return
+      }
+
+      const dragDistance = Math.hypot(event.clientX - session.startX, event.clientY - session.startY)
+      let activeSession = session
+
+      if (!session.isDragging) {
+        if (dragDistance < TAB_DRAG_START_DISTANCE) return
+
+        activeSession = {
+          ...session,
+          currentX: event.clientX,
+          currentY: event.clientY,
+          isDragging: true,
+        }
+        tabDragSessionRef.current = activeSession
+        setTabDragSession(activeSession)
+        closeTabContextMenu()
+        selectTab(activeSession.tabId)
+        setFocusedTabId(activeSession.tabId)
+        focusTab(activeSession.tabId)
+      }
+
+      event.preventDefault()
+
+      if (activeSession.currentX !== event.clientX || activeSession.currentY !== event.clientY) {
+        activeSession = {
+          ...activeSession,
+          currentX: event.clientX,
+          currentY: event.clientY,
+        }
+        tabDragSessionRef.current = activeSession
+        setTabDragSession(activeSession)
+      }
+
+      const dropIndex = getTabDropIndex(event.clientX, event.clientY, activeSession.tabId)
+      if (dropIndex !== null) {
+        moveTabToIndex(activeSession.tabId, dropIndex)
+      }
+    }
+
+    const handlePointerEnd = (event: globalThis.PointerEvent) => {
+      const session = tabDragSessionRef.current
+      if (!session || event.pointerId !== session.pointerId) return
+
+      if (session.isDragging) {
+        event.preventDefault()
+      }
+      finishTabDrag()
+    }
+
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key === 'Escape') finishTabDrag()
+    }
+
+    document.addEventListener('pointermove', handlePointerMove, { capture: true })
+    document.addEventListener('pointerup', handlePointerEnd, { capture: true })
+    document.addEventListener('pointercancel', handlePointerEnd, { capture: true })
+    document.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('blur', finishTabDrag)
+
+    return () => {
+      document.removeEventListener('pointermove', handlePointerMove, { capture: true })
+      document.removeEventListener('pointerup', handlePointerEnd, { capture: true })
+      document.removeEventListener('pointercancel', handlePointerEnd, { capture: true })
+      document.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('blur', finishTabDrag)
+    }
+  }, [
+    closeTabContextMenu,
+    finishTabDrag,
+    focusTab,
+    getTabDropIndex,
+    moveTabToIndex,
+    selectTab,
+    tabDragSession,
+  ])
 
   useEffect(() => {
     if (!tabContextMenu) return
@@ -913,10 +1161,17 @@ export const WorkspacePanel: FC<WorkspacePanelProps> = ({ focusMode = false }) =
   const toggleIcon = isVertical ? <PanelTopExpandRegular /> : <PanelLeftRegular />
   const showScrollButtons = !isVertical && (scrollState.canScrollLeft || scrollState.canScrollRight)
   const showEmptyState = tabs.length === 0
+  const draggedTab = tabDragSession?.isDragging
+    ? tabs.find(tab => tab.id === tabDragSession.tabId)
+    : undefined
+  const draggedTabLabel = draggedTab
+    ? (draggedTab.title ?? t('workspace.tabLabel', { index: draggedTab.sequence }))
+    : ''
   const panelTabs = tabs.map(tab => {
     const isActive = tab.id === activeTabId
     const tabLabel = tab.title ?? t('workspace.tabLabel', { index: tab.sequence })
     const isCloseVisible = visibleCloseTabId === tab.id
+    const isDragging = tabDragSession?.isDragging && tabDragSession.tabId === tab.id
 
     return (
       <div
@@ -924,6 +1179,7 @@ export const WorkspacePanel: FC<WorkspacePanelProps> = ({ focusMode = false }) =
         className={mergeClasses(
           styles.tabItem,
           isVertical ? styles.tabItemVertical : styles.tabItemHorizontal,
+          isDragging ? styles.tabItemDragging : undefined,
         )}
         onBlur={event => {
           if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
@@ -942,11 +1198,13 @@ export const WorkspacePanel: FC<WorkspacePanelProps> = ({ focusMode = false }) =
             styles.tabButton,
             isVertical ? styles.tabButtonVertical : styles.tabButtonHorizontal,
             isActive ? (isVertical ? styles.tabButtonVerticalActive : styles.tabButtonHorizontalActive) : undefined,
+            isDragging ? styles.tabButtonDragging : undefined,
           )}
           id={`${tab.id}-tab`}
           onClick={() => selectTab(tab.id)}
           onContextMenu={event => openTabContextMenu(event, tab.id)}
           onKeyDown={event => handleTabKeyDown(event, tab.id)}
+          onPointerDown={event => startTabDrag(event, tab.id)}
           ref={setTabButtonRef(tab.id)}
           role="tab"
           size="small"
@@ -1157,6 +1415,23 @@ export const WorkspacePanel: FC<WorkspacePanelProps> = ({ focusMode = false }) =
               </span>
             </MenuItem>
           </MenuList>
+        </div>
+      )}
+      {tabDragSession?.isDragging && draggedTab && (
+        <div
+          aria-hidden="true"
+          className={mergeClasses(
+            styles.dragPreview,
+            isVertical ? styles.dragPreviewVertical : styles.dragPreviewHorizontal,
+          )}
+          style={{
+            '--drag-x': `${tabDragSession.currentX - tabDragSession.offsetX}px`,
+            '--drag-y': `${tabDragSession.currentY - tabDragSession.offsetY}px`,
+            width: `${tabDragSession.width}px`,
+            height: `${tabDragSession.height}px`,
+          } as CSSProperties & Record<'--drag-x' | '--drag-y', string>}
+        >
+          <span className={styles.dragPreviewLabel}>{draggedTabLabel}</span>
         </div>
       )}
       <main className={styles.contentArea} key="workspace-content">
