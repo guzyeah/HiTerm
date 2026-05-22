@@ -105,6 +105,12 @@ contextBridge.exposeInMainWorld('windowAPI', {
   },
 })
 
+// --------- Expose System API to the Renderer process ---------
+contextBridge.exposeInMainWorld('systemAPI', {
+  openExternalUrl: (url: string): Promise<void> =>
+    ipcRenderer.invoke('system:openExternalUrl', url),
+})
+
 // --------- Expose Menu API to the Renderer process ---------
 contextBridge.exposeInMainWorld('menuAPI', {
   updateLabels: (labels: Record<string, string>) => ipcRenderer.send('menu:updateLabels', labels),

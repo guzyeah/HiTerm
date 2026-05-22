@@ -8,7 +8,7 @@
  *
  * You may choose the license that best suits your needs.
  */
-import { app, BrowserWindow, ipcMain, Menu, dialog, clipboard } from 'electron'
+import { app, BrowserWindow, ipcMain, Menu, dialog, clipboard, shell as electronShell } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import {
@@ -58,6 +58,26 @@ export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 'public') : RENDERER_DIST
 
 let win: Electron.BrowserWindow | null
+
+const MAX_EXTERNAL_URL_LENGTH = 4096
+
+function normalizeExternalHttpUrl(value: string): string {
+  const normalizedValue = value.trim()
+  if (!normalizedValue || normalizedValue.length > MAX_EXTERNAL_URL_LENGTH) {
+    throw new Error('Invalid external URL')
+  }
+
+  try {
+    const url = new URL(normalizedValue)
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      throw new Error('Unsupported external URL protocol')
+    }
+
+    return url.href
+  } catch {
+    throw new Error('Invalid external URL')
+  }
+}
 
 function createWindow() {
   // macOS使用原生菜单栏，Win/Linux移除原生菜单使用自绘菜单
@@ -132,6 +152,10 @@ function registerIpcHandlers() {
     const targetWindow = BrowserWindow.getFocusedWindow() ?? win
     return targetWindow?.isFullScreen() ?? false
   })
+
+  ipcMain.handle('system:openExternalUrl', (_event, url: string) => (
+    electronShell.openExternal(normalizeExternalHttpUrl(url))
+  ))
 
   // renderer发送i18n菜单标签到主进程，macOS上重建原生菜单
   ipcMain.on('menu:updateLabels', (_event, labels: MenuLabels) => {

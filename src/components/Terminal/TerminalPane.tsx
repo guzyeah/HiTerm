@@ -35,6 +35,8 @@ import { usePreferences } from '@/hooks/usePreferences'
 import { useWorkspaceRuntime } from '@/components/WorkspacePanel/workspaceRuntimeContext'
 import { terminalTheme } from './terminalTheme'
 import { getTerminalThemeById } from './terminalThemes'
+import { TerminalSemanticAddon } from './TerminalSemanticAddon'
+import { urlDetector } from './urlDetector'
 import type { TerminalPreferences } from '@/shared/preferencesTypes'
 
 interface TerminalPaneProps {
@@ -362,7 +364,7 @@ export const TerminalPane: FC<TerminalPaneProps> = ({
 
   useEffect(() => {
     const host = hostRef.current
-    if (!host || !window.terminalAPI || !window.clipboardAPI) return
+    if (!host || !window.terminalAPI || !window.clipboardAPI || !window.systemAPI) return
     let disposed = false
 
     const terminal = new Terminal({
@@ -380,6 +382,10 @@ export const TerminalPane: FC<TerminalPaneProps> = ({
 
     terminal.loadAddon(fitAddon)
     terminal.open(host)
+    terminal.loadAddon(new TerminalSemanticAddon({
+      detectors: [urlDetector],
+      openExternalUrl: window.systemAPI.openExternalUrl,
+    }))
     applyTerminalPreferences(terminal, terminalPreferencesRef.current)
 
     terminalRef.current = terminal

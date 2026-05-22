@@ -62,6 +62,10 @@ interface WindowAPI {
   onFullscreenChange: (callback: (fullscreen: boolean) => void) => () => void
 }
 
+interface SystemAPI {
+  openExternalUrl: (url: string) => Promise<void>
+}
+
 interface ShellAPI {
   saveShell: (record: unknown) => Promise<unknown>
   deleteShell: (shellId: string) => Promise<boolean>
@@ -133,6 +137,7 @@ interface Window {
   ipcRenderer: import('electron').IpcRenderer
   settingsAPI: SettingsAPI
   windowAPI: WindowAPI
+  systemAPI: SystemAPI
   menuAPI: MenuAPI
   shellAPI: ShellAPI
   dialogAPI: DialogAPI
