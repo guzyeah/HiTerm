@@ -9,11 +9,13 @@
  * You may choose the license that best suits your needs.
  */
 import { createContext, useContext } from 'react'
+import type { ProtocolType } from '@/shared/shellTypes'
 
 export interface ActiveTerminalSession {
   tabId: string
-  sessionId: string
+  sessionId: string | null
   shellName: string
+  protocol: ProtocolType
 }
 
 export interface TerminalController {

@@ -13,7 +13,7 @@
  * 左侧面板的顶部 icon-only TabList + 面板标题 + 内容切换
  */
 
-import { useState, type FC } from 'react'
+import { useEffect, useState, type FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   TabList,
@@ -29,6 +29,7 @@ import {
 import { ConnectionsPanel } from './panels/ConnectionsPanel'
 import { FilesPanel } from './panels/FilesPanel'
 import { HistoryPanel } from './panels/HistoryPanel'
+import { useWorkspaceRuntime } from '@/components/WorkspacePanel/workspaceRuntimeContext'
 
 /** 面板组件映射 */
 const PANEL_MAP: Record<ActivityType, FC> = {
@@ -88,10 +89,18 @@ const useStyles = makeStyles({
 export const ActivityBar: FC = () => {
   const styles = useStyles()
   const { t } = useTranslation()
+  const { activeTerminalSession } = useWorkspaceRuntime()
   const [active, setActive] = useState<ActivityType>(DEFAULT_ACTIVITY)
 
+  const isVncActive = activeTerminalSession?.protocol === 'vnc'
   const PanelComponent = PANEL_MAP[active]
   const activeConfig = ACTIVITY_CONFIGS.find(c => c.id === active)
+
+  useEffect(() => {
+    if (isVncActive && (active === 'files' || active === 'history')) {
+      setActive(DEFAULT_ACTIVITY)
+    }
+  }, [active, isVncActive])
 
   return (
     <div className={styles.root}>
@@ -102,9 +111,18 @@ export const ActivityBar: FC = () => {
           appearance="subtle"
           size="small"
         >
-          {ACTIVITY_CONFIGS.map(config => (
-            <Tab key={config.id} value={config.id} icon={config.icon} />
-          ))}
+          {ACTIVITY_CONFIGS.map(config => {
+            const isDisabled = isVncActive && (config.id === 'files' || config.id === 'history')
+
+            return (
+              <Tab
+                key={config.id}
+                value={config.id}
+                disabled={isDisabled}
+                icon={config.icon}
+              />
+            )
+          })}
         </TabList>
       </div>
       {activeConfig && (

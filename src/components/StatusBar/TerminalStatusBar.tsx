@@ -340,8 +340,10 @@ export function TerminalStatusBar({
     activeTerminalSession,
     focusActiveTerminal,
   } = useWorkspaceRuntime()
+  const isActiveVnc = activeTerminalSession?.protocol === 'vnc'
+  const statusSessionId = isActiveVnc ? null : activeTerminalSession?.sessionId ?? null
   const { cpuHistory, error, memoryHistory, sample } = useTerminalStatus(
-    activeTerminalSession?.sessionId ?? null,
+    statusSessionId,
   )
 
   const disks = sample?.disks ?? []
@@ -448,6 +450,8 @@ export function TerminalStatusBar({
   let metricsContent: ReactNode
   if (!activeTerminalSession) {
     metricsContent = <span className={styles.muted}>{t('workspace.statusReady')}</span>
+  } else if (isActiveVnc) {
+    metricsContent = <span className={styles.muted}>{t('vnc.connected')}</span>
   } else if (error && !sample) {
     metricsContent = <span className={styles.muted}>{t('status.unavailable')}</span>
   } else {

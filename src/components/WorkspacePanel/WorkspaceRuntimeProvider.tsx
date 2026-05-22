@@ -39,6 +39,7 @@ export const WorkspaceRuntimeProvider: FC<WorkspaceRuntimeProviderProps> = ({ ch
         previous?.tabId === session?.tabId
         && previous?.sessionId === session?.sessionId
         && previous?.shellName === session?.shellName
+        && previous?.protocol === session?.protocol
       ) {
         return previous
       }

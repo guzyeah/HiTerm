@@ -31,6 +31,7 @@ import {
   ProjectionScreenRegular,
   TabDesktopArrowClockwiseRegular,
 } from '@fluentui/react-icons'
+import { useWorkspaceRuntime } from '@/components/WorkspacePanel/workspaceRuntimeContext'
 import type {
   VncFramebufferUpdateEvent,
   VncRectangleUpdate,
@@ -38,6 +39,7 @@ import type {
 
 interface VNCDesktopPaneProps {
   shellId: string
+  tabId: string
   isActive: boolean
 }
 
@@ -158,6 +160,8 @@ const useStyles = makeStyles({
   canvasStage: {
     minWidth: '100%',
     minHeight: '100%',
+    width: 'max-content',
+    height: 'max-content',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -166,8 +170,7 @@ const useStyles = makeStyles({
   },
   canvas: {
     display: 'block',
-    maxWidth: '100%',
-    maxHeight: '100%',
+    flexShrink: 0,
     backgroundColor: '#000',
     outlineColor: tokens.colorBrandStroke1,
     outlineOffset: '2px',
@@ -267,9 +270,10 @@ function drawRectangle(canvas: HTMLCanvasElement, rectangle: VncRectangleUpdate)
   context.putImageData(new ImageData(rgba, rectangle.width, rectangle.height), rectangle.x, rectangle.y)
 }
 
-export const VNCDesktopPane: FC<VNCDesktopPaneProps> = ({ shellId, isActive }) => {
+export const VNCDesktopPane: FC<VNCDesktopPaneProps> = ({ shellId, tabId, isActive }) => {
   const styles = useStyles()
   const { t } = useTranslation()
+  const { registerTerminalController } = useWorkspaceRuntime()
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const sessionIdRef = useRef<string | null>(null)
   const buttonMaskRef = useRef(0)
@@ -323,11 +327,28 @@ export const VNCDesktopPane: FC<VNCDesktopPaneProps> = ({ shellId, isActive }) =
     setReconnectToken(token => token + 1)
   }, [])
 
+  const focusCanvas = useCallback(() => {
+    canvasRef.current?.focus()
+  }, [])
+
+  const writeTextToRemoteClipboard = useCallback((text: string) => {
+    const sessionId = sessionIdRef.current
+    if (!sessionId || !text) return
+
+    void window.vncAPI.clientCutText({ sessionId, text })
+    canvasRef.current?.focus()
+  }, [])
+
   useEffect(() => {
     if (isActive && connectionState === 'connected') {
       window.requestAnimationFrame(() => canvasRef.current?.focus())
     }
   }, [connectionState, isActive])
+
+  useEffect(() => registerTerminalController(tabId, {
+    focus: focusCanvas,
+    writeText: writeTextToRemoteClipboard,
+  }), [focusCanvas, registerTerminalController, tabId, writeTextToRemoteClipboard])
 
   useEffect(() => {
     let disposed = false

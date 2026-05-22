@@ -504,6 +504,7 @@ function WorkspaceTabPanel({
       {tab.content.type === 'vnc' ? (
         <VNCDesktopPane
           shellId={tab.content.shellId}
+          tabId={tab.id}
           isActive={isActive}
         />
       ) : (
@@ -1151,6 +1152,16 @@ export const WorkspacePanel: FC<WorkspacePanelProps> = ({ focusMode = false }) =
 
   useEffect(() => {
     const activeTab = tabs.find(tab => tab.id === activeTabId)
+    if (activeTab?.content.type === 'vnc') {
+      setActiveTerminalSession({
+        tabId: activeTab.id,
+        sessionId: null,
+        shellName: activeTab.content.shellName,
+        protocol: activeTab.content.protocol,
+      })
+      return
+    }
+
     if (
       activeTab?.content.type === 'terminal'
       && activeTab.content.sessionId
@@ -1159,6 +1170,7 @@ export const WorkspacePanel: FC<WorkspacePanelProps> = ({ focusMode = false }) =
         tabId: activeTab.id,
         sessionId: activeTab.content.sessionId,
         shellName: activeTab.content.shellName,
+        protocol: activeTab.content.protocol,
       })
       return
     }
