@@ -41,6 +41,7 @@ import {
   isPresetShellGroupName,
   SHELL_GROUP_I18N_KEYS,
 } from '@/shared/shellGroups'
+import { useWorkspaceRuntime } from '@/components/WorkspacePanel/workspaceRuntimeContext'
 import { PROTOCOL_ICON_MAP } from '@/shared/protocolIcons'
 import { emitOpenShellTab } from '@/shared/workspaceEvents'
 import type { ShellSummary } from '@/shared/shellTypes'
@@ -219,6 +220,7 @@ function buildGroupTree(groups: string[], shells: ShellSummary[]): ShellGroupNod
 export const ConnectionsPanel: FC = () => {
   const styles = useStyles()
   const { t } = useTranslation()
+  const { getOpenShellTabCount } = useWorkspaceRuntime()
   const contextMenuRef = useRef<HTMLDivElement | null>(null)
   const [groups, setGroups] = useState<string[]>([])
   const [shells, setShells] = useState<ShellSummary[]>([])
@@ -309,10 +311,23 @@ export const ConnectionsPanel: FC = () => {
     })
   }, [])
 
+  const showDeleteBlockedDialog = useCallback((shell: ShellSummary, count: number) => {
+    setAlertDialog({
+      title: t('activityBar.connectionDeleteBlockedTitle'),
+      message: t('activityBar.connectionDeleteBlockedMessage', { name: shell.name, count }),
+    })
+  }, [t])
+
   const openDeleteDialog = useCallback((shell: ShellSummary) => {
     closeContextMenu()
+    const openTabCount = getOpenShellTabCount(shell.id)
+    if (openTabCount > 0) {
+      showDeleteBlockedDialog(shell, openTabCount)
+      return
+    }
+
     setDeleteDialog({ shell, isSubmitting: false })
-  }, [closeContextMenu])
+  }, [closeContextMenu, getOpenShellTabCount, showDeleteBlockedDialog])
 
   const deleteGroupFromMenu = useCallback(async (group: ShellGroupNode) => {
     closeContextMenu()
@@ -344,6 +359,13 @@ export const ConnectionsPanel: FC = () => {
     if (!deleteDialog || !window.shellAPI) return
 
     const { shell } = deleteDialog
+    const openTabCount = getOpenShellTabCount(shell.id)
+    if (openTabCount > 0) {
+      setDeleteDialog(null)
+      showDeleteBlockedDialog(shell, openTabCount)
+      return
+    }
+
     setDeleteDialog({ shell, isSubmitting: true })
 
     try {
@@ -360,7 +382,7 @@ export const ConnectionsPanel: FC = () => {
         message: t('activityBar.connectionDeleteFailedMessage', { name: shell.name }),
       })
     }
-  }, [deleteDialog, t])
+  }, [deleteDialog, getOpenShellTabCount, showDeleteBlockedDialog, t])
 
   useEffect(() => {
     if (!contextMenu) return

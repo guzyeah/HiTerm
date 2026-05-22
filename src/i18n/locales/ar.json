@@ -143,6 +143,8 @@
     "connectionDeleteConfirmHint": "يزيل هذا الإجراء الاتصال المحفوظ فقط ولا يمكن التراجع عنه.",
     "connectionDeleteFailedTitle": "فشل الحذف",
     "connectionDeleteFailedMessage": "تعذر حذف \"{{name}}\".",
+    "connectionDeleteBlockedTitle": "لا يمكن الحذف الآن",
+    "connectionDeleteBlockedMessage": "لا يزال لدى \"{{name}}\" {{count}} من علامات التبويب المرتبطة المفتوحة. أغلقها قبل الحذف.",
     "groupContextMenu": "قائمة سياق المجموعة",
     "groupDelete": "حذف",
     "groupDeleteFailedTitle": "فشل الحذف",

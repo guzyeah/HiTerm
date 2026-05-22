@@ -18,6 +18,13 @@ export interface ActiveTerminalSession {
   protocol: ProtocolType
 }
 
+export interface WorkspaceShellTabSnapshot {
+  tabId: string
+  shellId: string
+  shellName: string
+  protocol: ProtocolType
+}
+
 export interface TerminalController {
   focus: () => void
   writeText: (text: string) => void
@@ -26,8 +33,10 @@ export interface TerminalController {
 export interface WorkspaceRuntimeContextValue {
   activeTerminalSession: ActiveTerminalSession | null
   focusActiveTerminal: () => void
+  getOpenShellTabCount: (shellId: string) => number
   registerTerminalController: (tabId: string, controller: TerminalController) => () => void
   setActiveTerminalSession: (session: ActiveTerminalSession | null) => void
+  setOpenShellTabs: (tabs: WorkspaceShellTabSnapshot[]) => void
   writeToActiveTerminal: (text: string) => void
 }
 

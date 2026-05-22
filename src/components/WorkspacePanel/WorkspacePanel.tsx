@@ -524,7 +524,7 @@ export const WorkspacePanel: FC<WorkspacePanelProps> = ({ focusMode = false }) =
   const styles = useStyles()
   const { t } = useTranslation()
   const { isRTL } = useRTL()
-  const { setActiveTerminalSession } = useWorkspaceRuntime()
+  const { setActiveTerminalSession, setOpenShellTabs } = useWorkspaceRuntime()
   const [layoutMode, setLayoutMode] = useState<WorkspaceLayoutMode>('horizontal')
   const [workspaceState, setWorkspaceState] = useState<WorkspaceState>({
     tabs: [],
@@ -1136,6 +1136,17 @@ export const WorkspacePanel: FC<WorkspacePanelProps> = ({ focusMode = false }) =
   }, [activeTabId, isVertical, layoutMode, tabs.length])
 
   useEffect(() => subscribeOpenShellTab(shell => openTerminalTab(shell)), [openTerminalTab])
+
+  useEffect(() => {
+    setOpenShellTabs(tabs.map(tab => ({
+      tabId: tab.id,
+      shellId: tab.content.shellId,
+      shellName: tab.content.shellName,
+      protocol: tab.content.protocol,
+    })))
+  }, [setOpenShellTabs, tabs])
+
+  useEffect(() => () => setOpenShellTabs([]), [setOpenShellTabs])
 
   useEffect(() => {
     if (tabs.length === 0) {

@@ -143,6 +143,8 @@
     "connectionDeleteConfirmHint": "此操作只會移除已儲存的連線，且無法復原。",
     "connectionDeleteFailedTitle": "刪除失敗",
     "connectionDeleteFailedMessage": "無法刪除 \"{{name}}\"。",
+    "connectionDeleteBlockedTitle": "暫時不可刪除",
+    "connectionDeleteBlockedMessage": "\"{{name}}\" 仍有 {{count}} 個相關標籤頁開啟，請先關閉後再刪除。",
     "groupContextMenu": "分組上下文選單",
     "groupDelete": "刪除",
     "groupDeleteFailedTitle": "刪除失敗",

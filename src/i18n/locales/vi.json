@@ -143,6 +143,8 @@
     "connectionDeleteConfirmHint": "Thao tác này chỉ xóa kết nối đã lưu và không thể hoàn tác.",
     "connectionDeleteFailedTitle": "Xóa thất bại",
     "connectionDeleteFailedMessage": "Không thể xóa \"{{name}}\".",
+    "connectionDeleteBlockedTitle": "Chưa thể xóa",
+    "connectionDeleteBlockedMessage": "\"{{name}}\" vẫn còn {{count}} thẻ liên quan đang mở. Hãy đóng chúng trước khi xóa.",
     "groupContextMenu": "Menu ngữ cảnh nhóm",
     "groupDelete": "Xóa",
     "groupDeleteFailedTitle": "Xóa thất bại",

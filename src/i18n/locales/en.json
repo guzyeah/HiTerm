@@ -143,6 +143,8 @@
     "connectionDeleteConfirmHint": "This action only removes the saved connection and cannot be undone.",
     "connectionDeleteFailedTitle": "Delete failed",
     "connectionDeleteFailedMessage": "Could not delete \"{{name}}\".",
+    "connectionDeleteBlockedTitle": "Cannot delete yet",
+    "connectionDeleteBlockedMessage": "\"{{name}}\" still has {{count}} related tab open. Close related tabs before deleting.",
     "groupContextMenu": "Group context menu",
     "groupDelete": "Delete",
     "groupDeleteFailedTitle": "Delete failed",

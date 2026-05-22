@@ -143,6 +143,8 @@
     "connectionDeleteConfirmHint": "Diese Aktion entfernt nur die gespeicherte Verbindung und kann nicht rückgängig gemacht werden.",
     "connectionDeleteFailedTitle": "Löschen fehlgeschlagen",
     "connectionDeleteFailedMessage": "\"{{name}}\" konnte nicht gelöscht werden.",
+    "connectionDeleteBlockedTitle": "Kann noch nicht gelöscht werden",
+    "connectionDeleteBlockedMessage": "\"{{name}}\" hat noch {{count}} zugehörige Registerkarte geöffnet. Schließen Sie zugehörige Registerkarten vor dem Löschen.",
     "groupContextMenu": "Gruppen-Kontextmenü",
     "groupDelete": "Löschen",
     "groupDeleteFailedTitle": "Löschen fehlgeschlagen",

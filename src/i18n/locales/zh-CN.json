@@ -143,6 +143,8 @@
     "connectionDeleteConfirmHint": "此操作只会移除已保存的连接，且无法撤销。",
     "connectionDeleteFailedTitle": "删除失败",
     "connectionDeleteFailedMessage": "无法删除 \"{{name}}\"。",
+    "connectionDeleteBlockedTitle": "暂时不可删除",
+    "connectionDeleteBlockedMessage": "\"{{name}}\" 仍有 {{count}} 个相关标签页打开，请先关闭后再删除。",
     "groupContextMenu": "分组上下文菜单",
     "groupDelete": "删除",
     "groupDeleteFailedTitle": "删除失败",

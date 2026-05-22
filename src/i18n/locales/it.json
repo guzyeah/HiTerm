@@ -143,6 +143,8 @@
     "connectionDeleteConfirmHint": "Questa azione rimuove solo la connessione salvata e non può essere annullata.",
     "connectionDeleteFailedTitle": "Eliminazione non riuscita",
     "connectionDeleteFailedMessage": "Impossibile eliminare \"{{name}}\".",
+    "connectionDeleteBlockedTitle": "Non eliminabile al momento",
+    "connectionDeleteBlockedMessage": "\"{{name}}\" ha ancora {{count}} scheda correlata aperta. Chiudere le schede correlate prima di eliminare.",
     "groupContextMenu": "Menu contestuale del gruppo",
     "groupDelete": "Elimina",
     "groupDeleteFailedTitle": "Eliminazione non riuscita",

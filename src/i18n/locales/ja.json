@@ -143,6 +143,8 @@
     "connectionDeleteConfirmHint": "この操作は保存済みの接続のみを削除し、元に戻せません。",
     "connectionDeleteFailedTitle": "削除に失敗しました",
     "connectionDeleteFailedMessage": "\"{{name}}\" を削除できませんでした。",
+    "connectionDeleteBlockedTitle": "まだ削除できません",
+    "connectionDeleteBlockedMessage": "\"{{name}}\" には関連するタブが {{count}} 個開いています。先に閉じてから削除してください。",
     "groupContextMenu": "グループのコンテキストメニュー",
     "groupDelete": "削除",
     "groupDeleteFailedTitle": "削除に失敗しました",

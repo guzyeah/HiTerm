@@ -143,6 +143,8 @@
     "connectionDeleteConfirmHint": "Cette action supprime uniquement la connexion enregistrée et est irréversible.",
     "connectionDeleteFailedTitle": "Échec de la suppression",
     "connectionDeleteFailedMessage": "Impossible de supprimer \"{{name}}\".",
+    "connectionDeleteBlockedTitle": "Suppression impossible pour le moment",
+    "connectionDeleteBlockedMessage": "\"{{name}}\" a encore {{count}} onglet associé ouvert. Fermez les onglets associés avant de supprimer.",
     "groupContextMenu": "Menu contextuel du groupe",
     "groupDelete": "Supprimer",
     "groupDeleteFailedTitle": "Échec de la suppression",

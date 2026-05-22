@@ -143,6 +143,8 @@
     "connectionDeleteConfirmHint": "Esta acción solo elimina la conexión guardada y no se puede deshacer.",
     "connectionDeleteFailedTitle": "Error al eliminar",
     "connectionDeleteFailedMessage": "No se pudo eliminar \"{{name}}\".",
+    "connectionDeleteBlockedTitle": "No se puede eliminar todavía",
+    "connectionDeleteBlockedMessage": "\"{{name}}\" aún tiene {{count}} pestaña relacionada abierta. Cierra las pestañas relacionadas antes de eliminar.",
     "groupContextMenu": "Menú contextual del grupo",
     "groupDelete": "Eliminar",
     "groupDeleteFailedTitle": "Error al eliminar",

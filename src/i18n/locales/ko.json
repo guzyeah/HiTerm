@@ -143,6 +143,8 @@
     "connectionDeleteConfirmHint": "이 작업은 저장된 연결만 제거하며 실행 취소할 수 없습니다.",
     "connectionDeleteFailedTitle": "삭제 실패",
     "connectionDeleteFailedMessage": "\"{{name}}\"을(를) 삭제할 수 없습니다.",
+    "connectionDeleteBlockedTitle": "아직 삭제할 수 없음",
+    "connectionDeleteBlockedMessage": "\"{{name}}\"의 관련 탭 {{count}}개가 아직 열려 있습니다. 먼저 닫은 뒤 삭제하세요.",
     "groupContextMenu": "그룹 컨텍스트 메뉴",
     "groupDelete": "삭제",
     "groupDeleteFailedTitle": "삭제 실패",

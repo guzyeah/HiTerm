@@ -21,6 +21,7 @@ import {
   type ActiveTerminalSession,
   type TerminalController,
   type WorkspaceRuntimeContextValue,
+  type WorkspaceShellTabSnapshot,
 } from './workspaceRuntimeContext'
 
 interface WorkspaceRuntimeProviderProps {
@@ -30,6 +31,7 @@ interface WorkspaceRuntimeProviderProps {
 export const WorkspaceRuntimeProvider: FC<WorkspaceRuntimeProviderProps> = ({ children }) => {
   const [activeTerminalSession, setActiveTerminalSessionState] = useState<ActiveTerminalSession | null>(null)
   const activeTerminalSessionRef = useRef<ActiveTerminalSession | null>(null)
+  const openShellTabsRef = useRef<WorkspaceShellTabSnapshot[]>([])
   const terminalControllersRef = useRef(new Map<string, TerminalController>())
 
   const setActiveTerminalSession = useCallback((session: ActiveTerminalSession | null) => {
@@ -58,6 +60,16 @@ export const WorkspaceRuntimeProvider: FC<WorkspaceRuntimeProviderProps> = ({ ch
     }
   }, [])
 
+  const setOpenShellTabs = useCallback((tabs: WorkspaceShellTabSnapshot[]) => {
+    openShellTabsRef.current = tabs
+  }, [])
+
+  const getOpenShellTabCount = useCallback((shellId: string) => (
+    openShellTabsRef.current.reduce((count, tab) => (
+      tab.shellId === shellId ? count + 1 : count
+    ), 0)
+  ), [])
+
   const focusActiveTerminal = useCallback(() => {
     const activeTabId = activeTerminalSessionRef.current?.tabId
     if (!activeTabId) return
@@ -75,14 +87,18 @@ export const WorkspaceRuntimeProvider: FC<WorkspaceRuntimeProviderProps> = ({ ch
   const value = useMemo<WorkspaceRuntimeContextValue>(() => ({
     activeTerminalSession,
     focusActiveTerminal,
+    getOpenShellTabCount,
     registerTerminalController,
     setActiveTerminalSession,
+    setOpenShellTabs,
     writeToActiveTerminal,
   }), [
     activeTerminalSession,
     focusActiveTerminal,
+    getOpenShellTabCount,
     registerTerminalController,
     setActiveTerminalSession,
+    setOpenShellTabs,
     writeToActiveTerminal,
   ])
 
