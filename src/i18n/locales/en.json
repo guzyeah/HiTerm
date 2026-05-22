@@ -228,6 +228,8 @@
     "scrollLeft": "Scroll tabs left",
     "scrollRight": "Scroll tabs right",
     "closeTab": "Close tab",
+    "tabContextMenu": "Tab context menu",
+    "cloneTab": "Clone tab",
     "emptyTitle": "No tabs open",
     "emptyDescription": "Create a new tab to continue."
   },

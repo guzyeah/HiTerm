@@ -228,6 +228,8 @@
     "scrollLeft": "Desplazar pestañas a la izquierda",
     "scrollRight": "Desplazar pestañas a la derecha",
     "closeTab": "Cerrar pestaña",
+    "tabContextMenu": "Menú contextual de pestaña",
+    "cloneTab": "Clonar pestaña",
     "emptyTitle": "No hay pestañas abiertas",
     "emptyDescription": "Crea una nueva pestaña para continuar."
   },

@@ -228,6 +228,8 @@
     "scrollLeft": "Cuộn thẻ sang trái",
     "scrollRight": "Cuộn thẻ sang phải",
     "closeTab": "Đóng thẻ",
+    "tabContextMenu": "Menu ngữ cảnh thẻ",
+    "cloneTab": "Nhân bản thẻ",
     "emptyTitle": "Chưa mở thẻ nào",
     "emptyDescription": "Tạo thẻ mới để tiếp tục."
   },

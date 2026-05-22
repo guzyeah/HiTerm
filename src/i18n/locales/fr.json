@@ -228,6 +228,8 @@
     "scrollLeft": "Faire défiler les onglets vers la gauche",
     "scrollRight": "Faire défiler les onglets vers la droite",
     "closeTab": "Fermer l'onglet",
+    "tabContextMenu": "Menu contextuel de l'onglet",
+    "cloneTab": "Cloner l'onglet",
     "emptyTitle": "Aucun onglet ouvert",
     "emptyDescription": "Créez un nouvel onglet pour continuer."
   },

@@ -228,6 +228,8 @@
     "scrollLeft": "탭을 왼쪽으로 이동",
     "scrollRight": "탭을 오른쪽으로 이동",
     "closeTab": "탭 닫기",
+    "tabContextMenu": "탭 상황에 맞는 메뉴",
+    "cloneTab": "탭 복제",
     "emptyTitle": "열린 탭이 없습니다",
     "emptyDescription": "새 탭을 만들어 계속하세요."
   },

@@ -228,6 +228,8 @@
     "scrollLeft": "向左捲動標籤",
     "scrollRight": "向右捲動標籤",
     "closeTab": "關閉標籤",
+    "tabContextMenu": "標籤頁內容功能表",
+    "cloneTab": "克隆標籤",
     "emptyTitle": "暫無標籤頁",
     "emptyDescription": "點擊新增按鈕繼續。"
   },

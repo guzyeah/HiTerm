@@ -15,10 +15,13 @@ import {
   useState,
   type FC,
   type KeyboardEvent,
+  type MouseEvent,
 } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Button,
+  MenuItem,
+  MenuList,
   makeStyles,
   mergeClasses,
   Spinner,
@@ -29,6 +32,7 @@ import {
   ChevronDownRegular,
   ChevronLeftRegular,
   ChevronRightRegular,
+  CopyRegular,
   DismissRegular,
   PanelLeftRegular,
   PanelTopExpandRegular,
@@ -60,6 +64,12 @@ interface ScrollState {
   canScrollRight: boolean
 }
 
+interface TabContextMenuState {
+  x: number
+  y: number
+  tabId: string
+}
+
 interface WorkspaceTabPanelProps {
   focusMode?: boolean
   onTerminalSessionDisposed: (tabId: string, sessionId: string) => void
@@ -73,6 +83,7 @@ interface WorkspacePanelProps {
 }
 
 const INITIAL_TAB_SEQUENCE = 1
+const CONTEXT_MENU_VIEWPORT_GAP = 8
 
 function createWorkspaceTab(
   sequence: number,
@@ -320,6 +331,19 @@ const useStyles = makeStyles({
   tabCloseButtonHidden: {
     pointerEvents: 'none',
   },
+  contextMenuSurface: {
+    position: 'fixed',
+    zIndex: 1200,
+    minWidth: '180px',
+    padding: tokens.spacingVerticalXXS,
+    borderRadius: tokens.borderRadiusMedium,
+    backgroundColor: tokens.colorNeutralBackground1,
+    boxShadow: tokens.shadow16,
+    border: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke2}`,
+  },
+  contextMenuItemContent: {
+    minWidth: '116px',
+  },
   contentArea: {
     position: 'relative',
     flex: 1,
@@ -434,8 +458,10 @@ export const WorkspacePanel: FC<WorkspacePanelProps> = ({ focusMode = false }) =
     canScrollLeft: false,
     canScrollRight: false,
   })
+  const [tabContextMenu, setTabContextMenu] = useState<TabContextMenuState | null>(null)
   const nextSequenceRef = useRef(INITIAL_TAB_SEQUENCE)
   const isResolvingDefaultTabRef = useRef(false)
+  const tabContextMenuRef = useRef<HTMLDivElement | null>(null)
   const tabButtonRefs = useRef(new Map<string, HTMLButtonElement | null>())
   const tabScrollViewportRef = useRef<HTMLDivElement | null>(null)
   const tabStripInnerRef = useRef<HTMLDivElement | null>(null)
@@ -523,6 +549,57 @@ export const WorkspacePanel: FC<WorkspacePanelProps> = ({ focusMode = false }) =
       isResolvingDefaultTabRef.current = false
     }
   }, [openTerminalTab])
+
+  const closeTabContextMenu = useCallback(() => {
+    setTabContextMenu(null)
+  }, [])
+
+  const openTabContextMenu = useCallback((event: MouseEvent<HTMLElement>, tabId: string) => {
+    event.preventDefault()
+    event.stopPropagation()
+    setTabContextMenu({
+      x: event.clientX,
+      y: event.clientY,
+      tabId,
+    })
+  }, [])
+
+  const cloneTab = useCallback((tabId: string) => {
+    let clonedTabId: string | null = null
+
+    setWorkspaceState(prev => {
+      const sourceIndex = prev.tabs.findIndex(tab => tab.id === tabId)
+      if (sourceIndex < 0) return prev
+
+      const sourceTab = prev.tabs[sourceIndex]
+      const nextTab = createWorkspaceTab(
+        nextSequenceRef.current,
+        {
+          type: 'terminal',
+          shellId: sourceTab.content.shellId,
+          shellName: sourceTab.content.shellName,
+        },
+        sourceTab.title,
+      )
+      nextSequenceRef.current += 1
+      clonedTabId = nextTab.id
+
+      return {
+        tabs: [
+          ...prev.tabs.slice(0, sourceIndex + 1),
+          nextTab,
+          ...prev.tabs.slice(sourceIndex + 1),
+        ],
+        activeTabId: nextTab.id,
+      }
+    })
+
+    closeTabContextMenu()
+
+    if (clonedTabId) {
+      focusTab(clonedTabId)
+    }
+  }, [closeTabContextMenu, focusTab])
 
   const updateScrollState = useCallback(() => {
     if (isVertical) {
@@ -706,6 +783,56 @@ export const WorkspacePanel: FC<WorkspacePanelProps> = ({ focusMode = false }) =
   }, [closeTab, focusTab, isRTL, isVertical, selectTab, tabs])
 
   useEffect(() => {
+    if (!tabContextMenu) return
+
+    const surface = tabContextMenuRef.current
+    if (!surface) return
+
+    const nextX = Math.min(
+      Math.max(tabContextMenu.x, CONTEXT_MENU_VIEWPORT_GAP),
+      Math.max(CONTEXT_MENU_VIEWPORT_GAP, window.innerWidth - surface.offsetWidth - CONTEXT_MENU_VIEWPORT_GAP),
+    )
+    const nextY = Math.min(
+      Math.max(tabContextMenu.y, CONTEXT_MENU_VIEWPORT_GAP),
+      Math.max(CONTEXT_MENU_VIEWPORT_GAP, window.innerHeight - surface.offsetHeight - CONTEXT_MENU_VIEWPORT_GAP),
+    )
+
+    if (nextX === tabContextMenu.x && nextY === tabContextMenu.y) return
+
+    setTabContextMenu(previous => (
+      previous?.tabId === tabContextMenu.tabId
+      && (previous.x !== nextX || previous.y !== nextY)
+        ? { ...previous, x: nextX, y: nextY }
+        : previous
+    ))
+  }, [tabContextMenu])
+
+  useEffect(() => {
+    if (!tabContextMenu) return
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (tabContextMenuRef.current?.contains(event.target as Node)) return
+      setTabContextMenu(null)
+    }
+    const handleClose = () => setTabContextMenu(null)
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key === 'Escape') setTabContextMenu(null)
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('blur', handleClose)
+    window.addEventListener('resize', handleClose)
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('blur', handleClose)
+      window.removeEventListener('resize', handleClose)
+    }
+  }, [tabContextMenu])
+
+  useEffect(() => {
     if (!isVertical && tabs.length > 1) {
       const viewport = tabScrollViewportRef.current
       const inner = tabStripInnerRef.current
@@ -818,6 +945,7 @@ export const WorkspacePanel: FC<WorkspacePanelProps> = ({ focusMode = false }) =
           )}
           id={`${tab.id}-tab`}
           onClick={() => selectTab(tab.id)}
+          onContextMenu={event => openTabContextMenu(event, tab.id)}
           onKeyDown={event => handleTabKeyDown(event, tab.id)}
           ref={setTabButtonRef(tab.id)}
           role="tab"
@@ -1000,6 +1128,35 @@ export const WorkspacePanel: FC<WorkspacePanelProps> = ({ focusMode = false }) =
             title={toggleLabel}
             type="button"
           />
+        </div>
+      )}
+      {tabContextMenu && (
+        <div
+          className={styles.contextMenuSurface}
+          onContextMenu={event => {
+            event.preventDefault()
+            event.stopPropagation()
+          }}
+          ref={tabContextMenuRef}
+          style={{
+            left: `${tabContextMenu.x}px`,
+            top: `${tabContextMenu.y}px`,
+          }}
+        >
+          <MenuList aria-label={t('workspace.tabContextMenu')}>
+            <MenuItem
+              icon={<CopyRegular />}
+              onMouseDown={event => {
+                event.preventDefault()
+                event.stopPropagation()
+              }}
+              onClick={() => cloneTab(tabContextMenu.tabId)}
+            >
+              <span className={styles.contextMenuItemContent}>
+                {t('workspace.cloneTab')}
+              </span>
+            </MenuItem>
+          </MenuList>
         </div>
       )}
       <main className={styles.contentArea} key="workspace-content">

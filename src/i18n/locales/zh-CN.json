@@ -228,6 +228,8 @@
     "scrollLeft": "向左滚动标签",
     "scrollRight": "向右滚动标签",
     "closeTab": "关闭标签",
+    "tabContextMenu": "标签页上下文菜单",
+    "cloneTab": "克隆标签",
     "emptyTitle": "暂无标签页",
     "emptyDescription": "点击新建按钮继续。"
   },

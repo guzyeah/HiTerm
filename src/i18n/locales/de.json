@@ -228,6 +228,8 @@
     "scrollLeft": "Tabs nach links scrollen",
     "scrollRight": "Tabs nach rechts scrollen",
     "closeTab": "Tab schließen",
+    "tabContextMenu": "Tab-Kontextmenü",
+    "cloneTab": "Tab klonen",
     "emptyTitle": "Keine offenen Tabs",
     "emptyDescription": "Erstellen Sie einen neuen Tab, um fortzufahren."
   },

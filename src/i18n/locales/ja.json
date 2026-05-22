@@ -228,6 +228,8 @@
     "scrollLeft": "タブを左へスクロール",
     "scrollRight": "タブを右へスクロール",
     "closeTab": "タブを閉じる",
+    "tabContextMenu": "タブのコンテキストメニュー",
+    "cloneTab": "タブを複製",
     "emptyTitle": "開いているタブはありません",
     "emptyDescription": "新しいタブを作成してください。"
   },

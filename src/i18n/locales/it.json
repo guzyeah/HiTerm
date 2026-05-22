@@ -228,6 +228,8 @@
     "scrollLeft": "Scorri le schede a sinistra",
     "scrollRight": "Scorri le schede a destra",
     "closeTab": "Chiudi scheda",
+    "tabContextMenu": "Menu contestuale scheda",
+    "cloneTab": "Clona scheda",
     "emptyTitle": "Nessuna scheda aperta",
     "emptyDescription": "Crea una nuova scheda per continuare."
   },
