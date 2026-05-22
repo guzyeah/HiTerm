@@ -1,7 +1,7 @@
 {
   "name": "hiterm",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "main": "dist-electron/main.js",
   "license": "AGPL-3.0-only",
