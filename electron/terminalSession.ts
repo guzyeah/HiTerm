@@ -17,10 +17,13 @@ import { existsSync, readFileSync, statSync } from 'node:fs'
 import { homedir } from 'node:os'
 import path from 'node:path'
 import { randomUUID } from 'node:crypto'
+import { Socket } from 'node:net'
+import { StringDecoder } from 'node:string_decoder'
 import { app, ipcMain, type WebContents } from 'electron'
 import * as pty from 'node-pty'
 import { Client, type ClientChannel, type ConnectConfig, type SFTPWrapper } from 'ssh2'
 import { getShellById } from './shellStore'
+import { TelnetProtocolHandler } from './telnetProtocol'
 import { recordTerminalCommand } from './terminalHistory'
 import type {
   CreateTerminalSessionRequest,
@@ -66,7 +69,24 @@ interface SshTerminalSession extends TerminalSessionBase {
   isClosing: boolean
 }
 
-type TerminalSession = LocalTerminalSession | SshTerminalSession
+interface TelnetLoginAutomationState {
+  username: string | null
+  password: string | null
+  usernameSent: boolean
+  passwordSent: boolean
+  recentOutput: string
+}
+
+interface TelnetTerminalSession extends TerminalSessionBase {
+  protocol: 'telnet'
+  socket: Socket
+  protocolHandler: TelnetProtocolHandler
+  decoder: StringDecoder
+  loginAutomation: TelnetLoginAutomationState
+  isClosing: boolean
+}
+
+type TerminalSession = LocalTerminalSession | SshTerminalSession | TelnetTerminalSession
 
 export interface TerminalSessionMetadata {
   sessionId: string
@@ -96,6 +116,10 @@ const ANSI_CONTROL_PATTERN = new RegExp(
   'g',
 )
 const SENSITIVE_PROMPT_PATTERN = /(?:password|passphrase|verification code|otp|pin|密码|口令)\s*[:：]\s*$/i
+
+const TELNET_CONNECT_TIMEOUT_MS = 15000
+const TELNET_USERNAME_PROMPT_PATTERN = /(?:login|username|user name)\s*[:：]\s*$/i
+const TELNET_PASSWORD_PROMPT_PATTERN = /password\s*[:：]\s*$/i
 
 function normalizeTerminalSize(cols: number, rows: number): { cols: number; rows: number } {
   return {
@@ -274,6 +298,15 @@ function validateSshHost(host: string | null | undefined): string {
   return normalizedHost
 }
 
+function validateTelnetHost(host: string | null | undefined): string {
+  const normalizedHost = host?.trim()
+  if (!normalizedHost) {
+    throw new Error('Missing Telnet host')
+  }
+
+  return normalizedHost
+}
+
 function resolveSshUsername(username: string | null | undefined): string {
   const normalizedUsername = username?.trim()
   if (normalizedUsername) return normalizedUsername
@@ -319,6 +352,29 @@ function buildSshConnectConfig(shell: ReturnType<typeof getShellById>): ConnectC
   }
 
   return connectConfig
+}
+
+function createTelnetLoginAutomationState(shell: ReturnType<typeof getShellById>): TelnetLoginAutomationState {
+  if (!shell || shell.protocol !== 'telnet' || shell.authType !== 'password') {
+    return {
+      username: null,
+      password: null,
+      usernameSent: false,
+      passwordSent: false,
+      recentOutput: '',
+    }
+  }
+
+  const username = shell.username?.trim() || null
+  const password = shell.secret || null
+
+  return {
+    username,
+    password,
+    usernameSent: false,
+    passwordSent: false,
+    recentOutput: '',
+  }
 }
 
 function getSessionForSender(sessionId: string, sender: WebContents): TerminalSession {
@@ -422,6 +478,14 @@ function cleanupSshSession(session: SshTerminalSession): void {
   }
 }
 
+function cleanupTelnetSession(session: TelnetTerminalSession): void {
+  try {
+    session.socket.destroy()
+  } catch {
+    // Telnet socket 可能已经由远端关闭。
+  }
+}
+
 function disposeTerminalSession(sessionId: string): void {
   const session = terminalSessions.get(sessionId)
   if (!session) return
@@ -441,7 +505,13 @@ function disposeTerminalSession(sessionId: string): void {
   }
 
   session.isClosing = true
-  cleanupSshSession(session)
+
+  if (session.protocol === 'ssh') {
+    cleanupSshSession(session)
+    return
+  }
+
+  cleanupTelnetSession(session)
 }
 
 function executeSshCommandWithClient(
@@ -642,6 +712,115 @@ async function createConnectedSshSession(
   })
 }
 
+function writeTelnetInput(session: TelnetTerminalSession, data: string): void {
+  if (!data || session.socket.destroyed) return
+
+  session.socket.write(session.protocolHandler.encodeInput(data))
+}
+
+function handleTelnetLoginAutomation(session: TelnetTerminalSession, data: string): void {
+  const state = session.loginAutomation
+  if ((!state.username || state.usernameSent) && (!state.password || state.passwordSent)) return
+
+  const normalizedOutput = stripAnsiSequences(data).replace(/\r/g, '')
+  state.recentOutput = `${state.recentOutput}${normalizedOutput}`.slice(-512)
+  const promptText = state.recentOutput.trimEnd()
+
+  if (state.username && !state.usernameSent && TELNET_USERNAME_PROMPT_PATTERN.test(promptText)) {
+    writeTelnetInput(session, `${state.username}\r`)
+    state.usernameSent = true
+    state.recentOutput = ''
+    return
+  }
+
+  if (state.password && !state.passwordSent && TELNET_PASSWORD_PROMPT_PATTERN.test(promptText)) {
+    writeTelnetInput(session, `${state.password}\r`)
+    state.passwordSent = true
+    state.recentOutput = ''
+  }
+}
+
+function createConnectedTelnetSession(
+  shellId: string,
+  cols: number,
+  rows: number,
+): Promise<{
+  socket: Socket
+  protocolHandler: TelnetProtocolHandler
+}> {
+  const shell = getShellById(shellId)
+  if (!shell || shell.protocol !== 'telnet') {
+    throw new Error('Only Telnet shell sessions are supported')
+  }
+
+  const socket = new Socket()
+  const protocolHandler = new TelnetProtocolHandler({
+    cols,
+    rows,
+    writeRaw: data => {
+      if (!socket.destroyed) {
+        socket.write(data)
+      }
+    },
+  })
+
+  return new Promise((resolve, reject) => {
+    let settled = false
+
+    const cleanupInitialListeners = () => {
+      socket.off('connect', handleConnect)
+      socket.off('timeout', handleTimeout)
+      socket.off('error', handleError)
+      socket.off('close', handleClose)
+    }
+
+    const finish = (callback: () => void) => {
+      if (settled) return
+      settled = true
+      socket.setTimeout(0)
+      cleanupInitialListeners()
+      callback()
+    }
+
+    const handleConnect = () => {
+      finish(() => {
+        socket.setNoDelay(true)
+        socket.setKeepAlive(true, 15000)
+        protocolHandler.start()
+        resolve({
+          socket,
+          protocolHandler,
+        })
+      })
+    }
+
+    const handleTimeout = () => {
+      finish(() => {
+        socket.destroy()
+        reject(new Error('Telnet connection timed out'))
+      })
+    }
+
+    const handleError = (error: Error) => {
+      finish(() => reject(error))
+    }
+
+    const handleClose = () => {
+      finish(() => reject(new Error('Telnet connection closed before initialization completed')))
+    }
+
+    socket.once('connect', handleConnect)
+    socket.once('timeout', handleTimeout)
+    socket.once('error', handleError)
+    socket.once('close', handleClose)
+    socket.setTimeout(TELNET_CONNECT_TIMEOUT_MS)
+    socket.connect({
+      host: validateTelnetHost(shell.host),
+      port: shell.port ?? 23,
+    })
+  })
+}
+
 function createLocalSession(
   webContents: WebContents,
   request: CreateTerminalSessionRequest,
@@ -801,6 +980,74 @@ async function createSshSession(
   return { sessionId }
 }
 
+async function createTelnetSession(
+  webContents: WebContents,
+  request: CreateTerminalSessionRequest,
+): Promise<CreateTerminalSessionResult> {
+  const shell = getShellById(request.shellId)
+  if (!shell || shell.protocol !== 'telnet') {
+    throw new Error('Only Telnet shell sessions are supported')
+  }
+
+  const { cols, rows } = normalizeTerminalSize(request.cols, request.rows)
+  const sessionId = randomUUID()
+  const {
+    socket,
+    protocolHandler,
+  } = await createConnectedTelnetSession(request.shellId, cols, rows)
+
+  const session: TelnetTerminalSession = {
+    socket,
+    protocolHandler,
+    decoder: new StringDecoder('utf8'),
+    cwd: '/',
+    homeDir: '/',
+    protocol: 'telnet',
+    remoteOs: null,
+    shellId: shell.id,
+    webContents,
+    loginAutomation: createTelnetLoginAutomationState(shell),
+    isClosing: false,
+    commandCapture: createCommandCaptureState(),
+  }
+
+  socket.on('data', (chunk: Buffer) => {
+    const output = protocolHandler.parse(chunk)
+    if (output.length === 0) return
+
+    const data = session.decoder.write(output)
+    if (!data) return
+
+    captureTerminalOutput(session, data)
+    handleTelnetLoginAutomation(session, data)
+
+    if (!webContents.isDestroyed()) {
+      webContents.send('terminal:data', {
+        sessionId,
+        data,
+      })
+    }
+  })
+  socket.on('close', hadError => {
+    const currentSession = terminalSessions.get(sessionId)
+    if (!currentSession || currentSession.protocol !== 'telnet') return
+
+    terminalSessions.delete(sessionId)
+    untrackSessionWebContents(sessionId, currentSession.webContents)
+    currentSession.isClosing = true
+    cleanupTelnetSession(currentSession)
+    safeSendTerminalExit(currentSession, sessionId, hadError ? 1 : 0)
+  })
+  socket.on('error', () => {
+    // socket close 会统一通知渲染端，避免错误文本污染终端输出。
+  })
+
+  terminalSessions.set(sessionId, session)
+  trackSessionWebContents(sessionId, webContents)
+
+  return { sessionId }
+}
+
 async function createSession(
   webContents: WebContents,
   request: CreateTerminalSessionRequest,
@@ -816,6 +1063,10 @@ async function createSession(
 
   if (shell.protocol === 'ssh') {
     return createSshSession(webContents, request)
+  }
+
+  if (shell.protocol === 'telnet') {
+    return createTelnetSession(webContents, request)
   }
 
   throw new Error(`Unsupported shell protocol: ${shell.protocol}`)
@@ -869,7 +1120,12 @@ export function registerTerminalIpcHandlers(): void {
       return
     }
 
-    session.shellChannel.write(request.data)
+    if (session.protocol === 'ssh') {
+      session.shellChannel.write(request.data)
+      return
+    }
+
+    writeTelnetInput(session, request.data)
   })
 
   ipcMain.handle('terminal:resize', (event, request: TerminalResizeRequest) => {
@@ -881,7 +1137,12 @@ export function registerTerminalIpcHandlers(): void {
       return
     }
 
-    session.shellChannel.setWindow(rows, cols, 0, 0)
+    if (session.protocol === 'ssh') {
+      session.shellChannel.setWindow(rows, cols, 0, 0)
+      return
+    }
+
+    session.protocolHandler.resize(cols, rows)
   })
 
   ipcMain.handle('terminal:dispose', (event, request: TerminalSessionRequest) => {

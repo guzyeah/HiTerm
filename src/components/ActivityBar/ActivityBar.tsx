@@ -92,27 +92,32 @@ export const ActivityBar: FC = () => {
   const { activeTerminalSession } = useWorkspaceRuntime()
   const [active, setActive] = useState<ActivityType>(DEFAULT_ACTIVITY)
 
-  const isVncActive = activeTerminalSession?.protocol === 'vnc'
-  const PanelComponent = PANEL_MAP[active]
-  const activeConfig = ACTIVITY_CONFIGS.find(c => c.id === active)
+  const isFilesDisabled = activeTerminalSession?.protocol === 'vnc' || activeTerminalSession?.protocol === 'telnet'
+  const isHistoryDisabled = activeTerminalSession?.protocol === 'vnc'
+  const activeActivity = (active === 'files' && isFilesDisabled) || (active === 'history' && isHistoryDisabled)
+    ? DEFAULT_ACTIVITY
+    : active
+  const PanelComponent = PANEL_MAP[activeActivity]
+  const activeConfig = ACTIVITY_CONFIGS.find(c => c.id === activeActivity)
 
   useEffect(() => {
-    if (isVncActive && (active === 'files' || active === 'history')) {
+    if ((active === 'files' && isFilesDisabled) || (active === 'history' && isHistoryDisabled)) {
       setActive(DEFAULT_ACTIVITY)
     }
-  }, [active, isVncActive])
+  }, [active, isFilesDisabled, isHistoryDisabled])
 
   return (
     <div className={styles.root}>
       <div className={styles.tabBar}>
         <TabList
-          selectedValue={active}
+          selectedValue={activeActivity}
           onTabSelect={(_, data) => setActive(data.value as ActivityType)}
           appearance="subtle"
           size="small"
         >
           {ACTIVITY_CONFIGS.map(config => {
-            const isDisabled = isVncActive && (config.id === 'files' || config.id === 'history')
+            const isDisabled = (config.id === 'files' && isFilesDisabled)
+              || (config.id === 'history' && isHistoryDisabled)
 
             return (
               <Tab

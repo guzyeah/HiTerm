@@ -341,7 +341,8 @@ export function TerminalStatusBar({
     focusActiveTerminal,
   } = useWorkspaceRuntime()
   const isActiveVnc = activeTerminalSession?.protocol === 'vnc'
-  const statusSessionId = isActiveVnc ? null : activeTerminalSession?.sessionId ?? null
+  const isActiveTelnet = activeTerminalSession?.protocol === 'telnet'
+  const statusSessionId = isActiveVnc || isActiveTelnet ? null : activeTerminalSession?.sessionId ?? null
   const { cpuHistory, error, memoryHistory, sample } = useTerminalStatus(
     statusSessionId,
   )
@@ -452,6 +453,8 @@ export function TerminalStatusBar({
     metricsContent = <span className={styles.muted}>{t('workspace.statusReady')}</span>
   } else if (isActiveVnc) {
     metricsContent = <span className={styles.muted}>{t('vnc.connected')}</span>
+  } else if (isActiveTelnet) {
+    metricsContent = <span className={styles.muted}>{t('status.unavailable')}</span>
   } else if (error && !sample) {
     metricsContent = <span className={styles.muted}>{t('status.unavailable')}</span>
   } else {
