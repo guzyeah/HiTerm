@@ -277,6 +277,18 @@
     "fullscreenTerminal": "터미널 전체 화면",
     "exitFullscreenTerminal": "전체 화면 종료"
   },
+  "donation": {
+    "title": "HiTerm 후원",
+    "buyMeACoffee": "buy me a coffee",
+    "domesticTitle": "국내 후원",
+    "overseasTitle": "해외 후원",
+    "domesticQrAlt": "WeChat Pay 후원 QR 코드",
+    "overseasQrAlt": "Ko-fi 후원 QR 코드",
+    "historyTitle": "이전 후원자",
+    "donorName": "닉네임",
+    "amount": "금액",
+    "emptyHistory": "아직 후원 기록이 없습니다"
+  },
   "shellGroups": {
     "default": "기본",
     "local": "로컬"

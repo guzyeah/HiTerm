@@ -277,6 +277,18 @@
     "fullscreenTerminal": "Terminal en plein écran",
     "exitFullscreenTerminal": "Quitter le plein écran"
   },
+  "donation": {
+    "title": "Soutenir HiTerm",
+    "buyMeACoffee": "buy me a coffee",
+    "domesticTitle": "Don national",
+    "overseasTitle": "Don international",
+    "domesticQrAlt": "Code QR de don WeChat Pay",
+    "overseasQrAlt": "Code QR de don Ko-fi",
+    "historyTitle": "Soutiens précédents",
+    "donorName": "Nom",
+    "amount": "Montant",
+    "emptyHistory": "Aucun don enregistré"
+  },
   "shellGroups": {
     "default": "Par défaut",
     "local": "Local actuel"

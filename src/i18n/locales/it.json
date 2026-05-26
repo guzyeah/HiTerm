@@ -277,6 +277,18 @@
     "fullscreenTerminal": "Terminale a schermo intero",
     "exitFullscreenTerminal": "Esci da schermo intero"
   },
+  "donation": {
+    "title": "Sostieni HiTerm",
+    "buyMeACoffee": "buy me a coffee",
+    "domesticTitle": "Donazione nazionale",
+    "overseasTitle": "Donazione internazionale",
+    "domesticQrAlt": "Codice QR donazione WeChat Pay",
+    "overseasQrAlt": "Codice QR donazione Ko-fi",
+    "historyTitle": "Sostenitori precedenti",
+    "donorName": "Nome",
+    "amount": "Importo",
+    "emptyHistory": "Nessuna donazione registrata"
+  },
   "shellGroups": {
     "default": "Predefinito",
     "local": "Locale"

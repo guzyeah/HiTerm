@@ -277,6 +277,18 @@
     "fullscreenTerminal": "Fullscreen terminal",
     "exitFullscreenTerminal": "Exit fullscreen"
   },
+  "donation": {
+    "title": "Support HiTerm",
+    "buyMeACoffee": "buy me a coffee",
+    "domesticTitle": "Domestic support",
+    "overseasTitle": "Overseas support",
+    "domesticQrAlt": "WeChat Pay donation QR code",
+    "overseasQrAlt": "Ko-fi donation QR code",
+    "historyTitle": "Past supporters",
+    "donorName": "Name",
+    "amount": "Amount",
+    "emptyHistory": "No donation records yet"
+  },
   "shellGroups": {
     "default": "Default",
     "local": "Local"

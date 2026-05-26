@@ -277,6 +277,18 @@
     "fullscreenTerminal": "全屏终端",
     "exitFullscreenTerminal": "退出全屏"
   },
+  "donation": {
+    "title": "支持 HiTerm",
+    "buyMeACoffee": "buy me a coffee",
+    "domesticTitle": "国内捐赠",
+    "overseasTitle": "国外捐赠",
+    "domesticQrAlt": "微信支付捐赠二维码",
+    "overseasQrAlt": "Ko-fi 捐赠二维码",
+    "historyTitle": "历史捐赠",
+    "donorName": "昵称",
+    "amount": "金额",
+    "emptyHistory": "暂无捐赠记录"
+  },
   "shellGroups": {
     "default": "默认",
     "local": "本地"

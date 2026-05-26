@@ -277,6 +277,18 @@
     "fullscreenTerminal": "全螢幕終端機",
     "exitFullscreenTerminal": "退出全螢幕"
   },
+  "donation": {
+    "title": "支持 HiTerm",
+    "buyMeACoffee": "buy me a coffee",
+    "domesticTitle": "國內捐贈",
+    "overseasTitle": "海外捐贈",
+    "domesticQrAlt": "微信支付捐贈 QR 碼",
+    "overseasQrAlt": "Ko-fi 捐贈 QR 碼",
+    "historyTitle": "歷史捐贈",
+    "donorName": "暱稱",
+    "amount": "金額",
+    "emptyHistory": "暫無捐贈記錄"
+  },
   "shellGroups": {
     "default": "預設",
     "local": "本機"

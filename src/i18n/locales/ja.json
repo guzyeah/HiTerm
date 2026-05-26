@@ -277,6 +277,18 @@
     "fullscreenTerminal": "ターミナルを全画面表示",
     "exitFullscreenTerminal": "全画面表示を終了"
   },
+  "donation": {
+    "title": "HiTerm を支援",
+    "buyMeACoffee": "buy me a coffee",
+    "domesticTitle": "国内向け寄付",
+    "overseasTitle": "海外向け寄付",
+    "domesticQrAlt": "WeChat Pay 寄付 QR コード",
+    "overseasQrAlt": "Ko-fi 寄付 QR コード",
+    "historyTitle": "過去の支援者",
+    "donorName": "ニックネーム",
+    "amount": "金額",
+    "emptyHistory": "寄付記録はまだありません"
+  },
   "shellGroups": {
     "default": "デフォルト",
     "local": "ローカル"

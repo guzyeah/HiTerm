@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 import { MenuBar } from '@/components/MenuBar/MenuBar'
 import { AboutDialog } from '@/components/AboutDialog/AboutDialog'
 import { ConnectDialog } from '@/components/ConnectDialog'
+import { DonationDialog } from '@/components/DonationDialog'
 import { PreferencesDialog } from '@/components/PreferencesDialog'
 import { WorkspacePanel, WorkspaceRuntimeProvider } from '@/components/WorkspacePanel'
 import { MainLayout } from '@/components/MainLayout'
@@ -22,28 +23,20 @@ import { TerminalStatusBar } from '@/components/StatusBar'
 import type { TerminalViewMode } from '@/shared/terminalViewTypes'
 import './App.css'
 
-const DONATE_URL = 'https://www.guzyeah.cn/donate'
-
 const useStyles = makeStyles({
   leftStatusBar: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    columnGap: tokens.spacingHorizontalS,
+    justifyContent: 'flex-start',
     width: '100%',
     minWidth: 0,
     overflow: 'hidden',
     whiteSpace: 'nowrap',
   },
-  leftStatusText: {
-    flex: 1,
+  donateLink: {
     minWidth: 0,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    fontSize: tokens.fontSizeBase100,
-  },
-  donateLink: {
-    flexShrink: 0,
     fontSize: tokens.fontSizeBase200,
   },
 })
@@ -53,6 +46,7 @@ function App() {
   const { t } = useTranslation()
   const [aboutOpen, setAboutOpen] = useState(false)
   const [connectOpen, setConnectOpen] = useState(false)
+  const [donationOpen, setDonationOpen] = useState(false)
   const [preferencesOpen, setPreferencesOpen] = useState(false)
   const [terminalViewMode, setTerminalViewMode] = useState<TerminalViewMode>('normal')
 
@@ -122,14 +116,16 @@ function App() {
           rightPanel={<WorkspacePanel focusMode={terminalViewMode !== 'normal'} />}
           leftStatusBar={(
             <span className={styles.leftStatusBar} dir="ltr">
-              <span className={styles.leftStatusText}>{`${t('app.name')} by Guzyeah, Free for Everyone`}</span>
               <Link
                 className={styles.donateLink}
-                href={DONATE_URL}
-                rel="noreferrer"
-                target="_blank"
+                href="#"
+                onClick={event => {
+                  event.preventDefault()
+                  setDonationOpen(true)
+                }}
+                title={t('donation.buyMeACoffee')}
               >
-                {t('status.donate')}
+                {t('donation.buyMeACoffee')}
               </Link>
             </span>
           )}
@@ -145,6 +141,7 @@ function App() {
       </WorkspaceRuntimeProvider>
       <AboutDialog open={aboutOpen} onOpenChange={setAboutOpen} />
       <ConnectDialog open={connectOpen} onOpenChange={setConnectOpen} />
+      <DonationDialog open={donationOpen} onOpenChange={setDonationOpen} />
       <PreferencesDialog open={preferencesOpen} onOpenChange={setPreferencesOpen} />
     </div>
   )

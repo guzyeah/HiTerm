@@ -277,6 +277,18 @@
     "fullscreenTerminal": "Terminal toàn màn hình",
     "exitFullscreenTerminal": "Thoát toàn màn hình"
   },
+  "donation": {
+    "title": "Ủng hộ HiTerm",
+    "buyMeACoffee": "buy me a coffee",
+    "domesticTitle": "Ủng hộ trong nước",
+    "overseasTitle": "Ủng hộ quốc tế",
+    "domesticQrAlt": "Mã QR ủng hộ WeChat Pay",
+    "overseasQrAlt": "Mã QR ủng hộ Ko-fi",
+    "historyTitle": "Người đã ủng hộ",
+    "donorName": "Biệt danh",
+    "amount": "Số tiền",
+    "emptyHistory": "Chưa có bản ghi ủng hộ"
+  },
   "shellGroups": {
     "default": "Mặc định",
     "local": "Cục bộ"

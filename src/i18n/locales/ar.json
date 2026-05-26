@@ -277,6 +277,18 @@
     "fullscreenTerminal": "طرفية بملء الشاشة",
     "exitFullscreenTerminal": "إنهاء ملء الشاشة"
   },
+  "donation": {
+    "title": "ادعم HiTerm",
+    "buyMeACoffee": "buy me a coffee",
+    "domesticTitle": "تبرع محلي",
+    "overseasTitle": "تبرع دولي",
+    "domesticQrAlt": "رمز QR للتبرع عبر WeChat Pay",
+    "overseasQrAlt": "رمز QR للتبرع عبر Ko-fi",
+    "historyTitle": "الداعمون السابقون",
+    "donorName": "الاسم المستعار",
+    "amount": "المبلغ",
+    "emptyHistory": "لا توجد سجلات تبرع بعد"
+  },
   "shellGroups": {
     "default": "افتراضي",
     "local": "محلي"
