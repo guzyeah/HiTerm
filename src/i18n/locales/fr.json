@@ -254,6 +254,15 @@
     "pasteClipboard": "Paste clipboard",
     "bell": "Remote bell"
   },
+  "rdp": {
+    "desktop": "Bureau RDP",
+    "connecting": "Connexion à RDP...",
+    "disconnected": "Connexion RDP fermée",
+    "connectionFailed": "Échec de la connexion RDP : {{message}}",
+    "engineUnavailable": "Le moteur RDP intégré n’est pas encore disponible",
+    "reconnect": "Reconnecter",
+    "pasteClipboard": "Coller le presse-papiers"
+  },
   "status": {
     "cpu": "CPU",
     "memory": "Mémoire",

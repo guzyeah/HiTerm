@@ -254,6 +254,15 @@
     "pasteClipboard": "Paste clipboard",
     "bell": "Remote bell"
   },
+  "rdp": {
+    "desktop": "سطح مكتب RDP",
+    "connecting": "جارٍ الاتصال بـ RDP...",
+    "disconnected": "تم إغلاق اتصال RDP",
+    "connectionFailed": "فشل اتصال RDP: {{message}}",
+    "engineUnavailable": "محرك RDP المضمن غير متاح بعد",
+    "reconnect": "إعادة الاتصال",
+    "pasteClipboard": "لصق الحافظة"
+  },
   "status": {
     "cpu": "CPU",
     "memory": "الذاكرة",

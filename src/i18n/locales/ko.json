@@ -254,6 +254,15 @@
     "pasteClipboard": "Paste clipboard",
     "bell": "Remote bell"
   },
+  "rdp": {
+    "desktop": "RDP 데스크톱",
+    "connecting": "RDP에 연결 중...",
+    "disconnected": "RDP 연결이 닫혔습니다",
+    "connectionFailed": "RDP 연결 실패: {{message}}",
+    "engineUnavailable": "내장 RDP 엔진은 아직 사용할 수 없습니다",
+    "reconnect": "다시 연결",
+    "pasteClipboard": "클립보드 붙여넣기"
+  },
   "status": {
     "cpu": "CPU",
     "memory": "메모리",

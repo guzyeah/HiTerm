@@ -92,8 +92,9 @@ export const ActivityBar: FC = () => {
   const { activeTerminalSession } = useWorkspaceRuntime()
   const [active, setActive] = useState<ActivityType>(DEFAULT_ACTIVITY)
 
-  const isFilesDisabled = activeTerminalSession?.protocol === 'vnc' || activeTerminalSession?.protocol === 'telnet'
-  const isHistoryDisabled = activeTerminalSession?.protocol === 'vnc'
+  const isGraphicalSession = activeTerminalSession?.protocol === 'vnc' || activeTerminalSession?.protocol === 'rdp'
+  const isFilesDisabled = isGraphicalSession || activeTerminalSession?.protocol === 'telnet'
+  const isHistoryDisabled = isGraphicalSession
   const activeActivity = (active === 'files' && isFilesDisabled) || (active === 'history' && isHistoryDisabled)
     ? DEFAULT_ACTIVITY
     : active

@@ -48,6 +48,19 @@ import type {
   TerminalHistoryDeletedEvent,
 } from '../src/shared/terminalHistoryTypes'
 import type {
+  RdpClientClipboardRequest,
+  RdpClipboardEvent,
+  RdpCreateSessionRequest,
+  RdpCreateSessionResult,
+  RdpDesktopSizeEvent,
+  RdpDisconnectedEvent,
+  RdpFramebufferUpdateEvent,
+  RdpKeyEventRequest,
+  RdpPointerEventRequest,
+  RdpResizeRequest,
+  RdpSessionRequest,
+} from '../src/shared/rdpTypes'
+import type {
   VncBellEvent,
   VncClientCutTextRequest,
   VncClipboardEvent,
@@ -180,6 +193,42 @@ contextBridge.exposeInMainWorld('terminalAPI', {
     const listener = (_event: Electron.IpcRendererEvent, payload: TerminalExitEvent) => callback(payload)
     ipcRenderer.on('terminal:exit', listener)
     return () => ipcRenderer.off('terminal:exit', listener)
+  },
+})
+
+// --------- Expose RDP API to the Renderer process ---------
+contextBridge.exposeInMainWorld('rdpAPI', {
+  createSession: (request: RdpCreateSessionRequest): Promise<RdpCreateSessionResult> =>
+    ipcRenderer.invoke('rdp:createSession', request),
+  pointerEvent: (request: RdpPointerEventRequest): Promise<void> =>
+    ipcRenderer.invoke('rdp:pointerEvent', request),
+  keyEvent: (request: RdpKeyEventRequest): Promise<void> =>
+    ipcRenderer.invoke('rdp:keyEvent', request),
+  resize: (request: RdpResizeRequest): Promise<void> =>
+    ipcRenderer.invoke('rdp:resize', request),
+  clientClipboard: (request: RdpClientClipboardRequest): Promise<void> =>
+    ipcRenderer.invoke('rdp:clientClipboard', request),
+  dispose: (request: RdpSessionRequest): Promise<void> =>
+    ipcRenderer.invoke('rdp:dispose', request),
+  onFramebufferUpdate: (callback: (event: RdpFramebufferUpdateEvent) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, payload: RdpFramebufferUpdateEvent) => callback(payload)
+    ipcRenderer.on('rdp:framebufferUpdate', listener)
+    return () => ipcRenderer.off('rdp:framebufferUpdate', listener)
+  },
+  onDesktopSize: (callback: (event: RdpDesktopSizeEvent) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, payload: RdpDesktopSizeEvent) => callback(payload)
+    ipcRenderer.on('rdp:desktopSize', listener)
+    return () => ipcRenderer.off('rdp:desktopSize', listener)
+  },
+  onClipboard: (callback: (event: RdpClipboardEvent) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, payload: RdpClipboardEvent) => callback(payload)
+    ipcRenderer.on('rdp:clipboard', listener)
+    return () => ipcRenderer.off('rdp:clipboard', listener)
+  },
+  onDisconnected: (callback: (event: RdpDisconnectedEvent) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, payload: RdpDisconnectedEvent) => callback(payload)
+    ipcRenderer.on('rdp:disconnected', listener)
+    return () => ipcRenderer.off('rdp:disconnected', listener)
   },
 })
 

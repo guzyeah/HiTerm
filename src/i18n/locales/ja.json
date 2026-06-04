@@ -254,6 +254,15 @@
     "pasteClipboard": "Paste clipboard",
     "bell": "Remote bell"
   },
+  "rdp": {
+    "desktop": "RDP デスクトップ",
+    "connecting": "RDP に接続中...",
+    "disconnected": "RDP 接続が閉じられました",
+    "connectionFailed": "RDP 接続に失敗しました: {{message}}",
+    "engineUnavailable": "内蔵 RDP エンジンはまだ利用できません",
+    "reconnect": "再接続",
+    "pasteClipboard": "クリップボードを貼り付け"
+  },
   "status": {
     "cpu": "CPU",
     "memory": "メモリ",

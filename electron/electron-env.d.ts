@@ -101,6 +101,21 @@ interface TerminalAPI {
   onExit: (callback: (event: import('../src/shared/terminalTypes').TerminalExitEvent) => void) => () => void
 }
 
+interface RdpAPI {
+  createSession: (
+    request: import('../src/shared/rdpTypes').RdpCreateSessionRequest
+  ) => Promise<import('../src/shared/rdpTypes').RdpCreateSessionResult>
+  pointerEvent: (request: import('../src/shared/rdpTypes').RdpPointerEventRequest) => Promise<void>
+  keyEvent: (request: import('../src/shared/rdpTypes').RdpKeyEventRequest) => Promise<void>
+  resize: (request: import('../src/shared/rdpTypes').RdpResizeRequest) => Promise<void>
+  clientClipboard: (request: import('../src/shared/rdpTypes').RdpClientClipboardRequest) => Promise<void>
+  dispose: (request: import('../src/shared/rdpTypes').RdpSessionRequest) => Promise<void>
+  onFramebufferUpdate: (callback: (event: import('../src/shared/rdpTypes').RdpFramebufferUpdateEvent) => void) => () => void
+  onDesktopSize: (callback: (event: import('../src/shared/rdpTypes').RdpDesktopSizeEvent) => void) => () => void
+  onClipboard: (callback: (event: import('../src/shared/rdpTypes').RdpClipboardEvent) => void) => () => void
+  onDisconnected: (callback: (event: import('../src/shared/rdpTypes').RdpDisconnectedEvent) => void) => () => void
+}
+
 interface VncAPI {
   createSession: (
     request: import('../src/shared/vncTypes').VncCreateSessionRequest
@@ -159,6 +174,7 @@ interface Window {
   clipboardAPI: ClipboardAPI
   serialAPI: SerialAPI
   terminalAPI: TerminalAPI
+  rdpAPI: RdpAPI
   vncAPI: VncAPI
   terminalFilesAPI: TerminalFilesAPI
   terminalStatusAPI: TerminalStatusAPI

@@ -254,6 +254,15 @@
     "pasteClipboard": "Paste clipboard",
     "bell": "Remote bell"
   },
+  "rdp": {
+    "desktop": "RDP-Desktop",
+    "connecting": "Verbinde mit RDP...",
+    "disconnected": "RDP-Verbindung geschlossen",
+    "connectionFailed": "RDP-Verbindung fehlgeschlagen: {{message}}",
+    "engineUnavailable": "Die eingebettete RDP-Engine ist noch nicht verfügbar",
+    "reconnect": "Erneut verbinden",
+    "pasteClipboard": "Zwischenablage einfügen"
+  },
   "status": {
     "cpu": "CPU",
     "memory": "Speicher",

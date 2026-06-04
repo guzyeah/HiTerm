@@ -341,8 +341,11 @@ export function TerminalStatusBar({
     focusActiveTerminal,
   } = useWorkspaceRuntime()
   const isActiveVnc = activeTerminalSession?.protocol === 'vnc'
+  const isActiveRdp = activeTerminalSession?.protocol === 'rdp'
   const isActiveTelnet = activeTerminalSession?.protocol === 'telnet'
-  const statusSessionId = isActiveVnc || isActiveTelnet ? null : activeTerminalSession?.sessionId ?? null
+  const statusSessionId = isActiveVnc || isActiveRdp || isActiveTelnet
+    ? null
+    : activeTerminalSession?.sessionId ?? null
   const { cpuHistory, error, memoryHistory, sample } = useTerminalStatus(
     statusSessionId,
   )
@@ -453,6 +456,8 @@ export function TerminalStatusBar({
     metricsContent = <span className={styles.muted}>{t('workspace.statusReady')}</span>
   } else if (isActiveVnc) {
     metricsContent = <span className={styles.muted}>{t('vnc.connected')}</span>
+  } else if (isActiveRdp) {
+    metricsContent = <span className={styles.muted}>{t('rdp.desktop')}</span>
   } else if (isActiveTelnet) {
     metricsContent = <span className={styles.muted}>{t('status.unavailable')}</span>
   } else if (error && !sample) {

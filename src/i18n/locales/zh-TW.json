@@ -254,6 +254,15 @@
     "pasteClipboard": "Paste clipboard",
     "bell": "Remote bell"
   },
+  "rdp": {
+    "desktop": "RDP 桌面",
+    "connecting": "正在連接 RDP...",
+    "disconnected": "RDP 連接已關閉",
+    "connectionFailed": "RDP 連接失敗：{{message}}",
+    "engineUnavailable": "內嵌 RDP 引擎尚未接入",
+    "reconnect": "重新連接",
+    "pasteClipboard": "貼上剪貼簿"
+  },
   "status": {
     "cpu": "CPU",
     "memory": "記憶體",

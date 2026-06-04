@@ -40,6 +40,7 @@ import {
   PanelTopExpandRegular,
 } from '@fluentui/react-icons'
 import { useRTL } from '@/hooks/useRTL'
+import { RDPDesktopPane } from '@/components/RDP'
 import { TerminalPane } from '@/components/Terminal/TerminalPane'
 import { VNCDesktopPane } from '@/components/VNC/VNCDesktopPane'
 import { subscribeOpenShellTab } from '@/shared/workspaceEvents'
@@ -49,7 +50,7 @@ import type { ShellSummary } from '@/shared/shellTypes'
 type WorkspaceLayoutMode = 'horizontal' | 'vertical'
 
 type WorkspaceTabContent = {
-  type: 'terminal' | 'vnc'
+  type: 'terminal' | 'vnc' | 'rdp'
   protocol: ShellSummary['protocol']
   shellId: string
   shellName: string
@@ -120,6 +121,11 @@ function createWorkspaceTab(
     title,
     content,
   }
+}
+
+function getWorkspaceTabContentType(protocol: ShellSummary['protocol']): WorkspaceTabContent['type'] {
+  if (protocol === 'vnc' || protocol === 'rdp') return protocol
+  return 'terminal'
 }
 
 const useStyles = makeStyles({
@@ -507,6 +513,12 @@ function WorkspaceTabPanel({
           tabId={tab.id}
           isActive={isActive}
         />
+      ) : tab.content.type === 'rdp' ? (
+        <RDPDesktopPane
+          shellId={tab.content.shellId}
+          tabId={tab.id}
+          isActive={isActive}
+        />
       ) : (
         <TerminalPane
           shellId={tab.content.shellId}
@@ -580,7 +592,7 @@ export const WorkspacePanel: FC<WorkspacePanelProps> = ({ focusMode = false }) =
       const nextTab = createWorkspaceTab(
         nextSequenceRef.current,
         {
-          type: shell.protocol === 'vnc' ? 'vnc' : 'terminal',
+          type: getWorkspaceTabContentType(shell.protocol),
           protocol: shell.protocol,
           shellId: shell.id,
           shellName: shell.name,
@@ -1163,7 +1175,7 @@ export const WorkspacePanel: FC<WorkspacePanelProps> = ({ focusMode = false }) =
 
   useEffect(() => {
     const activeTab = tabs.find(tab => tab.id === activeTabId)
-    if (activeTab?.content.type === 'vnc') {
+    if (activeTab?.content.type === 'vnc' || activeTab?.content.type === 'rdp') {
       setActiveTerminalSession({
         tabId: activeTab.id,
         sessionId: null,

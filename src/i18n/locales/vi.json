@@ -254,6 +254,15 @@
     "pasteClipboard": "Paste clipboard",
     "bell": "Remote bell"
   },
+  "rdp": {
+    "desktop": "Màn hình RDP",
+    "connecting": "Đang kết nối RDP...",
+    "disconnected": "Kết nối RDP đã đóng",
+    "connectionFailed": "Kết nối RDP thất bại: {{message}}",
+    "engineUnavailable": "Chưa tích hợp engine RDP nhúng",
+    "reconnect": "Kết nối lại",
+    "pasteClipboard": "Dán clipboard"
+  },
   "status": {
     "cpu": "CPU",
     "memory": "Bộ nhớ",
